@@ -1,0 +1,150 @@
+---
+interface Track {
+  n: number;
+  title: string;
+  lyric?: string;     // 省略時は defaultLyric を使用
+  music?: string;     // 省略時は defaultMusic を使用
+  arrange?: string;
+  producer?: string;  // 省略時は defaultProducer を使用
+  time?: string;
+  mark?: '' | '★' | '★★' | '★★★' | '-u' | '★-u' | '★★-u' | '★★★-u';  // -u suffix = 下線追加
+  note?: string;      // 補足（例: ストリングスアレンジ: 星勝）
+}
+
+interface Props {
+  tracks: Track[];
+  defaultLyric?: string;
+  defaultMusic?: string;
+  defaultArrange?: string;
+  defaultProducer?: string;
+  simple?: boolean;   // true = #・曲名・markのみ
+}
+
+const { tracks, defaultLyric = '', defaultMusic = '', defaultArrange = '', defaultProducer = '', simple = false } = Astro.props;
+
+function parseMarkBase(mark: string): string {
+  return mark.endsWith('-u') ? mark.slice(0, -2) : mark;
+}
+function titleClass(track: Track): string {
+  const classes = [];
+  const base = parseMarkBase(track.mark ?? '');
+  if (base === '★★' || base === '★★★') classes.push('mark-fav');
+  if ((track.mark ?? '').endsWith('-u')) classes.push('mark-single');
+  return classes.join(' ');
+}
+---
+
+<div class="tracklist-wrap">
+  <table class={`tracklist${simple ? ' simple' : ''}`}>
+    {!simple && (
+      <thead>
+        <tr>
+          <th class="col-n">#</th>
+          <th class="col-title">曲名</th>
+          <th class="col-lyric">作詞</th>
+          <th class="col-music">作曲</th>
+          <th class="col-arrange">編曲</th>
+          <th class="col-producer">プロデュース</th>
+          <th class="col-time">時間</th>
+        </tr>
+      </thead>
+    )}
+    <tbody>
+      {tracks.map(track => {
+        const cls = titleClass(track);
+        const isBold = parseMarkBase(track.mark ?? '') === '★' || parseMarkBase(track.mark ?? '') === '★★★';
+        return (<>
+          <tr>
+            <td class="col-n">{track.n}</td>
+            <td class="col-title">
+              {isBold
+                ? <strong class={cls || undefined}>{track.title}</strong>
+                : cls
+                ? <span class={cls}>{track.title}</span>
+                : track.title
+              }
+            </td>
+            {!simple && <>
+              <td class="col-lyric">{track.lyric || defaultLyric}</td>
+              <td class="col-music">{track.music || defaultMusic}</td>
+              <td class="col-arrange">{track.arrange || defaultArrange}</td>
+              <td class="col-producer">{track.producer || defaultProducer}</td>
+              <td class="col-time">{track.time ?? ''}</td>
+            </>}
+          </tr>
+          {track.note && !simple && (
+            <tr class="note-row">
+              <td></td>
+              <td colspan="6" class="note-cell">{track.note}</td>
+            </tr>
+          )}
+        </>);
+      })}
+    </tbody>
+  </table>
+</div>
+
+<style>
+.tracklist-wrap { margin-bottom: 1.5rem; }
+
+.tracklist {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tracklist th {
+  text-align: left;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem 0.3rem 0;
+  border-bottom: 0.5px solid var(--color-border);
+  white-space: nowrap;
+}
+.tracklist td {
+  font-size: 14px;
+  color: var(--color-text);
+  padding: 0.4rem 0.75rem 0.4rem 0;
+  border-bottom: 0.5px solid var(--color-border);
+  color: var(--color-text-mid);
+  vertical-align: top;
+}
+.tracklist .col-title {
+  font-size: 16px;
+}
+.tracklist .note-row td { border-bottom: 0.5px solid var(--color-border); }
+.tracklist tbody tr:last-child td { border-bottom: none; }
+.tracklist .note-row:last-child td { border-bottom: none; }
+
+.col-n        { width: 2rem; color: var(--color-text-muted); }
+.col-title    { width: 31%; }
+.col-lyric    { width: 13%; }
+.col-music    { width: 13%; }
+.col-arrange  { width: 13%; }
+.col-producer { width: 14%; }
+.col-time     { width: 8%; white-space: nowrap; }
+
+/* simpleモード */
+.tracklist.simple .col-title { width: auto; }
+
+@media (max-width: 800px) {
+  .col-lyric, .col-music, .col-arrange, .col-producer { display: none; }
+  .col-title { width: auto; }
+}
+.tracklist.simple td {
+  border-bottom: none;
+  padding: 0.2rem 0.5rem 0.2rem 0;
+}
+
+.note-cell {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding-top: 0;
+  padding-bottom: 0.5rem;
+}
+
+.mark-fav    { color: red; }
+.mark-single { text-decoration: underline; text-underline-offset: 3px; }
+</style>

@@ -1,0 +1,16 @@
+---
+interface Props {
+  label: string;
+  active?: boolean;
+}
+const { label, active = false } = Astro.props;
+---
+
+<div class="tab-panel" data-label={label} data-active={active ? 'true' : undefined}>
+  <slot />
+</div>
+
+<style>
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+</style>

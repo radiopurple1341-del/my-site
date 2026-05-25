@@ -1,0 +1,458 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+function linkify(text: string) {
+  return text.replace(
+    /(https?:\/\/[^\s<>"]+)/g,
+    '<a href="$1" target="_blank" rel="noopener">$1</a>'
+  );
+}
+
+const categoryClass: Record<string, string> = {
+  '音楽': 'music', '映画': 'film', '漫画': 'manga', '書籍': 'novel', 'ゲーム': 'game', 'その他': 'other'
+};
+
+// 日記（新しい順、最大5件）
+const diaryEntries = (await getCollection('diary'))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 5);
+
+// 記事（新しい順）
+const articles = (await getCollection('article'))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const recentArticles = articles.slice(0, 4);
+
+// 更新履歴：日記と記事を混ぜて新しい順、最大4件
+const diaryUpdates = diaryEntries.map(e => ({
+  date: e.data.pubDate,
+  title: (e.body ?? '').split('\n').find((l: string) => l.trim()) ?? '日記',
+  href: `/diary#${e.id}`,
+}));
+const articleUpdates = articles.slice(0, 8).map(a => ({
+  date: a.data.pubDate,
+  title: a.data.title,
+  href: a.data.externalUrl ?? `/article/${a.id.split('/').pop()}`,
+  external: !!a.data.externalUrl,
+}));
+const allUpdates = [...diaryUpdates, ...articleUpdates]
+  .sort((a, b) => b.date.getTime() - a.date.getTime())
+  .slice(0, 4);
+
+// ランダム表示用（featuredのもの）
+const featuredArticles = articles.filter(a => a.data.featured);
+
+// 作品セクション：カテゴリ別件数
+const allWorks = await getCollection('work');
+const workCategories = ['音楽', '映画', '漫画', 'ゲーム', '書籍', 'その他'] as const;
+const workCounts = Object.fromEntries(
+  workCategories.map(cat => [cat, allWorks.filter(w => w.data.category === cat).length])
+);
+---
+
+<BaseLayout>
+  <!-- 更新履歴 -->
+  <section class="update-box">
+    <div class="update-box-header">
+      <span class="update-label">更新履歴</span>
+      <a href="/archive" class="update-more">一覧 →</a>
+    </div>
+    <div class="update-rows">
+      {allUpdates.map(item => {
+        const d = item.date;
+        const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+        return (
+          <div class="update-row">
+            <time class="u-date">{dateStr}</time>
+            <span class="u-text">
+              <a href={item.href} target={'external' in item && item.external ? '_blank' : undefined} rel={'external' in item && item.external ? 'noopener' : undefined}>
+                {item.title}
+              </a>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+
+  <!-- 作品セクション -->
+  <section class="works-nav-section">
+    <h2 class="works-nav-title">作品</h2>
+    <div class="works-nav-cats">
+      <a href="/works" class="works-nav-btn all">
+        すべて <span class="works-nav-count">{allWorks.length}</span>
+      </a>
+      {workCategories.filter(cat => workCounts[cat] > 0).map(cat => (
+        <a href={`/works?filter=${cat}`} class={`works-nav-btn ${categoryClass[cat]}`}>
+          {cat} <span class="works-nav-count">{workCounts[cat]}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- メインコンテンツグリッド -->
+  <div class="main-content-grid">
+    <!-- 左: 最近の記事 -->
+    <section>
+      <div class="section-header">
+        <h2 class="section-title">最新記事</h2>
+        <a href="/archive" class="section-more">もっと見る →</a>
+      </div>
+      <div class="articles-list">
+        {recentArticles.map((article, i) => {
+          const catClass = categoryClass[article.data.category] ?? 'other';
+          const href = article.data.externalUrl ?? `/article/${article.id.split('/').pop()}`;
+          const isExternal = !!article.data.externalUrl;
+          const thumb = article.data.thumbnail ?? article.data.artwork;
+          const d = article.data.pubDate;
+          const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+          return (
+            <a href={href} class={`article-card${i === 0 ? ' featured' : ''}`}
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noopener' : undefined}>
+              <div class="article-thumb">
+                {thumb && <img src={thumb} alt={article.data.title} loading="lazy" onerror="this.src='/images/thumbnail-default.jpg'" />}
+              </div>
+              <div class="article-body">
+                <div class="article-meta">
+                  <span class={`article-cat ${catClass}`}>{article.data.category}</span>
+                  <span class="article-date">{dateStr}</span>
+                </div>
+                <p class="article-title-block">{article.data.title}</p>
+                {article.data.description && (
+                  <p class="article-desc-small">{article.data.description}</p>
+                )}
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- 右: ランダムアーカイブ -->
+    {featuredArticles.length > 0 && (
+      <section>
+        <div class="section-header">
+          <h2 class="section-title">ランダム・アーカイブ</h2>
+          <button class="random-reload" id="random-reload">↺</button>
+        </div>
+        <div class="random-grid" id="random-grid"></div>
+      </section>
+    )}
+  </div>
+
+  <!-- 日記 -->
+  <section class="diary-section">
+    <div class="section-header">
+      <h2 class="section-title">雑記</h2>
+      <a href="/diary" class="section-more">もっと見る →</a>
+    </div>
+    <div class="diary-list">
+      {diaryEntries.map(entry => {
+        const d = entry.data.pubDate;
+        const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+        const text = (entry.body ?? '').trim();
+        return (
+          <div class="diary-row">
+            <time class="diary-date">{dateStr}</time>
+            <p class="diary-text" set:html={linkify(text)} />
+          </div>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ featuredArticles: featuredArticles.map(a => ({
+  title: a.data.title,
+  thumbnail: a.data.thumbnail ?? a.data.artwork ?? null,
+  href: a.data.externalUrl ?? `/article/${a.id.split('/').pop()}`,
+  external: !!a.data.externalUrl,
+})) }}>
+function renderRandom() {
+  const grid = document.getElementById('random-grid');
+  if (!grid || featuredArticles.length === 0) return;
+  const shuffled = [...featuredArticles].sort(() => Math.random() - 0.5).slice(0, 4);
+  grid.innerHTML = shuffled.map(a => `
+    <a href="${a.href}" ${a.external ? 'target="_blank" rel="noopener"' : ''} class="random-card">
+      <div class="random-thumb">
+        ${a.thumbnail
+          ? `<img src="${a.thumbnail}" alt="${a.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.src='/images/thumbnail-default.jpg'" />`
+          : `<div class="random-thumb-placeholder"></div>`}
+      </div>
+      <div class="random-body">
+        <p class="random-title">${a.title}</p>
+      </div>
+    </a>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderRandom();
+  document.getElementById('random-reload')?.addEventListener('click', renderRandom);
+});
+</script>
+
+<style>
+/* 作品セクション */
+.works-nav-section {
+  margin-bottom: 1.75rem;
+}
+.works-nav-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.6rem;
+}
+.works-nav-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.works-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+  text-decoration: none;
+  transition: opacity 0.1s;
+}
+.works-nav-btn:hover { opacity: 0.75; text-decoration: none; }
+.works-nav-count {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+.works-nav-btn.all   { color: var(--color-text); border-color: var(--color-border-strong); background: var(--color-surface); }
+.works-nav-btn.music { color: #534AB7; border-color: #AFA9EC; background: #EEEDFE; }
+.works-nav-btn.film  { color: #0F6E56; border-color: #5DCAA5; background: #E1F5EE; }
+.works-nav-btn.manga { color: #993C1D; border-color: #F0997B; background: #FAECE7; }
+.works-nav-btn.novel { color: #185FA5; border-color: #85B7EB; background: #E6F1FB; }
+.works-nav-btn.game  { color: #5F5E5A; border-color: #B4B2A9; background: #F1EFE8; }
+.works-nav-btn.other { color: #5F5E5A; border-color: #B4B2A9; background: #F1EFE8; }
+
+/* 更新履歴 */
+.update-box {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.update-box-header {
+  background: var(--color-surface);
+  padding: 0.4rem 0.875rem;
+  border-bottom: 1px solid var(--color-border-strong);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.update-label {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+.update-more { font-size: 11px; color: var(--color-text-muted); }
+.update-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.35rem 0.875rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.update-row:last-child { border-bottom: none; }
+.update-row:hover { background: var(--color-surface); }
+.u-date { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.u-text { font-size: 12px; color: var(--color-text-mid); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.u-text a { color: inherit; }
+.u-text a:hover { color: var(--color-text); text-decoration: underline; }
+
+/* メインコンテンツグリッド */
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+.main-content-grid > * { min-width: 0; }
+
+/* 記事カード */
+.article-card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.6rem 4px;
+  border-bottom: 0.5px solid var(--color-border);
+  text-decoration: none;
+  transition: background 0.12s;
+  border-radius: 3px;
+  margin: 0 -4px;
+}
+.article-card:last-child { border-bottom: none; }
+.article-card:hover { background: var(--color-surface); text-decoration: none; }
+
+/* Featured（1件目）：横レイアウトはそのまま、サムネと余白を少し大きく */
+.article-card.featured {
+  height: 125px;
+  overflow: hidden;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* 2件目以降 */
+.article-card:not(.featured) {
+  height: 110px;
+  overflow: hidden;
+}
+.article-card.featured .article-thumb {
+  width: 135px;
+  height: 105px;
+}
+.article-card.featured .article-title-block { font-size: 18px; }
+
+.article-thumb {
+  width: 120px;
+  height: 90px;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.article-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.article-body { flex: 1; min-width: 0; }
+
+.article-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+.article-cat {
+  font-size: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 0.5px solid;
+  line-height: 1.6;
+}
+.article-cat.music { color: #534AB7; border-color: #AFA9EC; background: #EEEDFE; }
+.article-cat.film  { color: #0F6E56; border-color: #5DCAA5; background: #E1F5EE; }
+.article-cat.manga { color: #993C1D; border-color: #F0997B; background: #FAECE7; }
+.article-cat.novel { color: #185FA5; border-color: #85B7EB; background: #E6F1FB; }
+.article-cat.game  { color: #5F5E5A; border-color: #B4B2A9; background: #F1EFE8; }
+.article-cat.other { color: #5F5E5A; border-color: #B4B2A9; background: #F1EFE8; }
+
+.article-title-block {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.article-date { font-size: 10px; color: var(--color-text-muted); white-space: nowrap; flex-shrink: 0; }
+.article-desc-small {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-top: 3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ランダムアーカイブ */
+.random-reload {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: none;
+  border: 0.5px solid var(--color-border-mid);
+  border-radius: var(--radius-sm);
+  padding: 2px 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.random-reload:hover { color: var(--color-text); background: var(--color-surface); }
+.random-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+:global(.random-card) {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 0.15s;
+}
+:global(.random-card):hover { opacity: 0.85; text-decoration: none; }
+:global(.random-thumb) {
+  flex: 1;
+  min-height: 0;
+  height: 0;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+:global(.random-thumb-placeholder) { width: 100%; height: 100%; }
+:global(.random-body) { padding: 0.5rem 0.625rem; flex-shrink: 0; overflow: hidden; }
+:global(.random-title) {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 日記 */
+.diary-section { margin-bottom: 1.5rem; }
+.diary-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.4rem 0;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.diary-row:last-child { border-bottom: none; }
+.diary-date { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; }
+.diary-text {
+  font-size: 12px;
+  color: var(--color-text-mid);
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .main-content-grid { grid-template-columns: 1fr; }
+  .random-grid { grid-template-columns: 1fr; }
+}
+</style>

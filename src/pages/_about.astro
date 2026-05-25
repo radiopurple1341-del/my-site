@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE_TITLE, NOTE_URL, TWITTER_HANDLE } from '../consts';
+---
+
+<BaseLayout title="about">
+  <div class="about-wrap">
+    <h1 class="page-title">about</h1>
+
+    <div class="about-body">
+      <p>
+        音楽・映画・漫画・書籍などについて書いています。<br />
+        日々の記録もここに置いています。
+      </p>
+
+      <h2>このサイトについて</h2>
+      <p>
+        note や FC2 ブログに書いてきた記事のインデックスと、日々の短い記録を置く場所です。
+        毎日のぞいていただけると嬉しいです。
+      </p>
+
+      <h2>リンク</h2>
+      <ul class="link-list">
+        <li><a href={NOTE_URL} target="_blank" rel="noopener">note</a> — 主な記事はこちら</li>
+        <li><a href={`https://twitter.com/${TWITTER_HANDLE.replace('@','')}`} target="_blank" rel="noopener">X / Twitter</a></li>
+      </ul>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+.about-wrap { max-width: 640px; }
+.page-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.about-body { font-size: 14px; color: var(--color-text-mid); line-height: 1.85; }
+.about-body h2 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 2rem 0 0.75rem;
+}
+.about-body p { margin-bottom: 1rem; }
+.about-body a { color: var(--color-accent); text-decoration: underline; }
+.link-list { padding-left: 1.25rem; }
+.link-list li { margin-bottom: 0.5rem; }
+</style>

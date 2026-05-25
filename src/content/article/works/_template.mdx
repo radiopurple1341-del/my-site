@@ -1,0 +1,82 @@
+---
+title: "アーティスト名『作品名』"
+pubDate: 2000-01-01
+description: ""
+category: 音楽
+tags: [アーティスト名]
+featured: false
+workId: "artist_name-work_title"
+artwork: "/artworks/artist_name-work_title.jpg"
+rating: 0
+---
+
+import Tabs from '../../../components/Tabs.astro';
+import Tab from '../../../components/Tab.astro';
+import Tracklist from '../../../components/Tracklist.astro';
+import TrackLegend from '../../../components/TrackLegend.astro';
+import YouTube from '../../../components/YouTube.astro';
+import Spotify from '../../../components/Spotify.astro';
+import Expand from '../../../components/Expand.astro';
+import URL from '../../../components/URL.astro';
+import B from '../../../components/B.astro';
+import R from '../../../components/R.astro';
+import RB from '../../../components/RB.astro';
+import U from '../../../components/U.astro';
+import Review from '../../../components/Review.astro';
+import Quote from '../../../components/Quote.astro';
+---
+
+共通情報をここに書く。（リリース背景、作品概要など）
+
+<Tabs>
+  <Tab label="YYYY/MM/DD v1" active>
+
+## トラックリスト
+<TrackLegend />
+<Tracklist
+  defaultLyric="作詞者名"
+  defaultMusic="作曲者名"
+  defaultArrange="編曲者名"
+  defaultProducer="プロデューサー名"
+  tracks={[
+    { n: 1, title: "曲名", mark: "", lyric: "", music: "", arrange: "", producer: "", time: "0:00" },
+    { n: 2, title: "曲名", mark: "", lyric: "", music: "", arrange: "", producer: "", time: "0:00" },
+    { n: 3, title: "曲名", mark: "", lyric: "", music: "", arrange: "", producer: "", time: "0:00", note: "補足情報" },
+  ]}
+/>
+
+---
+
+総評：
+
+はじめて聴いたときの感想をここに書く。
+
+  </Tab>
+  <Tab label="YYYY/MM/DD v2">
+
+## トラックリスト
+<TrackLegend />
+<Tracklist
+  defaultLyric="作詞者名"
+  defaultMusic="作曲者名"
+  defaultArrange="編曲者名"
+  defaultProducer="プロデューサー名"
+  tracks={[
+    { n: 1, title: "曲名", lyric: "", music: "", arrange: "", producer: "", time: "0:00" },
+    { n: 2, title: "曲名", lyric: "", music: "", arrange: "", producer: "", time: "0:00" },
+    { n: 3, title: "曲名", lyric: "", music: "", arrange: "", producer: "", time: "0:00" },
+  ]}
+/>
+
+---
+
+総評：
+
+聴き返してみて気づいたことをここに書く。
+
+  </Tab>
+</Tabs>
+
+---
+
+<Spotify url="https://open.spotify.com/album/ALBUM_ID" />

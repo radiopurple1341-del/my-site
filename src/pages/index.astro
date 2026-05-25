@@ -1,0 +1,752 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+function linkify(text: string) {
+  return text
+    .replace(
+      /<URL\s+h="([^"]*)">([\s\S]*?)<\/URL>/g,
+      '<a href="$1" target="_blank" rel="noopener">$2</a>'
+    )
+    .replace(
+      /(?<!href=")(https?:\/\/[^\s<>"]+)/g,
+      '<a href="$1" target="_blank" rel="noopener">$1</a>'
+    );
+}
+
+const diaryDate = (e: { id: string; data: { pubDate?: Date } }) =>
+  e.data.pubDate ?? new Date(e.id);
+
+// 日記（新しい順、最大5件）
+const diaryEntries = (await getCollection('diary'))
+  .sort((a, b) => diaryDate(b).getTime() - diaryDate(a).getTime())
+  .slice(0, 5);
+
+// 記事（新しい順）
+const articles = (await getCollection('article'))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+// 更新情報：日記と記事を混ぜて新しい順、最大5件
+const diaryUpdates = diaryEntries.map(e => ({
+  date: diaryDate(e),
+  label: '日記',
+  text: (e.body ?? '').split('\n').find((l: string) => l.trim()) ?? '',
+  href: `/diary#${e.id}`,
+  external: false,
+}));
+const articleUpdates = articles.slice(0, 8).map(a => ({
+  date: a.data.pubDate,
+  label: a.data.externalUrl ? '他サイト' : '記事',
+  text: a.data.externalUrl ? a.data.title : `${a.data.title}${a.data.description ? '：' + a.data.description : ''}`,
+  href: a.data.externalUrl ?? `/article/${a.id.split('/').pop()}`,
+  external: !!a.data.externalUrl,
+}));
+const allUpdates = [...diaryUpdates, ...articleUpdates]
+  .sort((a, b) => b.date.getTime() - a.date.getTime())
+  .slice(0, 6);
+
+// ランダム表示用（featuredのもの）
+const featuredArticles = articles.filter(a => a.data.featured);
+
+// カルーセル: 最新5件（external_curated除外）
+const carouselArticles = articles.filter(a => !a.id.startsWith('external_curated/')).slice(0, 5);
+
+// 最近追加した作品: work_index から pubDate順に4件
+const allWorks = await getCollection('work');
+const recentWorks = [...allWorks]
+  .sort((a, b) => {
+    const aDate = a.data.pubDate?.getTime() ?? 0;
+    const bDate = b.data.pubDate?.getTime() ?? 0;
+    return bDate - aDate;
+  })
+  .slice(0, 6);
+
+// workIdと記事の紐付け（記事ありドット表示用）
+const linkedArticles = articles.filter(a => a.data.workId);
+const articleByWorkId = new Map(linkedArticles.map(a => [a.data.workId!, a]));
+
+// workIdとwork_indexの紐付け（descriptionフォールバック用）
+const workByWorkId = new Map(allWorks.map(w => [w.id, w]));
+---
+
+<BaseLayout>
+  <div class="page-grid">
+
+    <!-- 左カラム -->
+    <div class="main-col">
+
+      <!-- FEATURED WORK カルーセル -->
+      <section class="featured-section">
+        <p class="featured-label">FEATURED WORK</p>
+        <div class="carousel" id="carousel">
+          {carouselArticles.length > 1 && (
+            <>
+              <button class="carousel-prev" id="carousel-prev" aria-label="前へ">‹</button>
+              <button class="carousel-next" id="carousel-next" aria-label="次へ">›</button>
+            </>
+          )}
+          <div class="carousel-inner" id="carousel-inner">
+            {carouselArticles.map((article, i) => {
+              const thumb = article.data.thumbnail ?? article.data.artwork;
+              const href = article.data.externalUrl ?? `/article/${article.id.split('/').pop()}`;
+              const isExternal = !!article.data.externalUrl;
+              const metaParts = [
+                article.data.category,
+                ...(article.data.tags?.slice(0, 1) ?? []),
+                article.data.workYear,
+              ].filter(Boolean);
+              return (
+                <a
+                  class={`carousel-slide${i === 0 ? ' active' : ''}`}
+                  data-index={i}
+                  href={href}
+                  target={isExternal ? '_blank' : undefined}
+                  rel={isExternal ? 'noopener' : undefined}
+                >
+                  <div class="slide-thumb">
+                    {thumb
+                      ? <img src={thumb} alt={article.data.title} loading={i === 0 ? 'eager' : 'lazy'} />
+                      : <div class="slide-thumb-placeholder" />}
+                  </div>
+                  <div class="slide-body">
+                    {metaParts.length > 0 && (
+                      <p class="slide-meta">{metaParts.join(' / ')}</p>
+                    )}
+                    <h2 class="slide-title">{article.data.title}</h2>
+                    {(() => {
+                      const desc = article.data.description
+                        || (article.data.workId && workByWorkId.get(article.data.workId)?.data.description)
+                        || '';
+                      return desc ? <p class="slide-desc" set:html={desc} /> : null;
+                    })()}
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+        {carouselArticles.length > 1 && (
+          <div class="carousel-dots" id="carousel-dots">
+            {carouselArticles.map((_, i) => (
+              <button
+                class={`dot${i === 0 ? ' active' : ''}`}
+                data-index={i}
+                aria-label={`スライド ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <!-- 最近追加した作品 -->
+      {recentWorks.length > 0 && (
+        <section class="recent-works-section">
+          <div class="section-header">
+            <h2 class="section-title">最近追加した作品</h2>
+            <a href="/works" class="section-more">すべての作品を見る →</a>
+          </div>
+          <div class="recent-works-grid">
+            {recentWorks.map((work, i) => {
+              const hasArticle = articleByWorkId.has(work.id);
+              return (
+                <>
+                {i === 3 && <div class="recent-works-sep" />}
+                <a href={`/works#${work.id}`} class="recent-work-card">
+                  <div class="recent-work-thumb">
+                    {work.data.thumbnail
+                      ? <img src={work.data.thumbnail} alt={work.data.title} loading="lazy" />
+                      : <div class="recent-work-placeholder" />}
+                  </div>
+                  <div class="recent-work-body">
+                    {work.data.artist && <p class="recent-work-artist">{work.data.artist}</p>}
+                    <p class="recent-work-title">『{work.data.title}』</p>
+                    <p class="recent-work-meta">
+                      {[work.data.workYear, work.data.workType].filter(Boolean).join(' / ')}
+                    </p>
+                    {hasArticle && <span class="recent-work-dot" title="記事あり" />}
+                  </div>
+                </a>
+                </>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <!-- 日記 -->
+      <section class="diary-section">
+        <div class="section-header">
+          <h2 class="section-title">日記</h2>
+          <a href="/diary" class="section-more">もっと見る →</a>
+        </div>
+        <div class="diary-list">
+          {diaryEntries.map(entry => {
+            const d = diaryDate(entry);
+            const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+            const text = (entry.body ?? '').trim();
+            return (
+              <div class="diary-row">
+                <time class="diary-date">{dateStr}</time>
+                <p class="diary-text" set:html={linkify(text)} />
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 右カラム -->
+    <div class="side-col">
+
+      <!-- 更新情報 -->
+      <section class="update-box">
+        <div class="update-box-header">
+          <span class="update-label">更新情報</span>
+        </div>
+        <div class="update-rows">
+          {allUpdates.map(item => {
+            const d = item.date;
+            const dateStr = `${String(d.getFullYear()).slice(-2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+            return (
+              <div class="update-row">
+                <time class="u-date">{dateStr}</time>
+                <span class="u-text">
+                  <a
+                    href={item.href}
+                    target={item.external ? '_blank' : undefined}
+                    rel={item.external ? 'noopener' : undefined}
+                  >
+                    <span class="u-label">【{item.label}】</span>{item.label === '日記' ? <span set:html={linkify(item.text)} /> : item.text}
+                  </a>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <div class="update-footer">
+          <a href="/archive" class="update-more-link">一覧を見る →</a>
+        </div>
+      </section>
+
+      <!-- ランダムアーカイブ -->
+      {featuredArticles.length > 0 && (
+        <section class="random-section">
+          <div class="section-header">
+            <h2 class="section-title"><a href="/archive" class="section-title-link">ランダム・アーカイブ</a></h2>
+            <button class="random-reload" id="random-reload">↺</button>
+          </div>
+          <div class="random-grid" id="random-grid"></div>
+        </section>
+      )}
+
+      <!-- モバイル用ナビ（800px以下でのみ表示） -->
+      <nav class="mobile-nav">
+        <a href="/works">作品棚</a>
+        <a href="/archive">アーカイブ</a>
+        <a href="/about">about</a>
+      </nav>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<!-- カルーセル（サーバーデータ不要） -->
+<script>
+  const carouselEl = document.getElementById('carousel') as HTMLElement;
+  const inner = document.getElementById('carousel-inner') as HTMLElement;
+  const slides = document.querySelectorAll<HTMLElement>('.carousel-slide');
+  const dots = document.querySelectorAll<HTMLButtonElement>('.dot');
+  let current = 0;
+
+  const isMobile = () => window.innerWidth <= 500;
+
+  function goTo(index: number) {
+    const next = (index + slides.length) % slides.length;
+    dots[current]?.classList.remove('active');
+    current = next;
+    dots[current]?.classList.add('active');
+
+    if (isMobile()) {
+      const gap = parseFloat(getComputedStyle(inner).columnGap) || 0;
+      const w = slides[0]?.getBoundingClientRect().width ?? 0;
+      carouselEl.scrollTo({ left: current * (w + gap), behavior: 'smooth' });
+    } else {
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    }
+  }
+
+  document.getElementById('carousel-prev')?.addEventListener('click', () => goTo(current - 1));
+  document.getElementById('carousel-next')?.addEventListener('click', () => goTo(current + 1));
+  dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+  // モバイル: スクロール位置からドットを同期
+  let scrollTimer: ReturnType<typeof setTimeout>;
+  carouselEl?.addEventListener('scroll', () => {
+    if (!isMobile()) return;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      const gap = parseFloat(getComputedStyle(inner).columnGap) || 0;
+      const w = slides[0]?.getBoundingClientRect().width ?? 0;
+      const idx = Math.round(carouselEl.scrollLeft / (w + gap));
+      const clamped = Math.max(0, Math.min(idx, slides.length - 1));
+      if (clamped !== current) {
+        dots[current]?.classList.remove('active');
+        current = clamped;
+        dots[current]?.classList.add('active');
+      }
+    }, 50);
+  }, { passive: true });
+</script>
+
+<!-- ランダムアーカイブ（サーバーデータ必要） -->
+<script define:vars={{ featuredArticles: featuredArticles.map(a => {
+  const isCurated = a.id.startsWith('external_curated/');
+  const isNote = (a.data.externalUrl ?? '').includes('note.com');
+  const label = isCurated ? (isNote ? 'note' : (a.data.author ?? null)) : null;
+  return {
+    title: label ? `【${label}】${a.data.title}` : a.data.title,
+    thumbnail: a.data.thumbnail ?? a.data.artwork ?? null,
+    href: a.data.externalUrl ?? `/article/${a.id.split('/').pop()}`,
+    external: !!a.data.externalUrl,
+    curated: isCurated,
+  };
+}) }}>
+let reloadCount = 0;
+
+function renderRandom() {
+  const grid = document.getElementById('random-grid');
+  if (!grid || featuredArticles.length === 0) return;
+
+  const curated = featuredArticles.filter(a => a.curated);
+  const own = featuredArticles.filter(a => !a.curated);
+
+  let selected = [...featuredArticles].sort(() => Math.random() - 0.5).slice(0, 4);
+  const curatedInSelected = selected.filter(a => a.curated);
+  if (curatedInSelected.length >= 3) {
+    const keptCurated = [...curatedInSelected].sort(() => Math.random() - 0.5).slice(0, 2);
+    const fillOwn = [...own].sort(() => Math.random() - 0.5).slice(0, 2);
+    selected = [...keptCurated, ...fillOwn].sort(() => Math.random() - 0.5);
+  } else if (reloadCount === 1 && curatedInSelected.length === 0 && curated.length > 0) {
+    const oneCurated = curated[Math.floor(Math.random() * curated.length)];
+    const fillOwn = [...own].sort(() => Math.random() - 0.5).slice(0, 3);
+    selected = [oneCurated, ...fillOwn].sort(() => Math.random() - 0.5);
+  }
+
+  grid.innerHTML = selected.map(a => `
+    <a href="${a.href}" ${a.external ? 'target="_blank" rel="noopener"' : ''} class="random-card${a.curated ? ' random-card--curated' : ''}">
+      <div class="random-thumb">
+        ${a.thumbnail
+          ? `<img src="${a.thumbnail}" alt="${a.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.src='/images/thumbnail-default.jpg'" />`
+          : `<div class="random-thumb-placeholder"></div>`}
+      </div>
+      <div class="random-body">
+        <p class="random-title">${a.title}</p>
+        <span class="random-arrow">→</span>
+      </div>
+    </a>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderRandom();
+  document.getElementById('random-reload')?.addEventListener('click', () => {
+    reloadCount++;
+    renderRandom();
+  });
+});
+</script>
+
+<style>
+/* ページグリッド */
+:global(.site-wrap) { max-width: 800px; }
+.page-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+.main-col, .side-col { min-width: 0; }
+
+/* セクションヘッダー共通 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-text);
+}
+.section-more {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+.section-more:hover { color: var(--color-text); }
+
+/* FEATURED WORK */
+.featured-section { margin-bottom: 1.5rem; }
+.featured-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.carousel-slide {
+  display: none;
+  gap: 1rem;
+  align-items: flex-start;
+  border: 1px solid var(--color-border-strong);
+  background: #fff;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+  height: 280px;
+  overflow: hidden;
+}
+.carousel-slide.active { display: flex; }
+.carousel-slide:hover { opacity: 0.85; text-decoration: none; }
+.carousel-dots {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-border-strong);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+.dot.active { opacity: 1; }
+.slide-thumb {
+  width: 250px;
+  height: 250px;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.slide-thumb img,
+.slide-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.slide-body { flex: 1; min-width: 0; overflow: hidden; }
+.slide-meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 0.25rem;
+}
+.slide-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-text);
+  margin-bottom: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.slide-desc {
+  font-size: 16px;
+  color: var(--color-text-mid);
+  line-height: 1.7;
+  height: 150px;
+  overflow: hidden;
+}
+.carousel { position: relative; }
+.carousel-prev, .carousel-next {
+  position: absolute;
+  top: 125px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(247, 245, 241, 0.75);
+  border: 0.5px solid var(--color-border-mid);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 22px;
+  color: var(--color-text-mid);
+  opacity: 0;
+  transition: opacity 0.18s;
+  z-index: 2;
+  padding: 0;
+  line-height: 1;
+}
+.carousel-prev { left: 0; }
+.carousel-next { right: 0; }
+.carousel:hover .carousel-prev,
+.carousel:hover .carousel-next { opacity: 1; }
+.carousel-prev:hover,
+.carousel-next:hover { background: var(--color-surface); color: var(--color-text); }
+
+/* 最近追加した作品 */
+.recent-works-section { margin-bottom: 1.5rem; }
+.recent-works-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.625rem;
+  margin-top: 0.25rem;
+}
+.recent-works-sep { display: none; }
+.recent-work-card { text-decoration: none; display: block; }
+.recent-work-card:nth-of-type(n+5) { display: none; }
+.recent-work-card:hover { text-decoration: none; }
+.recent-work-card:hover .recent-work-thumb img { opacity: 0.8; }
+.recent-work-thumb {
+  width: 100%;
+  padding-bottom: 100%;
+  position: relative;
+  background: var(--color-surface);
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+.recent-work-thumb img,
+.recent-work-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.15s;
+}
+.recent-work-artist {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.recent-work-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+  margin-top: 1px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.recent-work-meta {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+.recent-work-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  margin-top: 4px;
+  vertical-align: middle;
+}
+
+/* 日記 */
+.diary-section { margin-bottom: 1.5rem; }
+.diary-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.4rem 0;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.diary-row:last-child { border-bottom: none; }
+.diary-date { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; }
+.diary-text {
+  font-size: 12px;
+  color: var(--color-text-mid);
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 更新情報（1270px未満では非表示） */
+.update-box {
+  display: none;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.update-box-header {
+  background: var(--color-surface);
+  padding: 0.4rem 0.875rem;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+.update-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+.update-row {
+  display: grid;
+  grid-template-columns: 3.3rem 1fr;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0.875rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.update-row:last-child { border-bottom: none; }
+.update-row:hover { background: var(--color-surface); }
+.u-date { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.u-text { font-size: 12px; color: var(--color-text-mid); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.u-label { font-size: 10px; color: var(--color-text-muted); margin-right: 2px; }
+.u-text a { color: inherit; text-decoration: none; }
+.u-text a:hover { color: var(--color-text); text-decoration: underline; }
+.update-footer {
+  padding: 0.35rem 0.875rem;
+  background: var(--color-surface);
+  border-top: 0.5px solid var(--color-border);
+  text-align: right;
+}
+.update-more-link { font-size: 11px; color: var(--color-text-muted); text-decoration: none; }
+.update-more-link:hover { color: var(--color-text); }
+
+/* ランダムアーカイブ */
+.section-title-link { color: inherit; text-decoration: none; }
+.random-reload {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  background: none;
+  border: 0.5px solid var(--color-border-mid);
+  border-radius: var(--radius-sm);
+  padding: 2px 30px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.random-reload:hover { color: var(--color-text); background: var(--color-surface); }
+.random-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+:global(.random-card) {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 0.15s;
+  text-decoration: none;
+}
+:global(.random-card):hover { opacity: 0.8; }
+:global(.random-card--curated) { background: #d6e8f7; border-color: #0033cc; }
+:global(.random-thumb) {
+  aspect-ratio: 1;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+:global(.random-thumb-placeholder) { width: 100%; height: 100%; }
+:global(.random-body) {
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+:global(.random-title) {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+:global(.random-arrow) {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+/* モバイルナビ */
+.mobile-nav {
+  display: none;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 0.5px solid var(--color-border);
+}
+.mobile-nav a {
+  font-size: 14px;
+  color: var(--color-text-mid);
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--color-border-mid);
+  text-decoration: none;
+}
+.mobile-nav a:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+@media (max-width: 800px) {
+  .mobile-nav { display: flex; }
+}
+
+@media (max-width: 500px) {
+  .carousel {
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .carousel::-webkit-scrollbar { display: none; }
+  .carousel-inner { display: flex; gap: 0.5rem; }
+  .carousel-slide {
+    display: flex !important;
+    flex: none;
+    width: 60%;
+    height: auto;
+    flex-direction: column;
+    scroll-snap-align: start;
+  }
+  .slide-thumb { width: 100%; height: auto; aspect-ratio: 1; }
+  .slide-title { font-size: 17px; -webkit-line-clamp: 3; }
+  .slide-desc { font-size: 13px; height: auto; -webkit-line-clamp: 3; }
+  .carousel-prev, .carousel-next { display: none; }
+  .recent-works-grid { grid-template-columns: repeat(3, 1fr); gap: 0.3rem; row-gap: 0; }
+  a.recent-work-card:nth-of-type(n+5) { display: block; }
+  .recent-work-body { display: none; }
+  .recent-work-card { border: 1px solid var(--color-border-strong); }
+  .recent-works-sep { display: block; grid-column: 1 / -1; height: 1px; background: var(--color-border); margin: 0.2rem 0; }
+}
+
+@media (min-width: 1270px) {
+  :global(.site-wrap) { max-width: 1264px; }
+  .page-grid { grid-template-columns: 800px 400px; }
+  .update-box { display: block; margin-top: 24.5px; height: 280px; }
+}
+</style>

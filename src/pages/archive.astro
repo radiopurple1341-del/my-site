@@ -1,0 +1,224 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+
+const allArticles = (await getCollection('article'))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const categories = ['音楽', '映画', '漫画', '書籍', '文章'];
+const allTags = [...new Set(allArticles.flatMap(a => a.data.tags))].sort();
+---
+
+<BaseLayout title="アーカイブ">
+  <div class="page-header">
+    <h1 class="page-title">アーカイブ</h1>
+<p class="page-desc">FC2ブログ、note、本サイトにてこれまで書いてきた個別記事を抜粋・集約したページ。<br />オススメする他サイトの記事も載せています。</p>
+  </div>
+
+  <div class="archive-layout">
+    <!-- フィルター -->
+    <aside class="filters">
+      <div class="filter-group">
+        <p class="filter-label">カテゴリ</p>
+        <div class="filter-links">
+          <a href="/archive" class="filter-link" data-filter-cat="">
+            すべて ({allArticles.length})
+          </a>
+          {categories.map(cat => {
+            const count = allArticles.filter(a => a.data.category === cat).length;
+            if (count === 0) return null;
+            return (
+              <a
+                href={`/archive?category=${encodeURIComponent(cat)}`}
+                class="filter-link"
+                data-filter-cat={cat}
+              >
+                {cat} ({count})
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* タグフィルター：整備後に再表示
+      {allTags.length > 0 && (
+        <div class="filter-group">
+          <p class="filter-label">タグ</p>
+          <div class="filter-tags">
+            {allTags.map(tag => {
+              const count = allArticles.filter(a => a.data.tags.includes(tag)).length;
+              return (
+                <a
+                  href={`/archive?tag=${encodeURIComponent(tag)}`}
+                  class="tag-link"
+                  data-filter-tag={tag}
+                >
+                  {tag} <span class="tag-count">{count}</span>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      */}
+    </aside>
+
+    <!-- 記事一覧 -->
+    <div class="article-list" id="article-list">
+      <div class="curated-toggle-row">
+        <button class="curated-toggle-btn" id="curated-toggle">他サイト記事を表示する</button>
+      </div>
+      {allArticles.map(article => (
+        <div
+          class="article-item"
+          data-category={article.data.category}
+          data-tags={JSON.stringify(article.data.tags)}
+          data-curated={article.id.startsWith('external_curated/') ? 'true' : 'false'}
+        >
+          <ArticleCard
+            title={article.data.title}
+            description={article.data.description}
+            category={article.data.category}
+            pubDate={article.data.pubDate}
+            thumbnail={article.data.thumbnail ?? article.data.artwork}
+            href={`/article/${article.id.split('/').pop()}`}
+            externalUrl={article.data.externalUrl}
+            tags={article.data.tags}
+            siteName={article.id.startsWith('external_curated/') ? (article.data.siteName ?? undefined) : undefined}
+            author={article.id.startsWith('external_curated/') ? (article.data.author ?? undefined) : undefined}
+          />
+        </div>
+      ))}
+      <p class="empty" id="empty-msg" style="display:none">該当する記事がありません</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+function applyFilter() {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('category') ?? '';
+  const tag = params.get('tag') ?? '';
+
+  const showCurated = document.getElementById('curated-toggle')?.dataset.active === 'true';
+  const items = document.querySelectorAll<HTMLElement>('.article-item');
+  let visible = 0;
+  items.forEach(item => {
+    const itemCat = item.dataset.category ?? '';
+    const itemTags: string[] = JSON.parse(item.dataset.tags ?? '[]');
+    const isCurated = item.dataset.curated === 'true';
+    const viewMatch = showCurated ? isCurated : !isCurated;
+    const show = viewMatch && (!cat || itemCat === cat) && (!tag || itemTags.includes(tag));
+    item.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  const countEl = document.getElementById('count');
+  if (countEl) countEl.textContent = `${visible}件`;
+
+  const emptyMsg = document.getElementById('empty-msg');
+  if (emptyMsg) emptyMsg.style.display = visible === 0 ? '' : 'none';
+
+  document.querySelectorAll<HTMLElement>('.filter-link').forEach(a => {
+    const filterCat = a.dataset.filterCat ?? '';
+    const isActive = !cat && !tag ? filterCat === '' : filterCat === cat && !tag;
+    a.classList.toggle('active', isActive);
+  });
+  document.querySelectorAll<HTMLElement>('.tag-link').forEach(a => {
+    a.classList.toggle('active', (a.dataset.filterTag ?? '') === tag);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('curated-toggle') as HTMLButtonElement | null;
+  if (btn && sessionStorage.getItem('archiveCurated') === 'true') {
+    btn.dataset.active = 'true';
+    btn.textContent = '自分の記事を表示する';
+  }
+
+  applyFilter();
+
+  btn?.addEventListener('click', (e) => {
+    const btn = e.currentTarget as HTMLButtonElement;
+    const isActive = btn.dataset.active === 'true';
+    btn.dataset.active = isActive ? 'false' : 'true';
+    btn.textContent = isActive ? '他サイト記事を表示する' : '自分の記事を表示する';
+    sessionStorage.setItem('archiveCurated', isActive ? 'false' : 'true');
+    applyFilter();
+  });
+});
+window.addEventListener('popstate', applyFilter);
+</script>
+
+<style>
+.page-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.page-title { font-size: 18px; font-weight: 700; }
+.count { font-size: 12px; color: var(--color-text-muted); }
+.page-desc { font-size: 12px; color: var(--color-text-muted); }
+
+.archive-layout {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.filters { position: sticky; top: 64px; }
+.filter-group { margin-bottom: 1.5rem; }
+.filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.filter-links { display: flex; flex-direction: column; gap: 0.1rem; }
+.filter-link {
+  font-size: 12px;
+  color: var(--color-text-mid);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+.filter-link:hover { background: var(--color-surface); text-decoration: none; }
+.filter-link.active { color: var(--color-accent); font-weight: 700; background: var(--color-accent-light); }
+
+.filter-tags { display: flex; flex-direction: column; gap: 0.15rem; }
+.tag-link {
+  font-size: 12px;
+  color: var(--color-text-mid);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  justify-content: space-between;
+}
+.tag-link:hover { background: var(--color-surface); text-decoration: none; }
+.tag-link.active { color: var(--color-accent); font-weight: 700; background: var(--color-accent-light); }
+.tag-count { color: var(--color-text-muted); font-size: 11px; }
+
+.article-list { display: flex; flex-direction: column; gap: 0.325rem; }
+.article-item[data-curated="true"] :global(article) { border: 1px solid #0055cc; }
+.curated-toggle-row { padding: 0.25rem 0; }
+.curated-toggle-btn {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: none;
+  border: 0.5px solid var(--color-border-mid);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.curated-toggle-btn:hover { background: var(--color-surface); color: var(--color-text); }
+.empty { font-size: 13px; color: var(--color-text-muted); }
+
+@media (max-width: 640px) {
+  .archive-layout { grid-template-columns: 1fr; }
+  .filters { position: static; }
+}
+</style>

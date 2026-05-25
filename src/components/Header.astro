@@ -1,0 +1,132 @@
+---
+import { SITE_TITLE } from '../consts';
+
+const navItems = [
+  { href: '/works', label: '作品棚' },
+  { href: '/archive', label: 'アーカイブ' },
+  { href: '/about', label: 'about' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header>
+  <div class="site-wrap header-inner">
+    <a href="/" class="site-title">
+      <span class="title-main">Without Sound</span><span class="title-sep"> / </span><span class="title-sub">Within</span>
+    </a>
+    <nav>
+      {navItems.map(item => (
+        <a
+          href={item.href}
+          class:list={['nav-link', { active: currentPath === item.href }]}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+header {
+  border-bottom: 1.5px solid var(--color-border-strong);
+  background: var(--color-bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  gap: 1rem;
+}
+.site-title {
+  font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 0.20em;
+  text-decoration: none;
+  color: inherit;
+  text-transform: uppercase;
+
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.site-title:hover { text-decoration: none; }
+nav {
+  display: flex;
+  gap: 0.1rem;
+  flex-wrap: wrap;
+}
+.title-sep {
+  opacity: 0.6;
+}
+
+.nav-link {
+  font-size: 16px;
+  color: #222;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+  text-decoration: none;
+}
+.nav-link:hover {
+  color: var(--color-text);
+  background: var(--color-surface);
+  text-decoration: none;
+}
+.nav-link.active {
+  color: var(--color-accent);
+}
+@media (max-width: 800px) {
+  header {
+    position: static;
+    background: #16263a;
+    border-bottom-color: #16263a;
+  }
+  .header-inner {
+    flex-direction: column;
+    height: auto;
+    padding: 1rem 0 0;
+    gap: 0;
+    align-items: center;
+  }
+  .site-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    line-height: 1.3;
+  }
+  .title-sep { display: none; }
+  .title-sub::before { content: '/ '; }
+  nav {
+    display: flex;
+    width: 100%;
+    margin-top: 0.75rem;
+    border-top: 1px solid #2e4560;
+  }
+  .nav-link {
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    padding: 0.6rem 0;
+    border-radius: 0;
+    border: none;
+    background: #edf0f2;
+    color: #2a3a4a;
+  }
+  .nav-link + .nav-link {
+    border-left: 1px solid #c8d0d8;
+  }
+  .nav-link:hover { background: #f5f7f8; }
+  .nav-link.active { background: #fff; color: #0a1f35; font-weight: 700; }
+}
+</style>

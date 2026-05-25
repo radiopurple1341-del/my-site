@@ -1,0 +1,52 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title?: string;
+  frontmatter?: { title?: string };
+}
+
+const { title, frontmatter } = Astro.props;
+const pageTitle = title ?? frontmatter?.title ?? '';
+---
+
+<BaseLayout title={pageTitle}>
+  <div class="prose-wrap">
+    <h1 class="page-title">{pageTitle}</h1>
+    <div class="prose-body">
+      <slot />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+.prose-wrap { max-width: 640px; }
+.page-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.prose-body { font-size: 14px; color: var(--color-text-mid); line-height: 1.85; }
+.prose-body :global(h2) {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 2.5rem 0 0.75rem;
+  padding: 0.3rem 0.75rem;
+  background: #16263a;
+}
+.prose-body :global(h3) {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin: 1.5rem 0 0.4rem;
+  padding: 0.2rem 0.6rem;
+  background: #16263a;
+}
+.prose-body :global(p) { margin-bottom: 1rem; }
+.prose-body :global(a) { color: var(--color-accent); text-decoration: underline; }
+.prose-body :global(ul) { padding-left: 1.25rem; }
+.prose-body :global(li) { margin-bottom: 0.5rem; }
+</style>

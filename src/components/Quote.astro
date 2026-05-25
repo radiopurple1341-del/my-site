@@ -1,0 +1,36 @@
+---
+interface Props {
+  source?: string;
+  sourceUrl?: string;
+}
+const { source, sourceUrl } = Astro.props;
+---
+
+<blockquote class="quote">
+  <div class="quote-body"><slot /></div>
+  {source && (
+    <p class="quote-source">
+      {sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer">{source}</a> : source}
+    </p>
+  )}
+</blockquote>
+
+<style>
+.quote {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem 0.5rem;
+  background: white;
+  border: 1.5px solid #000;
+}
+.quote-body {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--color-text);
+}
+.quote-source {
+  margin-top: 0.75rem;
+  text-align: right;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+</style>

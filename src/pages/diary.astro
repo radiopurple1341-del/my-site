@@ -1,0 +1,123 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// ---- キャラクター設定 ----
+// アイコン画像は public/icons/ に配置してください
+const characters: Record<string, { name: string; handle: string; icon: string }> = {
+  default: {
+    name: '',
+    handle: '',
+    icon: '/icons/main.jpg',
+  },
+  // 例: 二人目のキャラクター
+  // sub: {
+  //   name: 'Sub Name',
+  //   handle: '@sub_handle',
+  //   icon: '/icons/sub.jpg',
+  // },
+};
+
+const getCharacter = (key?: string) =>
+  (key && characters[key]) ? characters[key] : characters.default;
+// -------------------------
+
+const diaryDate = (e: { id: string; data: { pubDate?: Date } }) =>
+  e.data.pubDate ?? new Date(e.id);
+
+const entries = (await getCollection('diary'))
+  .sort((a, b) => diaryDate(b).getTime() - diaryDate(a).getTime());
+
+function linkify(text: string) {
+  return text
+    .replace(
+      /<URL\s+h="([^"]*)">([\s\S]*?)<\/URL>/g,
+      '<a href="$1" target="_blank" rel="noopener">$2</a>'
+    )
+    .replace(
+      /(?<!href=")(https?:\/\/[^\s<>"]+)/g,
+      '<a href="$1" target="_blank" rel="noopener">$1</a>'
+    );
+}
+---
+
+<BaseLayout title="日記">
+  <div class="page-header">
+    <h1 class="page-title">日記</h1>
+  </div>
+  <div class="diary-list">
+    {entries.map(entry => {
+      const d = diaryDate(entry);
+      const yy  = String(d.getFullYear()).slice(2);
+      const mm  = String(d.getMonth() + 1).padStart(2, '0');
+      const dd  = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${yy}.${mm}.${dd}`;
+      const char = getCharacter(entry.data.character);
+      return (
+        <article class="post" id={entry.id}>
+          <img src={char.icon} alt={char.name} class="avatar" />
+          <time class="post-date">{dateStr}</time>
+          <p class="post-text" set:html={linkify((entry.body ?? '').trim())} />
+        </article>
+      );
+    })}
+  </div>
+</BaseLayout>
+
+<style>
+.page-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.diary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 700px;
+}
+
+.post {
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  column-gap: 14px;
+}
+
+.avatar {
+  display: none;
+}
+.post-date {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding-top: 2px;
+}
+
+.post-text {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 14px;
+  color: var(--color-text-mid);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+.post-text :global(a) {
+  color: blue;
+  text-decoration: none;
+}
+.post-text :global(a:hover) {
+  text-decoration: underline;
+}
+</style>

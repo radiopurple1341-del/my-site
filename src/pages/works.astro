@@ -1,0 +1,578 @@
+---
+import { getCollection } from 'astro:content';
+import { statSync } from 'fs';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const stripThe = (s: string) => s.replace(/^The\s+/i, '');
+const sortKey = (work: { data: { artist?: string; title: string } }) =>
+  stripThe(work.data.artist || work.data.title);
+
+const allWorks = (await getCollection('work'))
+  .sort((a, b) => {
+    const artistCmp = sortKey(a).localeCompare(sortKey(b), 'ja');
+    if (artistCmp !== 0) return artistCmp;
+    const yearCmp = (a.data.workYear ?? 0) - (b.data.workYear ?? 0);
+    if (yearCmp !== 0) return yearCmp;
+    return (a.data.workMonth ?? 0) - (b.data.workMonth ?? 0);
+  });
+
+const linkedArticles = (await getCollection('article')).filter(a => a.data.workId);
+const articleByWorkId = new Map(linkedArticles.map(a => [a.data.workId!, a]));
+
+const categories = ['音楽', '映画', '漫画', 'ゲーム', '書籍', 'その他']
+  .filter(cat => allWorks.some(w => w.data.category === cat));
+
+function formatDate(d: Date): string {
+  return `${String(d.getFullYear()).slice(2)}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function getLastModified(filePath?: string): string {
+  if (!filePath) return '';
+  try { return formatDate(statSync(filePath).mtime); } catch { return ''; }
+}
+
+function getCreatedDate(pubDate?: Date, filePath?: string): string {
+  if (pubDate) return formatDate(pubDate);
+  if (!filePath) return '';
+  try { return formatDate(statSync(filePath).birthtime); } catch { return ''; }
+}
+---
+
+<BaseLayout title="作品棚">
+  <div class="page-header">
+    <h1 class="page-title">作品棚</h1>
+    <p class="count" id="count">{allWorks.length}件</p>
+  </div>
+
+  <div class="filters">
+    <div class="filters-left">
+      <button class="filter-btn active" data-filter="">すべて <span class="filter-count">{allWorks.length}</span></button>
+      <span class="filter-sep">|</span>
+      {categories.map(cat => {
+        const count = allWorks.filter(w => w.data.category === cat).length;
+        return <button class="filter-btn" data-filter={cat}>{cat} <span class="filter-count">{count}</span></button>;
+      })}
+    </div>
+    <div class="filters-right">
+      <button class="note-filter-btn" id="note-filter">📝 一言あり</button>
+      <button class="article-filter-btn" id="article-filter">🔗 記事あり</button>
+      <button class="random-btn" id="random-btn">🔄 ランダム10</button>
+      <select id="sort-select" class="sort-select">
+        <option value="artist:asc">アーティスト名順</option>
+        <option value="year:asc">リリース年順（古→新）</option>
+        <option value="year:desc">リリース年順（新→古）</option>
+        <option value="updated:desc">最新更新日順</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 作品テーブル -->
+  <div class="table-wrap">
+    <table class="works-table show-thumb" id="works-table">
+      <thead>
+        <tr>
+          <th class="col-work sortable" data-col="artist">作品 <span class="sort-icon">↑</span></th>
+          <th class="col-note">一言</th>
+          <th class="col-year sortable" data-col="year">発表年 <span class="sort-icon">↕</span></th>
+          <th class="col-category">カテゴリ</th>
+          <th class="col-type">種別</th>
+          <th class="col-created sortable" data-col="created">登録日 <span class="sort-icon">↕</span></th>
+          <th class="col-updated sortable" data-col="updated">最終更新 <span class="sort-icon">↕</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {allWorks.map(work => {
+          const article = articleByWorkId.get(work.id);
+          const href = article
+            ? (article.data.externalUrl ?? `/article/${article.id.split('/').pop()}`)
+            : null;
+          const isExternal = !!(article?.data.externalUrl);
+          const thumbSrc = work.data.thumbnail ?? null;
+          const updated = getLastModified(work.filePath);
+          const created = getCreatedDate(work.data.pubDate, work.filePath);
+          return (
+            <tr
+              id={work.id}
+              class={href ? (isExternal ? 'has-article is-external' : 'has-article') : undefined}
+              data-category={work.data.category}
+              data-tags={(work.data.tags ?? []).join(',')}
+              data-year={String(work.data.workYear ?? '')}
+              data-title={work.data.title}
+              data-artist={work.data.artist || work.data.title}
+              data-created={created}
+              data-updated={updated}
+              data-has-note={work.data.description ? '1' : '0'}
+            >
+              <td class="col-work">
+                <div class="work-cell">
+                  {href
+                    ? <a href={href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener' : undefined} class="work-link">
+                        {thumbSrc && <img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" />}
+                        <span class="work-text">
+                          <span class="work-meta">
+                            {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
+                            {work.data.workYear != null && <span class="work-year-tag">：{work.data.workYear}</span>}
+                          </span>
+                          {work.data.artist && <span class="work-sep"> - </span>}
+                          <span class="work-title">『{work.data.title}』</span>
+                        </span>
+                      </a>
+                    : <span class="work-nolink">
+                        {thumbSrc && <img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" />}
+                        <span class="work-text">
+                          <span class="work-meta">
+                            {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
+                            {work.data.workYear != null && <span class="work-year-tag">：{work.data.workYear}</span>}
+                          </span>
+                          {work.data.artist && <span class="work-sep"> - </span>}
+                          <span class="work-title">『{work.data.title}』</span>
+                        </span>
+                      </span>
+                  }
+                </div>
+              </td>
+              <td class="col-note">{work.data.description ? <span set:html={work.data.description} /> : <span class="note-empty">—</span>}</td>
+              <td class="col-year">{work.data.workYear ?? '—'}</td>
+              <td class="col-category">{work.data.category}</td>
+              <td class="col-type">{work.data.workType ?? '—'}</td>
+              <td class="col-created">{created || '—'}</td>
+              <td class="col-updated">{updated || '—'}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+</BaseLayout>
+
+<script>
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  const tbody = document.querySelector<HTMLElement>('#works-table tbody')!;
+  const countEl = document.getElementById('count');
+  const sortableHeaders = document.querySelectorAll<HTMLElement>('th.sortable');
+
+  const initialFilter = new URLSearchParams(location.search).get('filter') ?? '';
+  let activeFilter = initialFilter;
+  let articleOnly = false;
+  let noteOnly = false;
+  let sortCol = 'artist';
+  let sortDir: 'asc' | 'desc' = 'asc';
+
+  function getRows() {
+    return Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+  }
+
+  function syncCount() {
+    const visible = getRows().filter(r => r.style.display !== 'none').length;
+    if (countEl) countEl.textContent = `${visible}件`;
+  }
+
+  function applyRandom() {
+    const visibleRows = getRows().filter(r => r.style.display !== 'none');
+    const shuffled = visibleRows.slice().sort(() => Math.random() - 0.5);
+    const keep = new Set(shuffled.slice(0, 10));
+    visibleRows.forEach(row => { if (!keep.has(row)) row.style.display = 'none'; });
+    if (countEl) countEl.textContent = `${keep.size}件`;
+  }
+
+  function applyFilter() {
+    getRows().forEach(row => {
+      const tags = (row.dataset.tags ?? '').split(',').filter(Boolean);
+      const categoryMatch = !activeFilter
+        || row.dataset.category === activeFilter
+        || tags.includes(activeFilter);
+      const articleMatch = !articleOnly || row.classList.contains('has-article');
+      const noteMatch = !noteOnly || row.dataset.hasNote === '1';
+      row.style.display = (categoryMatch && articleMatch && noteMatch) ? '' : 'none';
+    });
+    syncCount();
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter ?? '';
+      worksTable?.classList.toggle('filter-active', activeFilter !== '');
+      applyFilter();
+    });
+  });
+
+  const articleFilterBtn = document.getElementById('article-filter');
+  articleFilterBtn?.addEventListener('click', () => {
+    articleOnly = !articleOnly;
+    articleFilterBtn.classList.toggle('active', articleOnly);
+    applyFilter();
+  });
+
+  const noteFilterBtn = document.getElementById('note-filter');
+  noteFilterBtn?.addEventListener('click', () => {
+    noteOnly = !noteOnly;
+    noteFilterBtn.classList.toggle('active', noteOnly);
+    applyFilter();
+  });
+
+  const randomBtn = document.getElementById('random-btn');
+  randomBtn?.addEventListener('click', () => {
+    randomBtn.classList.add('active');
+    applyFilter();
+    applyRandom();
+  });
+
+  const worksTable = document.getElementById('works-table');
+
+  const stripThe = (s: string) => s.replace(/^The\s+/i, '');
+
+  function applySort(col: string, dir: 'asc' | 'desc') {
+    const sorted = getRows().sort((a, b) => {
+      const av = stripThe(a.dataset[col] ?? '');
+      const bv = stripThe(b.dataset[col] ?? '');
+      if (col === 'year') {
+        return dir === 'asc'
+          ? (parseInt(av) || 0) - (parseInt(bv) || 0)
+          : (parseInt(bv) || 0) - (parseInt(av) || 0);
+      }
+      return dir === 'asc'
+        ? av.localeCompare(bv, 'ja')
+        : bv.localeCompare(av, 'ja');
+    });
+    sorted.forEach(row => tbody.appendChild(row));
+  }
+
+  sortableHeaders.forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col ?? '';
+      if (sortCol === col) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortCol = col;
+        sortDir = 'asc';
+      }
+
+      sortableHeaders.forEach(h => {
+        const icon = h.querySelector('.sort-icon');
+        if (icon) icon.textContent = h.dataset.col === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+      });
+
+      applySort(sortCol, sortDir);
+    });
+  });
+
+  const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null;
+  sortSelect?.addEventListener('change', () => {
+    const [col, dir] = sortSelect.value.split(':');
+    worksTable?.classList.toggle('sort-by-year', col === 'year');
+    applySort(col, dir as 'asc' | 'desc');
+  });
+
+  // URLパラメータによる初期フィルター適用
+  if (initialFilter) {
+    const targetBtn = Array.from(filterBtns).find(b => b.dataset.filter === initialFilter);
+    if (targetBtn) {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      targetBtn.classList.add('active');
+      worksTable?.classList.add('filter-active');
+    }
+    applyFilter();
+  }
+</script>
+
+<style>
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.page-title { font-size: 18px; font-weight: 700; }
+.count { font-size: 12px; color: var(--color-text-muted); }
+
+.filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.filters-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+}
+.filters-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.filter-sep {
+  color: var(--color-border);
+  padding: 0 0.25rem;
+  user-select: none;
+}
+.filter-count {
+  font-size: 10px;
+  opacity: 0.6;
+}
+.filter-btn {
+  font-size: 15px;
+  color: var(--color-text-mid);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid transparent;
+  background: none;
+  cursor: pointer;
+}
+.filter-btn:hover { background: var(--color-surface); }
+.filter-btn.active {
+  color: var(--color-accent);
+  font-weight: 700;
+  background: var(--color-accent-light);
+}
+
+.table-wrap { overflow-x: auto; }
+
+.works-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.works-table th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+  white-space: nowrap;
+}
+.works-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.works-table th.sortable:hover { color: var(--color-text); }
+.sort-icon { font-style: normal; opacity: 0.5; }
+
+.works-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+  color: var(--color-text-mid);
+  vertical-align: middle;
+}
+.works-table tr { scroll-margin-top: 60px; }
+.works-table tr:hover td { background: var(--color-surface); }
+
+.col-work    { width: 39%; font-size: 14px; }
+.col-category { width: 8%; }
+.filter-active .col-category { display: none; }
+.col-type    { display: none; }
+.col-year    { width: 3%; white-space: nowrap; }
+.col-note    { width: 34%; color: var(--color-text-muted); font-size: 12px; white-space: pre-line; }
+.col-created { width: 7%; white-space: nowrap; }
+.col-updated { display: none; }
+
+.work-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0033cc;
+  font-weight: 500;
+  position: relative;
+}
+.work-link:visited { color: #7755aa; }
+.work-link:hover { text-decoration: underline; }
+.work-link::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-accent);
+  border-radius: 1px;
+}
+.work-link::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+.is-external .work-link::before { background: #4a90d9; }
+.is-external .work-link::after  { background: #4a90d9; }
+.work-nolink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.work-year-tag { display: none; }
+
+.work-cell { }
+.work-thumb {
+  display: none;
+  width: 130px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.show-thumb .work-thumb { display: block; }
+.show-thumb .work-link,
+.show-thumb .work-nolink {
+  align-items: flex-start;
+}
+.show-thumb .work-text {
+  display: flex;
+  flex-direction: column;
+}
+.show-thumb .work-sep { display: none; }
+.show-thumb .work-title { font-size: 14px; font-weight: 400; }
+
+.article-filter-btn,
+.note-filter-btn,
+.random-btn {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--color-border);
+  background: none;
+  cursor: pointer;
+}
+.article-filter-btn:hover,
+.note-filter-btn:hover,
+.random-btn:hover { background: var(--color-surface); }
+.article-filter-btn.active,
+.note-filter-btn.active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+.random-btn.active {
+  color: var(--color-accent);
+  font-weight: 700;
+  background: var(--color-accent-light);
+}
+
+
+.sort-select { display: none; }
+
+@media (max-width: 800px) {
+  .sort-select {
+    display: block;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    padding: 0.2rem 0.4rem;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--color-border);
+    background: var(--color-bg);
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 800px) {
+  /* ①「すべて」を1行目、カテゴリを2行目に */
+  .filter-sep { flex-basis: 100%; height: 0; padding: 0; overflow: hidden; }
+  .table-wrap { overflow: visible; }
+
+  /* filters-right：記事あり・一言あり・プルダウン（右端）→ 改行 → ランダム10 */
+  .filters-right { flex-wrap: wrap; }
+  .article-filter-btn { order: 1; }
+  .note-filter-btn { order: 2; }
+  .sort-select { order: 3; margin-left: auto; }
+  .random-btn { order: 10; flex-basis: 100%; }
+
+  /* ②テーブル→グリッドカードレイアウト */
+  .works-table,
+  .works-table tbody { display: block; }
+  .works-table thead { display: none; }
+
+  .works-table tbody tr {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 0.625rem;
+    padding: 0.75rem 0;
+    border-bottom: 0.5px solid var(--color-border);
+    align-items: start;
+  }
+  .works-table tbody tr:hover td { background: none; }
+  .works-table tbody td { padding: 0; border: none; }
+
+  /* col-work・work-cell・work-link を透過してグリッドに直接参加させる */
+  .col-work, .work-cell, .work-link, .work-nolink { display: contents; }
+  .work-link::before, .work-link::after { display: none; }
+  .col-category, .col-type, .col-year, .col-created { display: none !important; }
+
+  /* サムネ：col1、2行スパン */
+  .work-thumb {
+    display: block !important;
+    width: 72px;
+    height: 72px;
+    grid-column: 1;
+    grid-row: 1 / 3;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+
+  /* タイトル：col2・row1 */
+  .work-text {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .work-sep { display: none; }
+  .work-artist { font-size: 10px; color: var(--color-text-muted); }
+  .work-title { font-size: 13px; font-weight: 600; line-height: 1.4; }
+  .work-year-tag { display: none; }
+  .sort-by-year .work-year-tag { display: inline; font-size: 10px; color: var(--color-text-muted); }
+
+  /* リンク付き作品のマーキング：trに絶対配置でサムネ左端に */
+  .has-article { position: relative; }
+  .has-article::before {
+    content: '';
+    position: absolute;
+    left: -6px; top: 0.75rem; bottom: 0.75rem;
+    width: 2px;
+    background: var(--color-accent);
+    border-radius: 1px;
+  }
+  .has-article::after {
+    content: '';
+    position: absolute;
+    left: -2px; top: calc(0.75rem - 3px);
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-bg);
+  }
+  .is-external::before { background: #4a90d9; }
+  .is-external::after  { background: #4a90d9; }
+  .note-empty { display: none; }
+
+  /* 一言：col2・row2 */
+  .col-note {
+    grid-column: 2;
+    grid-row: 2;
+    width: auto;
+    white-space: normal;
+    font-size: 11px;
+    padding-top: 0.25rem;
+    border: none;
+  }
+}
+</style>

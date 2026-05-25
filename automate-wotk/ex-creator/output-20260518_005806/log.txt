@@ -1,0 +1,44 @@
+実行日時: 20260518_005806
+------------------------------------------------------------
+[URL] https://moma-bd.com/
+  [HTTP] status=200
+  [title] <title>タグ: Beautiful Dreamer
+  [pubDate] 取得失敗
+  [thumbnail] 取得失敗
+  [siteName] 取得失敗
+  [author] 取得失敗
+[OK] external_curated/ex_20260518_music_rev_beautiful-dreamer.md
+
+[URL] https://sound.heavy.jp/grunge/
+  [HTTP] status=200
+  [title] OGP: GRUNGE ALTERNATIVE （グランジ・オルタナティヴ）の総合サイト
+  [pubDate] <time>タグ: 2024-01-16
+  [thumbnail] 取得成功
+  [siteName] GRUNGE ALTERNATIVE （グランジ・オルタナティヴ）の総合サイト
+  [author] 取得失敗
+[OK] external_curated/ex_20240116_music_rev_grunge-alternative-guranjiorutanateivu-no-sougou-saito.md
+
+[URL] https://ystmokzk.hatenablog.jp/
+  [HTTP] status=200
+  [title] OGP: ブンゲイブ・ケイオンガクブ
+  [pubDate] <time>タグ: 2045-01-15
+  [thumbnail] 取得成功
+  [siteName] ブンゲイブ・ケイオンガクブ
+  [author] 取得失敗
+[OK] external_curated/ex_20450115_music_rev_bungeibukeiongakubu.md
+
+[URL] https://listening-log.hatenablog.com/entry/2020/02/19/182321
+  [HTTP] status=200
+  [title] OGP: BEST OF 2019 - LL
+  [pubDate] datePublished: 2020-02-19
+  [thumbnail] 取得成功
+  [siteName] LL
+  [author] 取得失敗
+[OK] external_curated/ex_20200219_movie_rev_best-of-2019---ll.md
+
+[URL] https://www.random-noir.net/list-2/
+  [ERROR] 接続失敗: HTTPSConnectionPool(host='www.random-noir.net', port=443): Read timed out. (read timeout=10)
+[OK] external_curated/ex_20260518_movie_rev_shippai.md
+
+------------------------------------------------------------
+完了: 5件処理

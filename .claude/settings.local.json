@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(python3 -c ' *)",
+      "Bash(node --input-type=module --eval ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const d=JSON.parse\\(fs.readFileSync\\('.astro/data-store.json','utf-8'\\)\\);Object.entries\\(d\\).forEach\\(\\([k,v]\\)=>{if\\(k.includes\\('work'\\)\\){console.log\\('STORE:',k\\);Object.keys\\(v\\).forEach\\(id=>console.log\\(' ID:',id\\)\\)}}\\);\")",
+      "Bash(xargs grep -l \"external_curated\")",
+      "Bash(xargs head -20)",
+      "Bash(xargs grep -l \"^curated:\")",
+      "Bash(xargs head -25)",
+      "Bash(xargs cat)"
+    ]
+  }
+}

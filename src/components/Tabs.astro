@@ -1,0 +1,311 @@
+---
+// 使い方:
+// <Tabs>
+//   <Tab label="2025/10/23 v1">...</Tab>
+//   <Tab label="2026/04/16 v2" active>...</Tab>
+// </Tabs>
+---
+
+<div class="tabs-wrapper">
+  <div class="tab-labels"></div>
+  <div class="tab-content">
+    <slot />
+  </div>
+  <div class="tab-labels tab-labels-bottom"></div>
+</div>
+
+<script>
+  const TAB_W = 200;
+  const TAB_H = 36;
+  const TAB_SKEW = 12;
+  const TAB_SW = 1.5;
+  const TAB_FONT_SIZE = 14;
+  // 台形内の使用可能テキスト幅（両端のskew + 余白を除く）
+  const TAB_TEXT_MAX_W = TAB_W - TAB_SKEW * 1.2 - 16;
+
+  function centerActiveTab(inner: HTMLElement, idx: number, animate: boolean = true) {
+    const btn = inner.children[idx] as HTMLElement | null;
+    if (!btn) return;
+    const containerWidth = inner.parentElement?.offsetWidth ?? 0;
+    const totalWidth = inner.scrollWidth;
+    const target = btn.offsetLeft + btn.offsetWidth / 2 - containerWidth / 2;
+    const clamped = Math.min(Math.max(0, target), Math.max(0, totalWidth - containerWidth));
+    inner.style.transition = animate ? 'transform 0.3s ease' : 'none';
+    inner.style.transform = `translateX(-${clamped}px)`;
+  }
+
+  function fitTextToTab(svgEl: SVGSVGElement) {
+    const textEl = svgEl.querySelector<SVGTextElement>('text');
+    if (!textEl) return;
+    const measured = textEl.getComputedTextLength();
+    if (measured > TAB_TEXT_MAX_W) {
+      const scaled = Math.floor(TAB_FONT_SIZE * TAB_TEXT_MAX_W / measured);
+      textEl.setAttribute('font-size', String(scaled));
+    }
+  }
+
+  function buildTabSVG(label: string, active: boolean): SVGSVGElement {
+    const W = TAB_W;
+    const H = TAB_H;
+    const SKEW = TAB_SKEW;
+    const SW = TAB_SW;
+
+    const vw = W;
+    const vh = H + SW;
+
+    const pts = `0,${vh} ${SKEW * 0.6},1.5 ${vw - SKEW * 0.6},1.5 ${vw},${vh}`;
+
+    const STROKE = '#999592';
+    const BG_ACTIVE = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() || '#ffffff';
+    const BG_INACTIVE = '#dedad0';
+    const TEXT_ACTIVE = '#111111';
+    const TEXT_INACTIVE = '#aaaaaa';
+
+    const bg = active ? BG_ACTIVE : BG_INACTIVE;
+    const textColor = active ? TEXT_ACTIVE : TEXT_INACTIVE;
+    const bottomStroke = active ? BG_ACTIVE : STROKE;
+    const bottomSW = active ? SW + 1 : SW;
+
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width', String(vw));
+    svg.setAttribute('height', String(vh));
+    svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
+    svg.style.cssText = 'display:block;overflow:visible';
+
+    const poly = document.createElementNS(ns, 'polygon');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('fill', bg);
+    svg.appendChild(poly);
+
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', `M 0 ${vh} L ${SKEW * 0.6} 1.5 L ${vw - SKEW * 0.6} 1.5 L ${vw} ${vh}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', STROKE);
+    path.setAttribute('stroke-width', String(SW));
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', '0');
+    line.setAttribute('y1', String(vh - SW / 4));
+    line.setAttribute('x2', String(vw));
+    line.setAttribute('y2', String(vh - SW / 4));
+    line.setAttribute('stroke', bottomStroke);
+    line.setAttribute('stroke-width', String(bottomSW));
+    svg.appendChild(line);
+
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', String(vw / 2));
+    text.setAttribute('y', String(H / 2 + 5));
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('font-family', "'IBM Plex Mono', monospace");
+    text.setAttribute('font-size', String(TAB_FONT_SIZE));
+    text.setAttribute('font-weight', active ? '700' : '500');
+    text.setAttribute('letter-spacing', '0.12em');
+    text.setAttribute('fill', textColor);
+    text.style.userSelect = 'none';
+    text.textContent = label;
+    svg.appendChild(text);
+
+    return svg;
+  }
+
+  function buildTabSVGBottom(label: string, active: boolean): SVGSVGElement {
+    const W = TAB_W;
+    const H = TAB_H;
+    const SKEW = TAB_SKEW;
+    const SW = TAB_SW;
+    const vw = W;
+    const vh = H + SW;
+
+    const pts = `0,0 ${SKEW * 0.6},${vh - 1.5} ${vw - SKEW * 0.6},${vh - 1.5} ${vw},0`;
+
+    const STROKE = '#999592';
+    const BG_ACTIVE = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() || '#ffffff';
+    const BG_INACTIVE = '#dedad0';
+    const TEXT_ACTIVE = '#111111';
+    const TEXT_INACTIVE = '#aaaaaa';
+
+    const bg = active ? BG_ACTIVE : BG_INACTIVE;
+    const textColor = active ? TEXT_ACTIVE : TEXT_INACTIVE;
+    const topStroke = active ? BG_ACTIVE : STROKE;
+    const topSW = active ? SW + 1 : SW;
+
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width', String(vw));
+    svg.setAttribute('height', String(vh));
+    svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
+    svg.style.cssText = 'display:block;overflow:visible';
+
+    const poly = document.createElementNS(ns, 'polygon');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('fill', bg);
+    svg.appendChild(poly);
+
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', `M 0 0 L ${SKEW * 0.6} ${vh - 1.5} L ${vw - SKEW * 0.6} ${vh - 1.5} L ${vw} 0`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', STROKE);
+    path.setAttribute('stroke-width', String(SW));
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', '0');
+    line.setAttribute('y1', String(SW / 4));
+    line.setAttribute('x2', String(vw));
+    line.setAttribute('y2', String(SW / 4));
+    line.setAttribute('stroke', topStroke);
+    line.setAttribute('stroke-width', String(topSW));
+    svg.appendChild(line);
+
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', String(vw / 2));
+    text.setAttribute('y', String(H / 2 + 5));
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('font-family', "'IBM Plex Mono', monospace");
+    text.setAttribute('font-size', String(TAB_FONT_SIZE));
+    text.setAttribute('font-weight', active ? '700' : '500');
+    text.setAttribute('letter-spacing', '0.12em');
+    text.setAttribute('fill', textColor);
+    text.style.userSelect = 'none';
+    text.textContent = label;
+    svg.appendChild(text);
+
+    return svg;
+  }
+
+  document.querySelectorAll<HTMLElement>('.tabs-wrapper').forEach(wrapper => {
+    const panels = Array.from(wrapper.querySelectorAll<HTMLElement>('.tab-panel'));
+    const labelsEl = wrapper.querySelector<HTMLElement>('.tab-labels')!;
+    const labelsBottomEl = wrapper.querySelector<HTMLElement>('.tab-labels-bottom')!;
+
+    if (panels.length < 2) labelsBottomEl.style.display = 'none';
+
+    let activeIdx = panels.findIndex(p => p.dataset.active === 'true');
+    if (activeIdx < 0) activeIdx = 0;
+
+    function activate(idx: number, animate: boolean = true) {
+      panels.forEach(p => p.classList.remove('is-active'));
+      panels[idx].classList.add('is-active');
+
+      labelsEl.innerHTML = '';
+      labelsBottomEl.innerHTML = '';
+
+      const inner = document.createElement('div');
+      inner.className = 'tab-labels-inner';
+      labelsEl.appendChild(inner);
+
+      const innerB = document.createElement('div');
+      innerB.className = 'tab-labels-inner';
+      labelsBottomEl.appendChild(innerB);
+
+      panels.forEach((panel, i) => {
+        const label = panel.dataset.label ?? '';
+        const isActive = i === idx;
+
+        const btn = document.createElement('button');
+        btn.className = 'tab-btn' + (isActive ? ' is-active' : '');
+        btn.setAttribute('aria-selected', String(isActive));
+        btn.appendChild(buildTabSVG(label, isActive));
+        btn.addEventListener('click', () => activate(i));
+        inner.appendChild(btn);
+        fitTextToTab(btn.querySelector('svg')!);
+
+        const btnB = document.createElement('button');
+        btnB.className = 'tab-btn tab-btn-bottom' + (isActive ? ' is-active' : '');
+        btnB.setAttribute('aria-selected', String(isActive));
+        btnB.appendChild(buildTabSVGBottom(label, isActive));
+        btnB.addEventListener('click', () => {
+          activate(i);
+          const top = wrapper.getBoundingClientRect().top + window.scrollY;
+          const headerH = (document.querySelector('header') as HTMLElement | null)?.offsetHeight ?? 0;
+          window.scrollTo({ top: top - headerH - 8, behavior: 'smooth' });
+        });
+        innerB.appendChild(btnB);
+        fitTextToTab(btnB.querySelector('svg')!);
+      });
+
+      centerActiveTab(inner, idx, animate);
+      centerActiveTab(innerB, idx, animate);
+    }
+
+    activate(activeIdx, false);
+  });
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+
+  .tabs-wrapper {
+    margin: 2rem 0;
+  }
+
+  .tab-labels {
+    overflow-x: clip;
+  }
+
+  .tab-labels:not(.tab-labels-bottom) {
+    position: relative;
+    z-index: 1;
+    margin-bottom: -1.5px;
+  }
+
+  :global(.tab-labels-inner) {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+  }
+
+  :global(.tab-btn) {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    cursor: pointer;
+    margin-right: -1.5px;
+    position: relative;
+    display: block;
+    outline: none;
+    line-height: 0;
+    overflow: visible;
+  }
+  :global(.tab-btn.is-active) {
+    z-index: 2;
+  }
+
+  .tab-content {
+    border-top: 1.5px solid #999592;
+    border-bottom: 1.5px solid #999592;
+    padding: 28px 4px;
+    font-size: 15px;
+    line-height: 1.85;
+    position: relative;
+    z-index: 0;
+  }
+
+  .tab-labels-bottom {
+    align-items: flex-start;
+  }
+
+  :global(.tab-btn-bottom.is-active::after) {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--color-bg);
+    z-index: 3;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.is-active { display: block; }
+</style>

@@ -1,0 +1,28 @@
+# Astro content generator - input.csv,,,,,,
+#,,,,,,
+# [url]        Spotify album URL (required),,,,,,
+#              Example: https://open.spotify.com/album/2PJFqQrmD53wpxgJARQANz,,,,,,
+#,,,,,,
+# [rating]     Rating 0-100 (required),,,,,,
+#              Example: 72,,,,,,
+#,,,,,,
+# [title]      Album display name override (default: from Spotify),,,,,,
+#              Example: ネガティブ,,,,,,
+#,,,,,,
+# [artist]     Artist name override (default: from Spotify),,,,,,
+#              Example: 井上陽水,,,,,,
+#,,,,,,
+# [category]   One of: 音楽 / 映画 / 漫画 / ゲーム / 文章 / その他 (default: 音楽),,,,,,
+#              Example: 音楽,,,,,,
+#,,,,,,
+# [workType]   Work type label (default: アルバム),,,,,,
+#              Example: アルバム / シングル / EP / 映画 / 書籍,,,,,,
+#,,,,,,
+# [genArticle] Generate article/works/*.mdx: true / false (default: true),,,,,,
+#              Example: true,,,,,,
+#,,,,,,
+url,rating,title,artist,category,workType,genArticle
+https://open.spotify.com/intl-ja/album/3f2ONu5aS32qXwTZbLEgp1?si=0a-5c3zdRHyIk3nLPHLjxA,90,,,,,false
+https://open.spotify.com/intl-ja/album/0lKhpZwGFHDSKctDYk1dhy?si=q2MdVG0zRciwiWlFZCvxiA,86,,,,,false
+https://open.spotify.com/intl-ja/album/6c3Xs0oDVFXrqVh56D50do?si=PHAUc7rRQm2hnIMGDbq4Jw,88,,,,,false
+https://open.spotify.com/intl-ja/album/5sY6UIQ32GqwMLAfSNEaXb?si=DV-b95lMQoS-STCNuY52wQ,93,,,,,false

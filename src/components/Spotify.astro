@@ -1,0 +1,48 @@
+---
+interface Props {
+  url: string;
+  compact?: boolean; // true = 小さいプレーヤー
+}
+
+const { url, compact = false } = Astro.props;
+
+// URLから種別（track/album/playlist）とIDを抽出
+const match = url.match(/open\.spotify\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(?:intl-[a-z]+\/)?(track|album|playlist)\/([a-zA-Z0-9]+)/);
+const type = match?.[1] ?? '';
+const id   = match?.[2] ?? '';
+const embedUrl = `https://open.spotify.com/embed/${type}/${id}`;
+const height = compact ? 80 : (type === 'track' ? 152 : 352);
+---
+
+{id
+  ? (
+    <div class="spotify-wrap" style={`height: ${height}px`}>
+      <iframe
+        src={embedUrl}
+        height={height}
+        frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+      />
+    </div>
+  )
+  : <p class="spotify-error">Spotify URLが正しくありません: {url}</p>
+}
+
+<style>
+.spotify-wrap {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.spotify-wrap iframe {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+.spotify-error {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+</style>

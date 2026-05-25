@@ -1,0 +1,53 @@
+---
+title: "Larmousse『Larmousse』"
+pubDate: 2026-05-19
+description: ""
+category: 音楽
+tags: [Larmousse]
+featured: false
+workId: "larmousse-larmousse"
+artwork: "/artworks/larmousse-larmousse.jpg"
+rating: 82
+---
+
+import Tabs from '../../../components/Tabs.astro';
+import Tab from '../../../components/Tab.astro';
+import Tracklist from '../../../components/Tracklist.astro';
+import TrackLegend from '../../../components/TrackLegend.astro';
+import YouTube from '../../../components/YouTube.astro';
+import Spotify from '../../../components/Spotify.astro';
+import Expand from '../../../components/Expand.astro';
+import URL from '../../../components/URL.astro';
+import B from '../../../components/B.astro';
+import R from '../../../components/R.astro';
+import RB from '../../../components/RB.astro';
+import U from '../../../components/U.astro';
+import Review from '../../../components/Review.astro';
+import Quote from '../../../components/Quote.astro';
+import LinkCard from '../../../components/LinkCard.astro';
+
+<Tabs>
+  <Tab label="2026/05/19" active>
+
+## トラックリスト
+<TrackLegend />
+<Tracklist
+  defaultLyric=""
+  defaultMusic=""
+  defaultArrange=""
+  defaultProducer=""
+  tracks={[
+    { n: 1, title: "Static Phase", mark: "", lyric: "", music: "", arrange: "", producer: "", time: "10:27" },
+    { n: 2, title: "A Universal Hello", mark: "", lyric: "", music: "", arrange: "", producer: "", time: "10:38" },
+    { n: 3, title: "Relics and Artefacts", mark: "", lyric: "", music: "", arrange: "", producer: "", time: "6:53" },
+    { n: 4, title: "Tape", mark: "", lyric: "", music: "", arrange: "", producer: "", time: "12:57" },
+  ]}
+/>
+
+<Review rating={82}></Review>
+<Spotify url="https://open.spotify.com/intl-ja/album/5CQZRuGBMIvk8VHSoIsEM5?si=iR8vM3jyRfOVrGq5VWBf5A" />
+
+  </Tab>
+</Tabs>
+
+---

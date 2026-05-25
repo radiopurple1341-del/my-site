@@ -1,0 +1,128 @@
+@font-face {
+  font-family: 'Atkinson';
+  src: url('/fonts/atkinson-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Atkinson';
+  src: url('/fonts/atkinson-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font-sans: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+  --font-mono: 'Courier New', monospace;
+
+  --color-bg:            #f7f5f1;
+  --color-surface:       #f3f1ed;
+  --color-border:        rgba(0,0,0,0.11);
+  --color-border-mid:    rgba(0,0,0,0.20);
+  --color-border-strong: rgba(0,0,0,0.75);
+  --color-text:          #12120e;
+  --color-text-mid:      #3e3d38;
+  --color-text-muted:    #41403ceb;
+  --color-accent:        #3d6b4f;
+  --color-accent-light:  #e6efe8;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+
+  --max-width: 1000px;
+  --gap: 1.25rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.site-wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  width: 100%;
+}
+
+/* tag badges */
+.tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 0.5px solid var(--color-border-mid);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  white-space: nowrap;
+  line-height: 1.6;
+}
+.tag.music  { color: #534AB7; border-color: #AFA9EC; background: #EEEDFE; }
+.tag.film   { color: #0F6E56; border-color: #5DCAA5; background: #E1F5EE; }
+.tag.manga  { color: #993C1D; border-color: #F0997B; background: #FAECE7; }
+.tag.novel  { color: #185FA5; border-color: #85B7EB; background: #E6F1FB; }
+.tag.diary  { color: #5F5E5A; border-color: #B4B2A9; background: #F1EFE8; }
+.tag.other  { color: #5F5E5A; border-color: #B4B2A9; background: #F1EFE8; }
+
+/* section header（共通） */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.875rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+.section-more {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.section-more:hover { color: var(--color-text); }
+
+@media (max-width: 640px) {
+  :root { --gap: 1rem; }
+  html { font-size: 14px; }
+}

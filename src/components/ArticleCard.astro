@@ -1,0 +1,125 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  category: string;
+  pubDate: Date;
+  thumbnail?: string;
+  href: string;
+  externalUrl?: string;
+  tags?: string[];
+  siteName?: string;
+  author?: string;
+}
+
+const { title, description, category, pubDate, thumbnail, href, externalUrl, tags = [], siteName, author } = Astro.props;
+
+const d = pubDate;
+const dateStr = `${String(d.getFullYear()).slice(-2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+
+const categoryClass: Record<string, string> = {
+  '音楽': 'music', '映画': 'film', '漫画': 'manga', '書籍': 'novel', 'ゲーム': 'game', 'その他': 'other', '文章': 'writing'
+};
+const catClass = categoryClass[category] ?? 'other';
+const linkHref = externalUrl ?? href;
+const isExternal = !!externalUrl;
+const isCurated = !!(siteName || author);
+---
+
+<article class="card">
+  <a href={linkHref} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener' : undefined} class="card-thumb-link">
+    <div class="card-thumb">
+      {thumbnail
+        ? <img src={thumbnail} alt={title} loading="lazy" onerror="this.src='/images/thumbnail-default.jpg'" />
+        : <div class="card-thumb-placeholder">
+            <span class="cat-icon">
+              {category === '音楽' ? '♪' : category === '映画' ? '▶' : category === '漫画' ? '冊' : category === '書籍' ? '本' : '◆'}
+            </span>
+          </div>
+      }
+    </div>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <span class={`tag ${catClass}`}>{category}</span>
+      <time class="card-date">{dateStr}</time>
+      {isCurated && siteName && <><span class="meta-sep">|</span><span class="card-site">{siteName}</span></>}
+      {isCurated && author && <><span class="meta-sep">|</span><span class="card-author">{author}</span></>}
+    </div>
+    <h3 class="card-title">
+      <a href={linkHref} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener' : undefined}>
+        {title}
+        {isExternal && <span class="ext-mark">↗</span>}
+      </a>
+    </h3>
+    <p class="card-desc">{description}</p>
+  </div>
+</article>
+
+<style>
+.card {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 0.85rem;
+  padding: 0.55rem;
+  border: 0.5px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.card-thumb-link { display: block; flex-shrink: 0; }
+.card-thumb {
+  width: 170px;
+  height: 100px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 0.5px solid var(--color-border);
+  background: var(--color-surface);
+}
+.card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.card-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cat-icon { font-size: 20px; color: var(--color-text-muted); }
+
+.card-body { min-width: 0; }
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.card-date { font-size: 11px; }
+.card-site { font-size: 11px; }
+.card-author { font-size: 11px; }
+.meta-sep { font-size: 11px; color: var(--color-border-strong); }
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin-bottom: 0.25rem;
+}
+.card-title a { color: var(--color-text); }
+.card-title a:hover { color: var(--color-accent); text-decoration: none; }
+.ext-mark { font-size: 10px; color: var(--color-text-muted); margin-left: 2px; }
+.card-desc {
+  font-size: 12px;
+  color: var(--color-text-mid);
+  line-height: 1.65;
+}
+@media (max-width: 640px) {
+  .card {
+    grid-template-columns: 1fr;
+  }
+  .card-thumb {
+    width: 100%;
+    height: 130px;
+  }
+}
+</style>

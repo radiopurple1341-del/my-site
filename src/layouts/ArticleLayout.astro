@@ -1,0 +1,137 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import ShareButtons from '../components/ShareButtons.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  category: string;
+  tags?: string[];
+  thumbnail?: string;
+  externalUrl?: string;
+}
+
+const { title, description, pubDate, category, tags = [], thumbnail, externalUrl } = Astro.props;
+
+const dateStr = pubDate.toLocaleDateString('ja-JP', {
+  year: 'numeric', month: 'long', day: 'numeric'
+});
+
+const categoryClass: Record<string, string> = {
+  '音楽': 'music', '映画': 'film', '漫画': 'manga', '書籍': 'novel', 'ゲーム': 'game', 'その他': 'other'
+};
+const catClass = categoryClass[category] ?? 'other';
+---
+
+<BaseLayout title={title} description={description} image={thumbnail}>
+  <article class="article-wrap">
+    <header class="article-header">
+      <div class="article-meta">
+        <span class={`tag ${catClass}`}>{category}</span>
+        <time>{dateStr}</time>
+      </div>
+      <h1 class="article-title">{title}</h1>
+      {tags.length > 0 && (
+        <div class="article-tags">
+          {tags.map(tag => <span class="tag">{tag}</span>)}
+        </div>
+      )}
+    </header>
+
+    {thumbnail && (
+      <div class="article-thumbnail">
+        <img src={thumbnail} alt={title} onerror="this.src='/images/thumbnail-default.jpg'" />
+      </div>
+    )}
+
+    {externalUrl ? (
+      <div class="external-notice">
+        <p class="external-intro">{description}</p>
+        <a href={externalUrl} target="_blank" rel="noopener" class="external-link">
+          元の記事を読む ↗
+        </a>
+      </div>
+    ) : (
+      <div class="article-body">
+        <slot />
+      </div>
+    )}
+
+    <ShareButtons title={title} path={Astro.url.pathname} />
+  </article>
+</BaseLayout>
+
+<style>
+.article-wrap { max-width: 680px; margin: 0 auto; }
+.article-header { margin-bottom: 1.5rem; }
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.article-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+}
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.article-thumbnail {
+  margin-bottom: 2rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 0.5px solid var(--color-border);
+}
+.article-thumbnail img { width: 100%; max-height: 360px; object-fit: cover; }
+.article-body {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--color-text);
+}
+.article-body :global(h2) { font-size: 18px; margin: 2rem 0 1rem; font-weight: 700; }
+.article-body :global(h3) { font-size: 16px; margin: 1.5rem 0 0.75rem; font-weight: 700; }
+.article-body :global(p) { margin-bottom: 1.25rem; }
+.article-body :global(a) { color: var(--color-accent); text-decoration: underline; }
+.article-body :global(blockquote) {
+  border-left: 3px solid var(--color-border-mid);
+  padding-left: 1rem;
+  color: var(--color-text-mid);
+  margin: 1.5rem 0;
+}
+
+.external-notice {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.external-intro {
+  font-size: 14px;
+  color: var(--color-text-mid);
+  line-height: 1.75;
+  margin-bottom: 1rem;
+}
+.external-link {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-accent);
+  border: 0.5px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.875rem;
+}
+.external-link:hover {
+  background: var(--color-accent);
+  color: white;
+  text-decoration: none;
+}
+</style>

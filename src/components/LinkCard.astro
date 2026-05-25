@@ -1,0 +1,89 @@
+---
+interface Props {
+  url: string;
+  title: string;
+  description?: string;
+  image?: string;
+  newTab?: boolean;
+}
+
+const { url, title, description, image, newTab = true } = Astro.props;
+
+const domain = (() => { try { return new URL(url).hostname; } catch { return url; } })();
+const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+---
+
+<a class="link-card" href={url} target={newTab ? "_blank" : "_self"} rel={newTab ? "noopener noreferrer" : undefined}>
+  {image && <img class="link-card-image" src={image} alt="" loading="lazy" />}
+  <div class="link-card-body">
+    <p class="link-card-title">{title}</p>
+    {description && <p class="link-card-desc">{description}</p>}
+    <p class="link-card-meta">
+      <img class="link-card-favicon" src={favicon} alt="" width="14" height="14" />
+      <span>{domain}</span>
+    </p>
+  </div>
+</a>
+
+<style>
+.link-card {
+  display: flex;
+  border: 1.5px solid #000;
+  border-radius: var(--radius-md, 6px);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  margin: 1.5rem 0;
+  background: white;
+  transition: filter 0.15s;
+}
+.link-card:hover {
+  filter: brightness(0.97);
+  text-decoration: none;
+}
+.link-card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1rem 1.25rem;
+  min-width: 0;
+}
+.link-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.link-card-desc {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.link-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+.link-card-favicon {
+  display: block;
+  flex-shrink: 0;
+}
+.link-card-image {
+  width: 120px;
+  min-height: 90px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+</style>

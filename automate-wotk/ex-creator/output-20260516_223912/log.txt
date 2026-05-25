@@ -1,0 +1,94 @@
+実行日時: 20260516_223912
+------------------------------------------------------------
+[URL] https://listening-log.hatenablog.com/entry/2020/02/19/182321
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://news.mynavi.jp/article/20140411-denou3/
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_essay_rev_shippai.md
+
+[URL] https://note.com/yorosz/n/ndbf0e04578cc
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://note.com/yorosz/n/ndbe34429d18d?magazine_key=m97a0a50aac5f
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://p2ptk.org/monopoly/4880/
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_essay_rev_shippai.md
+
+[URL] https://news.mynavi.jp/article/20140411-denou3/
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_essay_rev_shippai.md
+
+[URL] https://m-nerds.com/3dbluray_fureru
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_essay_rev_shippai.md
+
+[URL] http://www.kaminotane.com/2024/03/05/25508/
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_movie_rev_shippai.md
+
+[URL] http://www.kaminotane.com/2024/06/26/25784/
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_movie_rev_shippai.md
+
+[URL] https://note.com/yasuhide1978/n/n7bb21c6604b6
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://rollingstonejapan.com/articles/detail/40780/1/1/1
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://realsound.jp/2023/06/post-1338306.html
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://kusodekaihug2.hatenablog.com/entry/2021/04/30/013859
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://kusodekaihug2.hatenablog.com/entry/2021/03/23/182821
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://kusodekaihug2.hatenablog.com/entry/2021/02/21/030938
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+[URL] https://econ101.jp/he-myth-of-meritocracy-how-exams/
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_essay_rev_shippai.md
+
+[URL] https://kangaeruhito.jp/interview/761148
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_essay_rev_shippai.md
+
+[URL] https://waterwalkmusic.com/archives/743
+  [HTTP] status=200
+  [ERROR] 接続失敗: 'str' object has no attribute 'unescape'
+[OK] external_curated/ex_20260516_music_rev_shippai.md
+
+------------------------------------------------------------
+完了: 18件処理

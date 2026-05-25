@@ -1,0 +1,74 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import WorkLayout from '../../layouts/WorkLayout.astro';
+
+export async function getStaticPaths() {
+  const stripThe = (s: string) => s.replace(/^The\s+/i, '');
+  const articles = await getCollection('article');
+  const works = await getCollection('work');
+  const workMap = new Map(works.map(w => [w.id, w.data]));
+
+  const workArticles = articles
+    .filter(a => !!a.data.workId)
+    .sort((a, b) => {
+      const aw = workMap.get(a.data.workId!);
+      const bw = workMap.get(b.data.workId!);
+      const aKey = stripThe(aw?.artist || aw?.title || a.data.title);
+      const bKey = stripThe(bw?.artist || bw?.title || b.data.title);
+      const cmp = aKey.localeCompare(bKey, 'ja');
+      if (cmp !== 0) return cmp;
+      return (aw?.workYear ?? 0) - (bw?.workYear ?? 0);
+    });
+
+  return articles.map(article => {
+    let prev: { href: string; title: string } | null = null;
+    let next: { href: string; title: string } | null = null;
+    if (article.data.workId) {
+      const idx = workArticles.findIndex(a => a.id === article.id);
+      if (idx > 0) {
+        const p = workArticles[idx - 1];
+        prev = { href: `/article/${p.id.split('/').pop()}`, title: p.data.title };
+      }
+      if (idx !== -1 && idx < workArticles.length - 1) {
+        const n = workArticles[idx + 1];
+        next = { href: `/article/${n.id.split('/').pop()}`, title: n.data.title };
+      }
+    }
+    return {
+      params: { slug: article.id.split('/').pop() },
+      props: { article, prev, next },
+    };
+  });
+}
+
+const { article, prev, next } = Astro.props;
+const { Content } = await render(article);
+const isWorkArticle = !!article.data.workId;
+---
+
+{isWorkArticle ? (
+  <WorkLayout
+    title={article.data.title}
+    pubDate={article.data.pubDate}
+    category={article.data.category}
+    artwork={article.data.artwork}
+    workId={article.data.workId}
+    prev={prev}
+    next={next}
+  >
+    <Content />
+  </WorkLayout>
+) : (
+  <ArticleLayout
+    title={article.data.title}
+    description={article.data.description}
+    pubDate={article.data.pubDate}
+    category={article.data.category}
+    tags={article.data.tags}
+    thumbnail={article.data.thumbnail ?? article.data.artwork}
+    externalUrl={article.data.externalUrl}
+  >
+    <Content />
+  </ArticleLayout>
+)}

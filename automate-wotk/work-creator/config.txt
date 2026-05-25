@@ -1,0 +1,9 @@
+# Spotify API credentials
+# Get your keys at: https://developer.spotify.com/dashboard
+
+SPOTIFY_CLIENT_ID=f921718cd8ba48baa2712b76ff31e582
+SPOTIFY_CLIENT_SECRET=d69fe0dd625343f5bfd7909347f13426
+
+# Output directory (point to your Astro project's src/content)
+# Example: OUTPUT_DIR=C:\Users\yourname\mysite\src\content
+OUTPUT_DIR=.\output

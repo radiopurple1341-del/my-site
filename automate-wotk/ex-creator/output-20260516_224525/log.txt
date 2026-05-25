@@ -1,0 +1,166 @@
+実行日時: 20260516_224525
+------------------------------------------------------------
+[URL] https://listening-log.hatenablog.com/entry/2020/02/19/182321
+  [HTTP] status=200
+  [title] OGP: BEST OF 2019 - LL
+  [pubDate] datePublished: 2020-02-19
+  [thumbnail] 取得成功
+  [siteName] LL
+  [author] 取得失敗
+[OK] external_curated/ex_20200219_music_rev_best-of-2019---ll.md
+
+[URL] https://news.mynavi.jp/article/20140411-denou3/
+  [HTTP] status=200
+  [title] OGP: 森下九段とツツカナが創り出したもの「第3回将棋電王戦」第4局 - 好敵手から生まれた名勝負の秘密
+  [pubDate] datePublished: 2014-04-11
+  [thumbnail] 取得成功
+  [siteName] マイナビニュース
+  [author] 取得失敗
+[OK] external_curated/ex_20140411_essay_rev_morishita-kudan-to-tsutsukana-ga-tsukuri-dashi-tamono-dai-3.md
+
+[URL] https://note.com/yorosz/n/ndbf0e04578cc
+  [HTTP] status=200
+  [title] OGP: フリージャズ～インプロ方面から掘るNels Clineのエグい演奏｜よろすず
+  [pubDate] datePublished: 2025-05-20
+  [thumbnail] 取得成功
+  [siteName] note
+  [author] よろすず
+[OK] external_curated/ex_20250520_music_rev_furiijazu-inpuro-houmen-kara-horu-nels-cline-no-egu-i-ensou.md
+
+[URL] https://note.com/yorosz/n/ndbe34429d18d?magazine_key=m97a0a50aac5f
+  [HTTP] status=200
+  [title] OGP: アルバムレビュー：Ellen Arkbro & Johan Graden『I get along without you
+  [pubDate] datePublished: 2022-10-13
+  [thumbnail] 取得成功
+  [siteName] note
+  [author] よろすず
+[OK] external_curated/ex_20221013_music_rev_arubamurebyuu-ellen-arkbro-johan-graden-i-get-along-without.md
+
+[URL] https://p2ptk.org/monopoly/4880/
+  [HTTP] status=200
+  [title] JSON-LD: なぜAmazonはPrime Videoに広告をぶち込めるのか » p2ptk[.]org
+  [pubDate] datePublished: 2024-10-17
+  [thumbnail] 取得成功
+  [siteName] p2ptk[.]org »
+  [author] heatwave_p2p
+[OK] external_curated/ex_20241017_essay_rev_naze-amazon-ha-prime-video-ni-koukoku-wobuchi-kome-runoka-p2.md
+
+[URL] https://news.mynavi.jp/article/20140411-denou3/
+  [HTTP] status=200
+  [title] OGP: 森下九段とツツカナが創り出したもの「第3回将棋電王戦」第4局 - 好敵手から生まれた名勝負の秘密
+  [pubDate] datePublished: 2014-04-11
+  [thumbnail] 取得成功
+  [siteName] マイナビニュース
+  [author] 取得失敗
+[OK] external_curated/ex_20140411_essay_rev_morishita-kudan-to-tsutsukana-ga-tsukuri-dashi-tamono-dai-3.md
+
+[URL] https://m-nerds.com/3dbluray_fureru
+  [HTTP] status=200
+  [title] JSON-LD: 終わったメディアに触れる 〜3D Blu-ray体験記〜 | ムービーナーズ
+  [pubDate] datePublished: 2023-08-25
+  [thumbnail] 取得成功
+  [siteName] ムービーナーズ
+  [author] 取得失敗
+[OK] external_curated/ex_20230825_essay_rev_owa-tta-media-ni-fureru-3d-blu-ray-taikenki-muubiinaazu.md
+
+[URL] http://www.kaminotane.com/2024/03/05/25508/
+  [HTTP] status=200
+  [title] OGP: 特別鼎談　三宅唱×濱口竜介×三浦哲哉偶然を構築して、偶然を待つ──『夜明けのすべて』の演出をめぐって | Creator
+  [pubDate] 取得失敗
+  [thumbnail] 取得成功
+  [siteName] かみのたね
+  [author] 取得失敗
+[OK] external_curated/ex_20260516_movie_rev_tokubetsu-teidan-miyake-shou-x-hamaguchi-ryuusuke-x-miura-te.md
+
+[URL] http://www.kaminotane.com/2024/06/26/25784/
+  [HTTP] status=200
+  [title] OGP: 特別鼎談　濱口竜介×三宅唱×三浦哲哉映画で「目撃する」ということ── 『悪は存在しない』をめぐって | Creator'
+  [pubDate] 取得失敗
+  [thumbnail] 取得成功
+  [siteName] かみのたね
+  [author] 取得失敗
+[OK] external_curated/ex_20260516_movie_rev_tokubetsu-teidan-hamaguchi-ryuusuke-x-miyake-shou-x-miura-te.md
+
+[URL] https://note.com/yasuhide1978/n/n7bb21c6604b6
+  [HTTP] status=200
+  [title] OGP: グランジムーブメントがメタルに与えた影響：1992-1995｜ヴァジュラ𝔦𝔡
+  [pubDate] datePublished: 2021-12-25
+  [thumbnail] 取得成功
+  [siteName] note
+  [author] ヴァジュラ𝔦𝔡
+[OK] external_curated/ex_20211225_music_rev_guranjimuubumento-ga-metaru-ni-atae-ta-eikyou-1992-1995-vaju.md
+
+[URL] https://rollingstonejapan.com/articles/detail/40780/1/1/1
+  [HTTP] status=200
+  [title] OGP: タイラ『TYLA』徹底解説　越境するアマピアノとアフリカンミュージックの新たな地平 | Rolling Stone Ja
+  [pubDate] 取得失敗
+  [thumbnail] 取得成功
+  [siteName] Rolling Stone Japan
+  [author] 取得失敗
+[OK] external_curated/ex_20260516_music_rev_taira-tyla-tettei-kaisetsu-ekkyou-suru-amapiano-to-afurikanm.md
+
+[URL] https://realsound.jp/2023/06/post-1338306.html
+  [HTTP] status=200
+  [title] OGP: メタルは“開かれた音楽”として発展する　ポップスやヒップホップなど広範なジャンルへの浸透も
+  [pubDate] datePublished: 2023-06-01
+  [thumbnail] 取得成功
+  [siteName] Real Sound｜リアルサウンド
+  [author] 取得失敗
+[OK] external_curated/ex_20230601_music_rev_metaru-ha-hiraka-reta-ongaku-toshite-hatten-suru-poppusu-ya.md
+
+[URL] https://kusodekaihug2.hatenablog.com/entry/2021/04/30/013859
+  [HTTP] status=200
+  [title] OGP: 記録シリーズ：Slintから辿るルイビルのポストロック - 朱莉TeenageRiot
+  [pubDate] datePublished: 2021-04-30
+  [thumbnail] 取得成功
+  [siteName] 朱莉TeenageRiot
+  [author] 取得失敗
+[OK] external_curated/ex_20210430_music_rev_kiroku-shiriizu-slint-kara-tadoru-ruibiru-no-posutorokku---a.md
+
+[URL] https://kusodekaihug2.hatenablog.com/entry/2021/03/23/182821
+  [HTTP] status=200
+  [title] OGP: 記録シリーズ：Rodan / June of 44 - 朱莉TeenageRiot
+  [pubDate] datePublished: 2021-03-23
+  [thumbnail] 取得成功
+  [siteName] 朱莉TeenageRiot
+  [author] 取得失敗
+[OK] external_curated/ex_20210323_music_rev_kiroku-shiriizu-rodan-june-of-44---akari-teenageriot.md
+
+[URL] https://kusodekaihug2.hatenablog.com/entry/2021/02/21/030938
+  [HTTP] status=200
+  [title] OGP: 記録シリーズ：uri gagarn - 朱莉TeenageRiot
+  [pubDate] datePublished: 2026-01-10
+  [thumbnail] 取得成功
+  [siteName] 朱莉TeenageRiot
+  [author] 取得失敗
+[OK] external_curated/ex_20260110_music_rev_kiroku-shiriizu-uri-gagarn---akari-teenageriot.md
+
+[URL] https://econ101.jp/he-myth-of-meritocracy-how-exams/
+  [HTTP] status=200
+  [title] OGP: 彭澎「中国の科挙とは何だったのか？ 本当にメリトクラシー（実力主義）に基づいた選別・統治手段だったのだろうか？」（202
+  [pubDate] 取得失敗
+  [thumbnail] 取得成功
+  [siteName] 経済学101
+  [author] 取得失敗
+[OK] external_curated/ex_20260516_essay_rev_hou-hou-chuugoku-no-kakyo-toha-nanda-ttanoka-hontou-ni-merit.md
+
+[URL] https://kangaeruhito.jp/interview/761148
+  [HTTP] status=200
+  [title] OGP: 第1回　言葉はどこからやって来るのか――中動態と与格構文 ｜ 國分功一郎×中島岳志「立ち尽くす思想」 ｜ 國分功一郎 ,
+  [pubDate] 取得失敗
+  [thumbnail] 取得成功
+  [siteName] 考える人
+  [author] 株式会社新潮社
+[OK] external_curated/ex_20260516_essay_rev_dai-1-kai-kotoba-hadokokarayatte-kuru-nokaaa-chuudou-wazato.md
+
+[URL] https://waterwalkmusic.com/archives/743
+  [HTTP] status=200
+  [title] JSON-LD: 【Club Mix】コーネリアスのコメントは異様に短い - Water Walk
+  [pubDate] datePublished: 2025-06-28
+  [thumbnail] 取得成功
+  [siteName] Water Walk - Avant-Garde Music Magazine
+  [author] EPOCALC
+[OK] external_curated/ex_20250628_music_rev_club-mix-kooneriasu-no-komento-ha-iyou-ni-mijikai---water-wa.md
+
+------------------------------------------------------------
+完了: 18件処理

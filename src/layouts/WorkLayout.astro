@@ -1,0 +1,144 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import ShareButtons from '../components/ShareButtons.astro';
+
+interface Props {
+  title: string;
+  pubDate: Date;
+  category: string;
+  artwork?: string;
+  workId?: string | null;
+  prev?: { href: string; title: string } | null;
+  next?: { href: string; title: string } | null;
+}
+
+const { title, pubDate, category, artwork, workId, prev, next } = Astro.props;
+
+const dateStr = pubDate.toLocaleDateString('ja-JP', {
+  year: 'numeric', month: 'long', day: 'numeric'
+});
+
+const categoryClass: Record<string, string> = {
+  '音楽': 'music', '映画': 'film', '漫画': 'manga', '書籍': 'novel', 'ゲーム': 'game', 'その他': 'other'
+};
+const catClass = categoryClass[category] ?? 'other';
+
+const backHref = workId ? `/works#${workId}` : '/works';
+---
+
+<BaseLayout title={title} image={artwork}>
+  <article class="work-wrap">
+    <header class="work-header">
+      <div class="work-meta">
+        <span class={`tag ${catClass}`}>{category}</span>
+        <time>{dateStr}</time>
+      </div>
+      <h1 class="work-title">{title}</h1>
+    </header>
+
+    {artwork && (
+      <div class="work-artwork">
+        <img src={artwork} alt={title} />
+      </div>
+    )}
+
+    <div class="work-body">
+      <slot />
+    </div>
+
+    <div class="work-footer">
+      <ShareButtons title={title} path={Astro.url.pathname} />
+      <nav class="work-nav">
+        <a href={backHref} class="back-link">← 作品棚に戻る</a>
+      </nav>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+.work-wrap { max-width: 680px; margin: 0 auto; }
+
+.work-header { margin-bottom: 1.5rem; }
+.work-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.work-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.work-artwork {
+  margin-bottom: 2rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 0.5px solid var(--color-border);
+  max-width: 300px;
+}
+.work-artwork img { width: 100%; display: block; }
+
+.work-body {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--color-text);
+}
+.work-body :global(h2) { font-size: 18px; margin: 0rem 0 1rem; font-weight: 700; }
+.work-body :global(h3) { font-size: 16px; margin: 1.5rem 0 0.75rem; font-weight: 700; }
+.work-body :global(p) { margin-bottom: 1.25rem; }
+.work-body :global(ul), .work-body :global(ol) {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.work-body :global(li) { margin-bottom: 0.3rem; }
+.work-body :global(table) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 1.5rem;
+}
+.work-body :global(th) {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem 0.3rem 0;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.work-body :global(td) {
+  padding: 0.4rem 0.75rem 0.4rem 0;
+  border-bottom: 0.5px solid var(--color-border);
+  color: var(--color-text-mid);
+}
+.work-body :global(tr:last-child td) { border-bottom: none; }
+
+.work-footer {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 0.5px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.work-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.back-link,
+.next-link {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.back-link:hover,
+.next-link:hover { color: var(--color-text); text-decoration: none; }
+</style>

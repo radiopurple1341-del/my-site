@@ -1,0 +1,61 @@
+---
+import { SITE_URL } from '../consts';
+
+interface Props {
+  title: string;
+  path: string;
+}
+
+const { title, path } = Astro.props;
+const pageUrl = encodeURIComponent(`${SITE_URL}${path}`);
+const pageTitle = encodeURIComponent(`${title} | Without Sound`);
+---
+
+<div class="share-buttons">
+  <span class="share-label">シェア</span>
+  <a
+    href={`https://twitter.com/intent/tweet?text=${pageTitle}&url=${pageUrl}`}
+    target="_blank"
+    rel="noopener"
+    class="share-btn share-x"
+    aria-label="X(Twitter)でシェア"
+  >
+    X
+  </a>
+  <a
+    href={`https://line.me/R/msg/text/?${pageTitle}%0D%0A${pageUrl}`}
+    target="_blank"
+    rel="noopener"
+    class="share-btn share-line"
+    aria-label="LINEでシェア"
+  >
+    LINE
+  </a>
+</div>
+
+<style>
+.share-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+.share-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.share-btn {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--color-border-mid);
+  background: var(--color-surface);
+  color: var(--color-text-mid);
+  transition: background 0.15s, color 0.15s;
+}
+.share-btn:hover {
+  background: var(--color-text);
+  color: var(--color-bg);
+  text-decoration: none;
+}
+</style>
