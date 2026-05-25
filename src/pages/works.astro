@@ -1,6 +1,5 @@
 ---
 import { getCollection } from 'astro:content';
-import { statSync } from 'fs';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const stripThe = (s: string) => s.replace(/^The\s+/i, '');
@@ -26,15 +25,13 @@ function formatDate(d: Date): string {
   return `${String(d.getFullYear()).slice(2)}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function getLastModified(filePath?: string): string {
-  if (!filePath) return '';
-  try { return formatDate(statSync(filePath).mtime); } catch { return ''; }
+function getLastModified(_filePath?: string): string {
+  return '';
 }
 
-function getCreatedDate(pubDate?: Date, filePath?: string): string {
+function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   if (pubDate) return formatDate(pubDate);
-  if (!filePath) return '';
-  try { return formatDate(statSync(filePath).birthtime); } catch { return ''; }
+  return '';
 }
 ---
 

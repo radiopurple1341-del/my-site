@@ -4,7 +4,7 @@ import { defineConfig } from 'astro/config';
 import remarkBreaks from 'remark-breaks';
 
 export default defineConfig({
-  site: 'https://example.com',
+  site: 'https://without-sound.org',
   integrations: [mdx(), sitemap()],
   markdown: {
     remarkPlugins: [remarkBreaks],
