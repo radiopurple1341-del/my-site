@@ -1,5 +1,11 @@
 name = "my-site"
 compatibility_date = "2024-09-23"
+main = "./worker.js"
 
 [assets]
 directory = "./dist"
+binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "COUNTER"
+id = "4a8eab5cc7ec4990a13818c062405309"

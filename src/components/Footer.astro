@@ -1,45 +1,105 @@
 ---
 import { SITE_TITLE, NOTE_URL, TWITTER_HANDLE } from '../consts';
+import AccessCounter from './AccessCounter.astro';
+
+const now = new Date();
+const lastUpdated = `${String(now.getFullYear()).slice(-2)}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
 ---
 
-<footer>
-  <div class="site-wrap footer-inner">
-    <span class="footer-title">{SITE_TITLE}</span>
-    <div class="footer-links">
+<footer class="footer">
+  <div class="footer-top site-wrap">
+    <a href="/" class="site-title">© {SITE_TITLE}</a>
+    <nav class="footer-nav">
       <a href={NOTE_URL} target="_blank" rel="noopener">note</a>
       <a href={`https://twitter.com/${TWITTER_HANDLE.replace('@','')}`} target="_blank" rel="noopener">X / Twitter</a>
       <a href="/about">about</a>
       <a href="/rss.xml">RSS</a>
+    </nav>
+  </div>
+
+
+  <div class="footer-bottom site-wrap">
+    <div class="footer-meta">
+      <span class="muted">last updated {lastUpdated}</span>
     </div>
+    <AccessCounter digits={6} size="sm" />
   </div>
 </footer>
 
+<script>
+  import { setAccessCount, setAccessDelta } from '../scripts/access-counter';
+
+  const KEY = 'counted_' + new Date().toISOString().slice(0, 10);
+  const alreadyCounted = localStorage.getItem(KEY);
+  const method = alreadyCounted ? 'GET' : 'POST';
+
+  fetch('/api/counter', { method })
+    .then(r => r.json())
+    .then(({ count, today }) => {
+      if (!alreadyCounted) localStorage.setItem(KEY, '1');
+      setAccessCount(count);
+      setAccessDelta(today);
+    })
+    .catch(() => {});
+</script>
+
 <style>
-footer {
-  margin-top: auto;
-  border-top: 0.5px solid var(--color-border);
-  padding: 1.5rem 0;
-}
-.footer-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-.footer-title {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-.footer-links {
-  display: flex;
-  gap: 1rem;
-}
-.footer-links a {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-.footer-links a:hover {
-  color: var(--color-text);
-}
+  .footer {
+    margin-top: auto;
+    background: var(--color-bg);
+    padding: 32px 0 20px;
+    border-top: 0.5px solid var(--color-border);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .site-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+  .footer-nav {
+    display: flex;
+    gap: 24px;
+  }
+  .footer-nav a {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+  .footer-nav a:hover {
+    color: var(--color-text);
+  }
+  .footer-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+  }
+  .muted {
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 720px) {
+    .footer-top,
+    .footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+  }
 </style>

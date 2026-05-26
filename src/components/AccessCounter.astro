@@ -1,0 +1,77 @@
+---
+interface Props {
+  count?: number;
+  delta?: number;
+  digits?: number;
+  size?: "sm" | "md" | "lg";
+}
+
+const { count = 0, delta = 0, digits = 6, size = "md" } = Astro.props;
+const padded = String(count).padStart(digits, "0");
+const deltaText = delta >= 0 ? `+${delta}` : String(delta);
+---
+
+<div class={`counter-wrap counter-${size}`}>
+  <div class="counter-head">
+    <span class="counter-label">TOTAL ACCESS</span>
+    <span class="counter-delta">{deltaText} TODAY</span>
+  </div>
+  <div class="counter-value" id="access-counter" data-digits={digits}>
+    {padded.split("").map((d) => <span class="digit">{d}</span>)}
+  </div>
+</div>
+
+<style>
+  .counter-wrap {
+    display: inline-flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-bg);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+  .counter-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid var(--color-border-strong);
+    color: var(--color-text);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+  .counter-delta {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    color: var(--color-accent);
+    letter-spacing: 0.05em;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .counter-value {
+    display: inline-flex;
+    background: var(--color-surface);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .digit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .digit + .digit {
+    border-left: 1px solid var(--color-border);
+  }
+
+  .counter-sm .counter-head  { padding: 4px 10px; font-size: 9px; }
+  .counter-sm .counter-value { font-size: 14px; }
+  .counter-sm .digit         { width: 20px; height: 28px; }
+
+  .counter-md .counter-head  { padding: 6px 12px; font-size: 10px; }
+  .counter-md .counter-value { font-size: 18px; }
+  .counter-md .digit         { width: 26px; height: 36px; }
+
+  .counter-lg .counter-head  { padding: 6px 12px; font-size: 10px; }
+  .counter-lg .counter-value { font-size: 22px; }
+  .counter-lg .digit         { width: 32px; height: 44px; }
+</style>
