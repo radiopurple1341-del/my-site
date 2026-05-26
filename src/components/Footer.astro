@@ -11,8 +11,7 @@ const lastUpdated = `${String(now.getFullYear()).slice(-2)}.${String(now.getMont
     <a href="/" class="site-title">© {SITE_TITLE}</a>
     <nav class="footer-nav">
       <a href={NOTE_URL} target="_blank" rel="noopener">note</a>
-      <a href={`https://twitter.com/${TWITTER_HANDLE.replace('@','')}`} target="_blank" rel="noopener">X / Twitter</a>
-      <a href="/about">about</a>
+      <a href={`https://twitter.com/${TWITTER_HANDLE.replace('@','')}`} target="_blank" rel="noopener">Twitter</a>
       <a href="/rss.xml">RSS</a>
     </nav>
   </div>
@@ -98,8 +97,15 @@ const lastUpdated = `${String(now.getFullYear()).slice(-2)}.${String(now.getMont
     .footer-top,
     .footer-bottom {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
+      text-align: center;
       gap: 14px;
+    }
+    .footer-nav {
+      justify-content: center;
+    }
+    .footer-meta {
+      align-items: center;
     }
   }
 </style>

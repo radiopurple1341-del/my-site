@@ -240,12 +240,6 @@ const workByWorkId = new Map(allWorks.map(w => [w.id, w]));
         </section>
       )}
 
-      <!-- モバイル用ナビ（800px以下でのみ表示） -->
-      <nav class="mobile-nav">
-        <a href="/works">作品棚</a>
-        <a href="/archive">アーカイブ</a>
-        <a href="/about">about</a>
-      </nav>
 
     </div>
   </div>
@@ -690,32 +684,6 @@ document.addEventListener('DOMContentLoaded', () => {
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
-/* モバイルナビ */
-.mobile-nav {
-  display: none;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 0.5px solid var(--color-border);
-}
-.mobile-nav a {
-  font-size: 14px;
-  color: var(--color-text-mid);
-  padding: 0.3rem 0.65rem;
-  border-radius: var(--radius-sm);
-  border: 0.5px solid var(--color-border-mid);
-  text-decoration: none;
-}
-.mobile-nav a:hover {
-  background: var(--color-surface);
-  color: var(--color-text);
-}
-
-@media (max-width: 800px) {
-  .mobile-nav { display: flex; }
-}
-
 @media (max-width: 500px) {
   .carousel {
     overflow-x: scroll;
