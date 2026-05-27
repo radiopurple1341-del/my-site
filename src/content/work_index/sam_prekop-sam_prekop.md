@@ -1,6 +1,6 @@
 ---
 title: "Sam Prekop"
-artist: "Sam Prekop"
+artist: "The Sea and Cake -> Sam Prekop"
 category: 音楽
 workYear: 1999
 workMonth: 2

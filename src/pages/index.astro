@@ -51,7 +51,7 @@ const featuredArticles = articles.filter(a => a.data.featured);
 // カルーセル: 最新5件（external_curated除外）
 const carouselArticles = articles.filter(a => !a.id.startsWith('external_curated/')).slice(0, 5);
 
-// 最近追加した作品: work_index から pubDate順に4件
+// 最近追加した作品: pubDate降順（未設定は最下位）
 const allWorks = await getCollection('work');
 const recentWorks = [...allWorks]
   .sort((a, b) => {

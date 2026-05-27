@@ -5,6 +5,7 @@ category: 音楽
 workYear: 2001
 workMonth: 9
 workType: "アルバム"
+pubDate: 2026-05-27
 tags: []
 description: |
   

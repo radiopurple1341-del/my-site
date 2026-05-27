@@ -1,6 +1,6 @@
 ---
 title: "Who's Your New Professor"
-artist: "Sam Prekop"
+artist: "The Sea and Cake -> Sam Prekop"
 category: 音楽
 workYear: 2005
 workMonth: 5

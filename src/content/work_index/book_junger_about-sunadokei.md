@@ -9,6 +9,7 @@ workMonth: 8  # 任意
 workType: "評論"
 # tags: カテゴリをまたぐ横断導線用。例: tags: [音楽, 映画]
 # 　　　category と同名タグを付けると、他カテゴリフィルターでも表示される
+pubDate: 2026-05-27
 tags: []
 thumbnail: "/artworks/book_junger_about-sunadokei.jpg"
 description: |
