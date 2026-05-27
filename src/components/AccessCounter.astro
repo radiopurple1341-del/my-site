@@ -46,7 +46,8 @@ const deltaText = delta >= 0 ? `+${delta}` : String(delta);
     margin-left: 16px;
   }
   .counter-value {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     background: var(--color-surface);
     font-family: "JetBrains Mono", ui-monospace, monospace;
     color: var(--color-text);
@@ -54,7 +55,8 @@ const deltaText = delta >= 0 ? `+${delta}` : String(delta);
     letter-spacing: -0.02em;
   }
   .digit {
-    display: inline-flex;
+    display: flex;
+    flex: 1;
     align-items: center;
     justify-content: center;
   }
@@ -64,13 +66,13 @@ const deltaText = delta >= 0 ? `+${delta}` : String(delta);
 
   .counter-sm .counter-head  { padding: 4px 10px; font-size: 9px; }
   .counter-sm .counter-value { font-size: 14px; }
-  .counter-sm .digit         { width: 20px; height: 28px; }
+  .counter-sm .digit         { height: 28px; }
 
   .counter-md .counter-head  { padding: 6px 12px; font-size: 10px; }
   .counter-md .counter-value { font-size: 18px; }
-  .counter-md .digit         { width: 26px; height: 36px; }
+  .counter-md .digit         { height: 36px; }
 
   .counter-lg .counter-head  { padding: 6px 12px; font-size: 10px; }
   .counter-lg .counter-value { font-size: 22px; }
-  .counter-lg .digit         { width: 32px; height: 44px; }
+  .counter-lg .digit         { height: 44px; }
 </style>
