@@ -1,7 +1,0 @@
-Run: 2026-05-19 02:02:57
-------------------------------------------------
-[1] https://open.spotify.com/intl-ja/album/5CQZRuGBMIvk8VHSoIsEM5?si=iR8vM3jyRfOVrGq5VWBf5A
-    base_id : larmousse-larmousse
-    artwork : OK
-    index   : OK
-    article : OK
