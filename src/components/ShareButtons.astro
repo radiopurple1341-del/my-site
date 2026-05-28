@@ -18,11 +18,11 @@ const pageTitle = encodeURIComponent(`${title} | Without Sound`);
     target="_blank"
     rel="noopener"
     class="share-btn share-x"
-    aria-label="X(Twitter)でシェア"
+    aria-label="Twitterでシェア"
   >
-    X
+    Twitter
   </a>
-  <a
+  <!-- <a
     href={`https://line.me/R/msg/text/?${pageTitle}%0D%0A${pageUrl}`}
     target="_blank"
     rel="noopener"
@@ -30,7 +30,7 @@ const pageTitle = encodeURIComponent(`${title} | Without Sound`);
     aria-label="LINEでシェア"
   >
     LINE
-  </a>
+  </a> -->
 </div>
 
 <style>
@@ -41,15 +41,16 @@ const pageTitle = encodeURIComponent(`${title} | Without Sound`);
   margin-top: 2rem;
 }
 .share-label {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--color-text-muted);
 }
 .share-btn {
-  font-size: 11px;
+  font-size: 14px;
+  font-weight: 700;
   padding: 3px 10px;
   border-radius: var(--radius-sm);
-  border: 0.5px solid var(--color-border-mid);
-  background: var(--color-surface);
+  border: 0.5px solid var(--color-border-strong);
+  background: #e8f4fc;
   color: var(--color-text-mid);
   transition: background 0.15s, color 0.15s;
 }

@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # automation tools (local use only)
 automate-wotk/
+
+# Claude Code config
+CLAUDE.md
+.claude/

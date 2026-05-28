@@ -3,10 +3,10 @@ export function setAccessCount(n: number) {
   if (!el) return;
   const digits = Number(el.dataset.digits ?? 6);
   const padded = String(n).padStart(digits, "0");
-  el.innerHTML = padded
-    .split("")
-    .map((d) => `<span class="digit">${d}</span>`)
-    .join("");
+  const spans = el.querySelectorAll<HTMLElement>(".digit");
+  spans.forEach((span, i) => {
+    span.textContent = padded[i] ?? "0";
+  });
 }
 
 export function setAccessDelta(delta: number) {
