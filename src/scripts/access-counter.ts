@@ -47,26 +47,20 @@ export function initHistoryPopup() {
 
 function renderChart(data: { date: string; count: number }[]): string {
   const max = Math.max(...data.map((d) => d.count), 1);
-  const barW = 80;
-  const gap = 20;
-  const chartH = 50;
-  const totalW = data.length * (barW + gap) - gap;
+  const maxBarH = 44;
+  const mono = "font-family:'JetBrains Mono',monospace";
 
-  const bars = data
-    .map((d, i) => {
-      const x = i * (barW + gap);
-      const barH = Math.round((d.count / max) * chartH);
-      const y = chartH - barH;
-      const label = d.date.slice(5).replace("-", "/");
-      return [
-        `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="var(--color-accent)" rx="1"/>`,
-        `<text x="${x + barW / 2}" y="${chartH + 14}" text-anchor="middle" font-size="11" fill="var(--color-text-muted)">${label}</text>`,
-        d.count > 0
-          ? `<text x="${x + barW / 2}" y="${y - 3}" text-anchor="middle" font-size="10" fill="var(--color-text)">${d.count}</text>`
-          : "",
-      ].join("");
-    })
-    .join("");
+  const cols = data.map((d) => {
+    const h = Math.round((d.count / max) * maxBarH);
+    const label = d.date.slice(5).replace("-", "/");
+    return `<div style="display:flex;flex-direction:column;align-items:center;flex:1">
+      <div style="font-size:9px;color:var(--color-text);min-height:13px;${mono}">${d.count > 0 ? d.count : ""}</div>
+      <div style="height:${maxBarH}px;display:flex;align-items:flex-end;width:100%;padding:0 2px;box-sizing:border-box">
+        <div style="width:100%;height:${h}px;background:var(--color-accent);${d.count > 0 ? "min-height:2px" : ""}"></div>
+      </div>
+      <div style="font-size:9px;color:var(--color-text-muted);margin-top:3px;${mono}">${label}</div>
+    </div>`;
+  }).join("");
 
-  return `<svg viewBox="0 0 ${totalW} ${chartH + 18}" width="100%" style="display:block;overflow:visible;font-family:'JetBrains Mono',monospace">${bars}</svg>`;
+  return `<div style="display:flex;width:100%">${cols}</div>`;
 }
