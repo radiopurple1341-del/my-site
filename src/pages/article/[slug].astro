@@ -50,6 +50,7 @@ const isWorkArticle = !!article.data.workId;
 {isWorkArticle ? (
   <WorkLayout
     title={article.data.title}
+    description={article.data.description}
     pubDate={article.data.pubDate}
     category={article.data.category}
     artwork={article.data.artwork}

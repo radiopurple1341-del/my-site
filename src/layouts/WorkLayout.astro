@@ -4,6 +4,7 @@ import ShareButtons from '../components/ShareButtons.astro';
 
 interface Props {
   title: string;
+  description?: string;
   pubDate: Date;
   category: string;
   artwork?: string;
@@ -12,7 +13,7 @@ interface Props {
   next?: { href: string; title: string } | null;
 }
 
-const { title, pubDate, category, artwork, workId, prev, next } = Astro.props;
+const { title, description, pubDate, category, artwork, workId, prev, next } = Astro.props;
 
 const dateStr = pubDate.toLocaleDateString('ja-JP', {
   year: 'numeric', month: 'long', day: 'numeric'
@@ -26,7 +27,7 @@ const catClass = categoryClass[category] ?? 'other';
 const backHref = workId ? `/works#${workId}` : '/works';
 ---
 
-<BaseLayout title={title} image={artwork}>
+<BaseLayout title={title} description={description} image={artwork}>
   <article class="work-wrap">
     <header class="work-header">
       <div class="work-meta">
