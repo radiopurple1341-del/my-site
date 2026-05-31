@@ -26,7 +26,7 @@ const lastUpdated = `${String(now.getFullYear()).slice(-2)}.${String(now.getMont
 </footer>
 
 <script>
-  import { setAccessCount, setAccessDelta } from '../scripts/access-counter';
+  import { setAccessCount, setAccessDelta, initHistoryPopup } from '../scripts/access-counter';
 
   const KEY = 'counted_' + new Date().toISOString().slice(0, 10);
   const alreadyCounted = localStorage.getItem(KEY);
@@ -40,6 +40,8 @@ const lastUpdated = `${String(now.getFullYear()).slice(-2)}.${String(now.getMont
       setAccessDelta(today);
     })
     .catch(() => {});
+
+  initHistoryPopup();
 </script>
 
 <style>

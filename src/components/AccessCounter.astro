@@ -11,7 +11,11 @@ const padded = String(count).padStart(digits, "0");
 const deltaText = delta >= 0 ? `+${delta}` : String(delta);
 ---
 
-<div class={`counter-wrap counter-${size}`}>
+<div class={`counter-wrap counter-${size}`} id="counter-widget">
+  <div class="counter-history" id="counter-history" aria-hidden="true">
+    <div class="history-label">DAILY — LAST 7 DAYS</div>
+    <div id="history-chart"></div>
+  </div>
   <div class="counter-head">
     <span class="counter-label">TOTAL ACCESS</span>
     <span class="counter-delta">{deltaText} TODAY</span>
@@ -23,11 +27,34 @@ const deltaText = delta >= 0 ? `+${delta}` : String(delta);
 
 <style>
   .counter-wrap {
+    position: relative;
     display: inline-flex;
     flex-direction: column;
     border: 1px solid var(--color-border-strong);
     background: var(--color-bg);
     font-family: "Space Grotesk", system-ui, sans-serif;
+    cursor: pointer;
+  }
+  .counter-history {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    right: 0;
+    width: 100%;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-strong);
+    padding: 8px 10px;
+    z-index: 100;
+  }
+  .counter-wrap:hover .counter-history,
+  .counter-wrap.history-open .counter-history {
+    display: block;
+  }
+  .history-label {
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
   }
   .counter-head {
     display: block;
