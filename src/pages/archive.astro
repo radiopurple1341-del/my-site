@@ -67,7 +67,7 @@ const allTags = [...new Set(allArticles.flatMap(a => a.data.tags))].sort();
     <!-- 記事一覧 -->
     <div class="article-list" id="article-list">
       <div class="curated-toggle-row">
-        <button class="curated-toggle-btn" id="curated-toggle">他サイト記事を表示する</button>
+        <button class="curated-toggle-btn" id="curated-toggle">他サイト記事のみ表示する</button>
       </div>
       {allArticles.map(article => (
         <div
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = e.currentTarget as HTMLButtonElement;
     const isActive = btn.dataset.active === 'true';
     btn.dataset.active = isActive ? 'false' : 'true';
-    btn.textContent = isActive ? '他サイト記事を表示する' : '自分の記事を表示する';
+    btn.textContent = isActive ? '他サイト記事のみ表示する' : '自サイト記事を表示する';
     sessionStorage.setItem('archiveCurated', isActive ? 'false' : 'true');
     applyFilter();
   });
@@ -205,7 +205,7 @@ window.addEventListener('popstate', applyFilter);
 .article-item[data-curated="true"] :global(article) { border: 1px solid #0055cc; }
 .curated-toggle-row { padding: 0.25rem 0; }
 .curated-toggle-btn {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--color-text-muted);
   background: none;
   border: 0.5px solid var(--color-border-mid);
