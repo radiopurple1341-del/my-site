@@ -40,13 +40,14 @@ const work = defineCollection({
     title: z.string(),
     artist: z.string().optional(),
     category: z.enum(['音楽', '映画', '漫画', 'ゲーム', '書籍', 'その他']),
-    workYear: z.number().int().min(1900).max(2100),
+    workYear: z.number().int().min(1900).max(2100).optional(),
     workMonth: z.number().int().min(1).max(12).optional(),
     workType: z.string().optional(),
     tags: z.array(z.string()).optional(),
     thumbnail: z.string().optional(),
     description: z.string().optional(),        // 一言メモ（作品リストの「一言」列に表示）
     pubDate: z.coerce.date().optional(),       // 登録日（空欄ならbirthtime参照）
+    isGuide: z.boolean().optional(),           // 特集記事フラグ（通常作品と異なる表示）
   }),
 });
 
