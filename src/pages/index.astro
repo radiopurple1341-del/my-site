@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <style>
 /* ページグリッド */
-:global(.site-wrap) { max-width: 800px; }
+body :global(.site-wrap) { max-width: 800px; }
 .page-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -714,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 @media (min-width: 1270px) {
-  :global(.site-wrap) { max-width: 1264px; }
+  body :global(.site-wrap) { max-width: 1264px; }
   .page-grid { grid-template-columns: 800px 400px; }
   .update-box { display: block; margin-top: 24.5px; height: 280px; }
 }
