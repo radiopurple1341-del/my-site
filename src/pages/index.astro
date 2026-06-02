@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import rawManualUpdates from '../data/updates.json';
 
 function linkify(text: string) {
   return text
@@ -34,16 +35,23 @@ const diaryUpdates = diaryEntries.map(e => ({
   href: `/diary#${e.id}`,
   external: false,
 }));
-const articleUpdates = articles.slice(0, 8).map(a => ({
+const articleUpdates = articles.slice(0, 10).map(a => ({
   date: a.data.pubDate,
-  label: a.data.externalUrl ? '他サイト' : '記事',
+  label: a.id.startsWith('external_curated/') ? '外部サイト' : a.data.externalUrl ? '他サイト' : '記事',
   text: a.data.externalUrl ? a.data.title : `${a.data.title}${a.data.description ? '：' + a.data.description : ''}`,
   href: a.data.externalUrl ?? `/article/${a.id.split('/').pop()}`,
   external: !!a.data.externalUrl,
 }));
-const allUpdates = [...diaryUpdates, ...articleUpdates]
+const manualUpdates = (rawManualUpdates as { date: string; text: string; href?: string }[]).map(u => ({
+  date: new Date(u.date),
+  label: 'お知らせ',
+  text: u.text,
+  href: u.href ?? null,
+  external: false,
+}));
+const allUpdates = [...articleUpdates, ...manualUpdates]
   .sort((a, b) => b.date.getTime() - a.date.getTime())
-  .slice(0, 6);
+  .slice(0, 7);
 
 // ランダム表示用（featuredのもの）
 const featuredArticles = articles.filter(a => a.data.featured);
@@ -207,25 +215,26 @@ const workByWorkId = new Map(allWorks.map(w => [w.id, w]));
         <div class="update-rows">
           {allUpdates.map(item => {
             const d = item.date;
-            const dateStr = `${String(d.getFullYear()).slice(-2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+            const dateStr = `${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+            const isManual = item.label === 'お知らせ';
+            const inner = (
+              <>
+                {!isManual && <span class="u-label">【{item.label}】</span>}
+                {item.text}
+              </>
+            );
             return (
               <div class="update-row">
                 <time class="u-date">{dateStr}</time>
-                <span class="u-text">
-                  <a
-                    href={item.href}
-                    target={item.external ? '_blank' : undefined}
-                    rel={item.external ? 'noopener' : undefined}
-                  >
-                    <span class="u-label">【{item.label}】</span>{item.label === '日記' ? <span set:html={linkify(item.text)} /> : item.text}
-                  </a>
+                <span class="u-text" title={item.text}>
+                  {item.href
+                    ? <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noopener' : undefined}>{inner}</a>
+                    : <span>{inner}</span>
+                  }
                 </span>
               </div>
             );
           })}
-        </div>
-        <div class="update-footer">
-          <a href="/archive" class="update-more-link">一覧を見る →</a>
         </div>
       </section>
 
@@ -603,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 .update-row {
   display: grid;
-  grid-template-columns: 3.3rem 1fr;
+  grid-template-columns: 2.2rem 1fr;
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.35rem 0.875rem;
@@ -616,14 +625,6 @@ document.addEventListener('DOMContentLoaded', () => {
 .u-label { font-size: 10px; color: var(--color-text-muted); margin-right: 2px; }
 .u-text a { color: inherit; text-decoration: none; }
 .u-text a:hover { color: var(--color-text); text-decoration: underline; }
-.update-footer {
-  padding: 0.35rem 0.875rem;
-  background: var(--color-surface);
-  border-top: 0.5px solid var(--color-border);
-  text-align: right;
-}
-.update-more-link { font-size: 11px; color: var(--color-text-muted); text-decoration: none; }
-.update-more-link:hover { color: var(--color-text); }
 
 /* ランダムアーカイブ */
 .section-title-link { color: inherit; text-decoration: none; }
