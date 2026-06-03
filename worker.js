@@ -18,7 +18,9 @@ export default {
       if (request.method === 'GET') {
         const count = parseInt(await env.COUNTER.get('total') || '0');
         const daily = parseInt(await env.COUNTER.get(dailyKey) || '0');
-        return new Response(JSON.stringify({ count, today: daily }), { headers });
+        return new Response(JSON.stringify({ count, today: daily }), {
+          headers: { ...headers, 'Cache-Control': 'public, max-age=600' },
+        });
       }
 
       if (request.method === 'POST') {
@@ -46,7 +48,9 @@ export default {
         date: k.replace('day_', ''),
         count: parseInt(values[i] || '0'),
       }));
-      return new Response(JSON.stringify(result), { headers });
+      return new Response(JSON.stringify(result), {
+        headers: { ...headers, 'Cache-Control': 'public, max-age=600' },
+      });
     }
 
     return env.ASSETS.fetch(request);
