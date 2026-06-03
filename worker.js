@@ -57,8 +57,9 @@ export default {
     }
 
     if (url.pathname === '/api/pageview' && request.method === 'POST') {
-      const { path } = await request.json().catch(() => ({}));
-      if (path) {
+      const { path: rawPath } = await request.json().catch(() => ({}));
+      if (rawPath) {
+        const path = rawPath === '/' ? '/' : rawPath.replace(/\/$/, '');
         const today = new Date().toISOString().slice(0, 10);
         await env.DB.prepare(
           'INSERT INTO page_visits (path, date, count) VALUES (?, ?, 1) ON CONFLICT(path, date) DO UPDATE SET count = count + 1'
