@@ -6,6 +6,7 @@ main = "./worker.js"
 directory = "./dist"
 binding = "ASSETS"
 
-[[kv_namespaces]]
-binding = "COUNTER"
-id = "4a8eab5cc7ec4990a13818c062405309"
+[[d1_databases]]
+binding = "DB"
+database_name = "my-site-counter"
+database_id = "6fd23f49-2df1-498e-99d9-f79ee1dda5fd"

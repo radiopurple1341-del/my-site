@@ -13,22 +13,24 @@ export default {
       }
 
       const today = new Date().toISOString().slice(0, 10);
-      const dailyKey = `day_${today}`;
 
       if (request.method === 'GET') {
-        const count = parseInt(await env.COUNTER.get('total') || '0');
-        const daily = parseInt(await env.COUNTER.get(dailyKey) || '0');
-        return new Response(JSON.stringify({ count, today: daily }), {
+        const row = await env.DB.prepare(
+          'SELECT COALESCE(SUM(count), 0) as total, COALESCE(SUM(CASE WHEN date = ? THEN count ELSE 0 END), 0) as today FROM visits'
+        ).bind(today).first();
+        return new Response(JSON.stringify({ count: row.total, today: row.today }), {
           headers: { ...headers, 'Cache-Control': 'public, max-age=600' },
         });
       }
 
       if (request.method === 'POST') {
-        const count = parseInt(await env.COUNTER.get('total') || '0') + 1;
-        const daily = parseInt(await env.COUNTER.get(dailyKey) || '0') + 1;
-        await env.COUNTER.put('total', String(count));
-        await env.COUNTER.put(dailyKey, String(daily));
-        return new Response(JSON.stringify({ count, today: daily }), { headers });
+        await env.DB.prepare(
+          'INSERT INTO visits (date, count) VALUES (?, 1) ON CONFLICT(date) DO UPDATE SET count = count + 1'
+        ).bind(today).run();
+        const row = await env.DB.prepare(
+          'SELECT COALESCE(SUM(count), 0) as total, COALESCE(SUM(CASE WHEN date = ? THEN count ELSE 0 END), 0) as today FROM visits'
+        ).bind(today).first();
+        return new Response(JSON.stringify({ count: row.total, today: row.today }), { headers });
       }
     }
 
@@ -38,16 +40,17 @@ export default {
         'Access-Control-Allow-Origin': '*',
       };
       const today = new Date();
-      const keys = Array.from({ length: 7 }, (_, i) => {
+      const dates = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(today);
         d.setDate(d.getDate() - (6 - i));
-        return `day_${d.toISOString().slice(0, 10)}`;
+        return d.toISOString().slice(0, 10);
       });
-      const values = await Promise.all(keys.map(k => env.COUNTER.get(k)));
-      const result = keys.map((k, i) => ({
-        date: k.replace('day_', ''),
-        count: parseInt(values[i] || '0'),
-      }));
+      const fromDate = dates[0];
+      const rows = await env.DB.prepare(
+        'SELECT date, count FROM visits WHERE date >= ? ORDER BY date'
+      ).bind(fromDate).all();
+      const countMap = Object.fromEntries(rows.results.map(r => [r.date, r.count]));
+      const result = dates.map(date => ({ date, count: countMap[date] || 0 }));
       return new Response(JSON.stringify(result), {
         headers: { ...headers, 'Cache-Control': 'public, max-age=600' },
       });
