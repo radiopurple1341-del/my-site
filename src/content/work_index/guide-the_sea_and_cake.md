@@ -1,12 +1,12 @@
 ---
-title: "The Sea and Cake — ディスコグラフィーガイド"
+title: "音響派？ポスト、ソフトロック？シカゴの無国境バンド「The Sea and Cake」のオススメ"
 artist: "The Sea and Cake"
 category: 音楽
 isGuide: true
 workType: "特集"
-pubDate: 2013-09-21
+pubDate: 2026-06-02
 tags: [The Sea and Cake]
 thumbnail: "/thumbnail/sp-The+Sea+and+Cake.jpg"
 description: |
-  シカゴ発、音響派/ポストロック/ソフトロックを横断する無国籍バンド。全作品を通じた入門ガイド。
+  シカゴ音響派？ポストロックとソフトロックを横断するジャンルレスな彼らの入門ガイドです。
 ---
