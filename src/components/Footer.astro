@@ -28,18 +28,29 @@ const lastUpdated = `${String(now.getFullYear()).slice(-2)}.${String(now.getMont
 <script>
   import { setAccessCount, setAccessDelta, initHistoryPopup } from '../scripts/access-counter';
 
-  const KEY = 'counted_' + new Date().toISOString().slice(0, 10);
-  const alreadyCounted = localStorage.getItem(KEY);
+  const today = new Date().toISOString().slice(0, 10);
+  const TOTAL_KEY = 'counted_' + today;
+  const PAGE_KEY = 'page_' + window.location.pathname + '_' + today;
+  const alreadyCounted = localStorage.getItem(TOTAL_KEY);
   const method = alreadyCounted ? 'GET' : 'POST';
 
   fetch('/api/counter', { method })
     .then(r => r.json())
-    .then(({ count, today }) => {
-      if (!alreadyCounted) localStorage.setItem(KEY, '1');
+    .then(({ count, today: todayCount }) => {
+      if (!alreadyCounted) localStorage.setItem(TOTAL_KEY, '1');
       setAccessCount(count);
-      setAccessDelta(today);
+      setAccessDelta(todayCount);
     })
     .catch(() => {});
+
+  if (!localStorage.getItem(PAGE_KEY)) {
+    localStorage.setItem(PAGE_KEY, '1');
+    fetch('/api/pageview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: window.location.pathname }),
+    }).catch(() => {});
+  }
 
   initHistoryPopup();
 </script>

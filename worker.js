@@ -56,6 +56,43 @@ export default {
       });
     }
 
+    if (url.pathname === '/api/pageview' && request.method === 'POST') {
+      const { path } = await request.json().catch(() => ({}));
+      if (path) {
+        const today = new Date().toISOString().slice(0, 10);
+        await env.DB.prepare(
+          'INSERT INTO page_visits (path, date, count) VALUES (?, ?, 1) ON CONFLICT(path, date) DO UPDATE SET count = count + 1'
+        ).bind(path, today).run();
+      }
+      return new Response(null, {
+        status: 204,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+      });
+    }
+
+    if (url.pathname === '/api/stats' && request.method === 'GET') {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=300',
+      };
+      const today = new Date();
+      const sevenDaysAgo = new Date(today);
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      const fromDate = sevenDaysAgo.toISOString().slice(0, 10);
+
+      const [allTime, last7days] = await Promise.all([
+        env.DB.prepare(
+          'SELECT path, SUM(count) as total FROM page_visits GROUP BY path ORDER BY total DESC LIMIT 30'
+        ).all(),
+        env.DB.prepare(
+          'SELECT path, SUM(count) as total FROM page_visits WHERE date >= ? GROUP BY path ORDER BY total DESC LIMIT 30'
+        ).bind(fromDate).all(),
+      ]);
+
+      return new Response(JSON.stringify({ allTime: allTime.results, last7days: last7days.results }), { headers });
+    }
+
     return env.ASSETS.fetch(request);
   },
 };

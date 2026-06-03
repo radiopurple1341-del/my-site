@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const articles = await getCollection('article');
+const pathTitleMap: Record<string, string> = {};
+for (const article of articles) {
+  const slug = article.id.split('/').pop();
+  pathTitleMap[`/article/${slug}`] = article.data.title;
+}
+---
+
+<BaseLayout title="Stats — without-sound.org">
+  <div class="stats-page site-wrap">
+    <h1 class="page-title">Stats</h1>
+    <div id="stats-root">
+      <p class="loading">読み込み中...</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ pathTitleMap }}>
+  function formatPath(path) {
+    return pathTitleMap[path] || path;
+  }
+
+  function renderTable(data) {
+    if (!data.length) return '<p class="empty">データなし</p>';
+    return `
+      <table class="stats-table">
+        <thead>
+          <tr><th>#</th><th>ページ</th><th>PV</th></tr>
+        </thead>
+        <tbody>
+          ${data.map((item, i) => `
+            <tr>
+              <td class="rank">${i + 1}</td>
+              <td class="title"><a href="${item.path}">${formatPath(item.path)}</a></td>
+              <td class="count">${item.total}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  async function loadStats() {
+    try {
+      const res = await fetch('/api/stats');
+      const { allTime, last7days } = await res.json();
+      document.getElementById('stats-root').innerHTML = `
+        <section>
+          <h2 class="section-title">直近7日間</h2>
+          ${renderTable(last7days)}
+        </section>
+        <section>
+          <h2 class="section-title">全期間</h2>
+          ${renderTable(allTime)}
+        </section>
+      `;
+    } catch {
+      document.getElementById('stats-root').innerHTML = '<p class="empty">読み込みに失敗しました</p>';
+    }
+  }
+
+  loadStats();
+</script>
+
+<style>
+  .stats-page {
+    padding: 40px 0 80px;
+  }
+  .page-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 40px;
+    letter-spacing: -0.02em;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 40px 0 12px;
+  }
+  .stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .stats-table th {
+    text-align: left;
+    padding: 6px 12px 6px 0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+  .stats-table td {
+    padding: 8px 12px 8px 0;
+    border-bottom: 0.5px solid var(--color-border);
+    vertical-align: middle;
+  }
+  .rank {
+    width: 32px;
+    color: var(--color-text-muted);
+  }
+  .title a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .title a:hover {
+    text-decoration: underline;
+  }
+  .count {
+    width: 60px;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-accent);
+  }
+  .loading, .empty {
+    color: var(--color-text-muted);
+    font-size: 13px;
+  }
+</style>
