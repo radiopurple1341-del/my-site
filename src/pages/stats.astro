@@ -24,7 +24,7 @@ for (const article of articles) {
     return pathTitleMap[path] || path;
   }
 
-  function renderTable(data) {
+  function renderAllTimeTable(data) {
     if (!data.length) return '<p class="empty">データなし</p>';
     return `
       <table class="stats-table">
@@ -44,6 +44,33 @@ for (const article of articles) {
     `;
   }
 
+  function renderWeekTable({ dates, rows }) {
+    if (!rows.length) return '<p class="empty">データなし</p>';
+    const labels = dates.map(d => d.slice(5).replace('-', '/'));
+    return `
+      <div class="week-table-wrap">
+        <table class="stats-table week-table">
+          <thead>
+            <tr>
+              <th class="title-col">ページ</th>
+              ${labels.map(l => `<th class="day-col">${l}</th>`).join('')}
+              <th class="count">合計</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr>
+                <td class="title"><a href="${row.path}">${formatPath(row.path)}</a></td>
+                ${row.days.map(n => `<td class="day-val">${n || '-'}</td>`).join('')}
+                <td class="count">${row.total}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
   async function loadStats() {
     try {
       const res = await fetch('/api/stats');
@@ -51,11 +78,11 @@ for (const article of articles) {
       document.getElementById('stats-root').innerHTML = `
         <section>
           <h2 class="section-title">直近7日間</h2>
-          ${renderTable(last7days)}
+          ${renderWeekTable(last7days)}
         </section>
         <section>
           <h2 class="section-title">全期間</h2>
-          ${renderTable(allTime)}
+          ${renderAllTimeTable(allTime)}
         </section>
       `;
     } catch {
@@ -117,6 +144,24 @@ for (const article of articles) {
     text-align: right;
     font-family: 'JetBrains Mono', monospace;
     color: var(--color-accent);
+  }
+  .week-table-wrap {
+    overflow-x: auto;
+  }
+  .week-table .title-col {
+    min-width: 160px;
+  }
+  .day-col {
+    width: 48px;
+    text-align: right;
+    color: var(--color-text-muted);
+    font-weight: 400;
+  }
+  .day-val {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--color-text-muted);
   }
   .loading, .empty {
     color: var(--color-text-muted);

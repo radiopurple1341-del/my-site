@@ -5,7 +5,7 @@ category: 音楽
 workYear: 1997
 workMonth: 4
 workType: "アルバム"
-pubDate: 2026-05-27
+pubDate: 2026-05-21
 tags: []
 description: |
   ソロファースト。キャリアの中でもリズムに比重を置いた、タイトで軽やかな、着こなしみたいなグルーヴが素敵な一枚

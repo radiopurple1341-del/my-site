@@ -78,20 +78,40 @@ export default {
         'Cache-Control': 'public, max-age=300',
       };
       const today = new Date();
-      const sevenDaysAgo = new Date(today);
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-      const fromDate = sevenDaysAgo.toISOString().slice(0, 10);
+      const dates = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(today);
+        d.setDate(d.getDate() - (6 - i));
+        return d.toISOString().slice(0, 10);
+      });
+      const fromDate = dates[0];
 
-      const [allTime, last7days] = await Promise.all([
+      const [allTimeRows, weekRows] = await Promise.all([
         env.DB.prepare(
           'SELECT path, SUM(count) as total FROM page_visits GROUP BY path ORDER BY total DESC LIMIT 30'
         ).all(),
         env.DB.prepare(
-          'SELECT path, SUM(count) as total FROM page_visits WHERE date >= ? GROUP BY path ORDER BY total DESC LIMIT 30'
+          'SELECT path, date, count FROM page_visits WHERE date >= ? ORDER BY path, date'
         ).bind(fromDate).all(),
       ]);
 
-      return new Response(JSON.stringify({ allTime: allTime.results, last7days: last7days.results }), { headers });
+      const pathTotals = {};
+      const pathDays = {};
+      for (const row of weekRows.results) {
+        pathTotals[row.path] = (pathTotals[row.path] || 0) + row.count;
+        if (!pathDays[row.path]) pathDays[row.path] = {};
+        pathDays[row.path][row.date] = row.count;
+      }
+      const sortedPaths = Object.keys(pathTotals).sort((a, b) => pathTotals[b] - pathTotals[a]);
+      const last7days = {
+        dates,
+        rows: sortedPaths.map(path => ({
+          path,
+          days: dates.map(d => pathDays[path][d] || 0),
+          total: pathTotals[path],
+        })),
+      };
+
+      return new Response(JSON.stringify({ allTime: allTimeRows.results, last7days }), { headers });
     }
 
     return env.ASSETS.fetch(request);
