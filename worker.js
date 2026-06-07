@@ -114,6 +114,38 @@ export default {
       return new Response(JSON.stringify({ allTime: allTimeRows.results, last7days }), { headers });
     }
 
+    if (url.pathname === '/api/like') {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      };
+
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { headers });
+      }
+
+      if (request.method === 'GET') {
+        const ids = (url.searchParams.get('ids') || '').split(',').filter(Boolean).slice(0, 100);
+        if (!ids.length) return new Response('{}', { headers });
+        const placeholders = ids.map(() => '?').join(',');
+        const rows = await env.DB.prepare(
+          `SELECT id, count FROM likes WHERE id IN (${placeholders})`
+        ).bind(...ids).all();
+        const result = Object.fromEntries(rows.results.map(r => [r.id, r.count]));
+        return new Response(JSON.stringify(result), { headers });
+      }
+
+      if (request.method === 'POST') {
+        const { id } = await request.json().catch(() => ({}));
+        if (!id) return new Response('{}', { headers });
+        await env.DB.prepare(
+          'INSERT INTO likes (id, count) VALUES (?, 1) ON CONFLICT(id) DO UPDATE SET count = count + 1'
+        ).bind(id).run();
+        const row = await env.DB.prepare('SELECT count FROM likes WHERE id = ?').bind(id).first();
+        return new Response(JSON.stringify({ count: row?.count ?? 1 }), { headers });
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 };

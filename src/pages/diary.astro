@@ -58,6 +58,11 @@ function linkify(text: string) {
           <img src={char.icon} alt={char.name} class="avatar" />
           <time class="post-date">{dateStr}</time>
           <p class="post-text" set:html={linkify((entry.body ?? '').trim())} />
+          <div class="post-footer">
+            <button class="like-btn" data-like-id={`diary:${entry.id}`} aria-label="いいね">
+              <span class="star">☆</span><span class="like-count">0</span>
+            </button>
+          </div>
         </article>
       );
     })}
@@ -127,4 +132,75 @@ function linkify(text: string) {
   margin-top: 8px;
   border-radius: var(--radius-md);
 }
+.post-footer {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+.like-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.like-btn:hover { color: var(--color-text); }
+.like-btn .star { font-size: 20px; }
+.like-btn.liked .star { color: #f5a623; }
+.like-btn.liked { color: #f5a623; }
 </style>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.like-btn[data-like-id]');
+  const ids = Array.from(buttons).map(b => b.dataset.likeId!);
+
+  // 既押しの状態を復元
+  buttons.forEach(btn => {
+    if (localStorage.getItem('liked_' + btn.dataset.likeId)) {
+      btn.querySelector('.star')!.textContent = '★';
+      btn.classList.add('liked');
+    }
+  });
+
+  // カウント一括取得
+  if (ids.length) {
+    fetch(`/api/like?ids=${ids.join(',')}`)
+      .then(r => r.json())
+      .then((counts: Record<string, number>) => {
+        buttons.forEach(btn => {
+          const n = counts[btn.dataset.likeId!] ?? 0;
+          btn.querySelector('.like-count')!.textContent = String(n);
+        });
+      })
+      .catch(() => {});
+  }
+
+  // クリック
+  buttons.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.likeId!;
+      if (localStorage.getItem('liked_' + id)) return;
+      localStorage.setItem('liked_' + id, '1');
+      btn.querySelector('.star')!.textContent = '★';
+      btn.classList.add('liked');
+      try {
+        const res = await fetch('/api/like', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        });
+        const { count } = await res.json();
+        btn.querySelector('.like-count')!.textContent = count ? String(count) : '';
+      } catch {}
+    });
+  });
+</script>
