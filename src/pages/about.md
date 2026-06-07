@@ -49,8 +49,9 @@ Twitterみたいなやつ。たぶん。
 <span style="color:red">「ランダム・アーカイブ」では、自分の記事 + 自分の好きな外部サイト記事がランダム表示</span>されます（その記事への自分のレコメンド文は「アーカイブ」から読めます）。ポチポチ押して、気になったものに飛んでみて下さい。外部サイト記事は青で網掛けしています（全てイチオシです）。
 
 ## その他
-- [note](https://note.com/okyouth2head) — 主な長文記事はこちら
-- [X / Twitter](https://twitter.com/WoweeYouth)
+- [Twitter](https://twitter.com/WoweeYouth)
+- [FC2ブログ](https://slapsticker.blog.fc2.com/) — 初代ブログ、昔は「一人音楽座談会」を名乗っていた
+- [note](https://note.com/okyouth2head) — 2代目ブログ。
 
 <br />
 

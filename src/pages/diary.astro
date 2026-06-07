@@ -184,22 +184,31 @@ function linkify(text: string) {
       .catch(() => {});
   }
 
-  // クリック
+  // クリック（toggle）
   buttons.forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.likeId!;
-      if (localStorage.getItem('liked_' + id)) return;
-      localStorage.setItem('liked_' + id, '1');
-      btn.querySelector('.star')!.textContent = '★';
-      btn.classList.add('liked');
+      const isLiked = !!localStorage.getItem('liked_' + id);
+      const method = isLiked ? 'DELETE' : 'POST';
+
+      if (isLiked) {
+        localStorage.removeItem('liked_' + id);
+        btn.querySelector('.star')!.textContent = '☆';
+        btn.classList.remove('liked');
+      } else {
+        localStorage.setItem('liked_' + id, '1');
+        btn.querySelector('.star')!.textContent = '★';
+        btn.classList.add('liked');
+      }
+
       try {
         const res = await fetch('/api/like', {
-          method: 'POST',
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id }),
         });
         const { count } = await res.json();
-        btn.querySelector('.like-count')!.textContent = count ? String(count) : '';
+        btn.querySelector('.like-count')!.textContent = String(count);
       } catch {}
     });
   });

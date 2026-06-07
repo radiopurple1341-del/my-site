@@ -144,6 +144,16 @@ export default {
         const row = await env.DB.prepare('SELECT count FROM likes WHERE id = ?').bind(id).first();
         return new Response(JSON.stringify({ count: row?.count ?? 1 }), { headers });
       }
+
+      if (request.method === 'DELETE') {
+        const { id } = await request.json().catch(() => ({}));
+        if (!id) return new Response('{}', { headers });
+        await env.DB.prepare(
+          'UPDATE likes SET count = MAX(0, count - 1) WHERE id = ?'
+        ).bind(id).run();
+        const row = await env.DB.prepare('SELECT count FROM likes WHERE id = ?').bind(id).first();
+        return new Response(JSON.stringify({ count: row?.count ?? 0 }), { headers });
+      }
     }
 
     return env.ASSETS.fetch(request);

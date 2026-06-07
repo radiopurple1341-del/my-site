@@ -1,6 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import ShareButtons from '../components/ShareButtons.astro';
+import { SITE_URL } from '../consts';
 
 interface Props {
   title: string;
@@ -25,6 +25,11 @@ const categoryClass: Record<string, string> = {
 const catClass = categoryClass[category] ?? 'other';
 
 const backHref = workId ? `/works#${workId}` : '/works';
+const rawPageUrl = `${SITE_URL}${Astro.url.pathname}`;
+const pageUrl = encodeURIComponent(rawPageUrl);
+const pageTitle = encodeURIComponent(`${title} | Without Sound`);
+const twitterUrl = `https://twitter.com/intent/tweet?text=${pageTitle}&url=${pageUrl}`;
+const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
 ---
 
 <BaseLayout title={title} description={description} image={artwork}>
@@ -47,8 +52,31 @@ const backHref = workId ? `/works#${workId}` : '/works';
       <slot />
     </div>
 
+    {workId && (
+      <div class="favo-share-wrap">
+        <div class="favo-section">
+          <div class="favo-row" data-like-id={`work:${workId}`} role="button" tabindex="0" aria-label="いいね">
+            <span class="star">☆</span><span class="like-count">0</span>
+          </div>
+        </div>
+        <div class="favo-share-divider" />
+        <div class="share-row">
+          <span class="share-label">この記事をシェア</span>
+          <a href={twitterUrl} target="_blank" rel="noopener" class="share-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#1DA1F2"><path d="M23.954 4.569a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 9.99 9.99 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.691 8.094 4.066 6.13 1.64 3.161a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.061a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.937 4.937 0 004.604 3.417 9.868 9.868 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63a9.936 9.936 0 002.46-2.548l-.047-.02z"/></svg>Twitter
+          </a>
+          <a href={lineUrl} target="_blank" rel="noopener" class="share-btn">
+            <span class="brand-dot" style="background:#06C755"></span>LINE
+          </a>
+          <button class="share-btn copy-btn" data-url={rawPageUrl}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            <span class="copy-label">URLコピー</span>
+          </button>
+        </div>
+      </div>
+    )}
+
     <div class="work-footer">
-      <ShareButtons title={title} path={Astro.url.pathname} />
       <nav class="work-nav">
         <a href={backHref} class="back-link">← 作品棚に戻る</a>
       </nav>
@@ -75,13 +103,106 @@ const backHref = workId ? `/works#${workId}` : '/works';
 }
 
 .work-artwork {
-  margin-bottom: 2rem;
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 0.5px solid var(--color-border);
   max-width: 300px;
+  margin-bottom: 2rem;
 }
 .work-artwork img { width: 100%; display: block; }
+
+.favo-share-wrap {
+  border: 0.5px solid var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+  border-radius: var(--radius-md);
+  background: transparent;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.favo-section {
+  padding: 12px 16px;
+}
+.favo-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px;
+  border: 0.5px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 15px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.favo-row:hover { border-color: var(--color-text-muted); color: var(--color-text); }
+.favo-row.liked { color: #f5a623; }
+.favo-row.liked .star { color: #f5a623; }
+.star { display: inline-block; }
+@keyframes star-pop {
+  0%   { transform: translateY(0) scale(1); }
+  35%  { transform: translateY(-6px) scale(1.45); }
+  65%  { transform: translateY(-2px) scale(1.1); }
+  100% { transform: translateY(0) scale(1); }
+}
+.star.popping { animation: star-pop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+.favo-share-divider {
+  height: 0.5px;
+  background: var(--color-border);
+  margin: 0 16px;
+}
+.share-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+}
+.share-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  margin-right: 4px;
+}
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 0.5px solid var(--color-border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+.share-btn:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.like-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.like-btn:hover { color: var(--color-text); }
+.like-btn .star { font-size: 20px; }
+.like-btn.liked .star { color: #f5a623; }
+.like-btn.liked { color: #f5a623; }
 
 .work-body {
   font-size: 15px;
@@ -143,3 +264,67 @@ const backHref = workId ? `/works#${workId}` : '/works';
 .back-link:hover,
 .next-link:hover { color: var(--color-text); text-decoration: none; }
 </style>
+
+<script>
+  const favoRow = document.querySelector<HTMLElement>('.favo-row[data-like-id]');
+  if (favoRow) {
+    const id = favoRow.dataset.likeId!;
+
+    if (localStorage.getItem('liked_' + id)) {
+      starEl.textContent = '★';
+      favoRow.classList.add('liked');
+    }
+
+    fetch(`/api/like?ids=${id}`)
+      .then(r => r.json())
+      .then((counts: Record<string, number>) => {
+        favoRow.querySelector('.like-count')!.textContent = String(counts[id] ?? 0);
+      })
+      .catch(() => {});
+
+    const starEl = favoRow.querySelector<HTMLElement>('.star')!;
+
+    const toggle = async () => {
+      const isLiked = !!localStorage.getItem('liked_' + id);
+      if (isLiked) {
+        localStorage.removeItem('liked_' + id);
+        starEl.textContent = '☆';
+        favoRow.classList.remove('liked');
+      } else {
+        localStorage.setItem('liked_' + id, '1');
+        starEl.textContent = '★';
+        favoRow.classList.add('liked');
+        starEl.classList.remove('popping');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          starEl.classList.add('popping');
+          starEl.addEventListener('animationend', () => starEl.classList.remove('popping'), { once: true });
+        }));
+      }
+      try {
+        const res = await fetch('/api/like', {
+          method: isLiked ? 'DELETE' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        });
+        const { count } = await res.json();
+        favoRow.querySelector('.like-count')!.textContent = String(count);
+      } catch {}
+    };
+
+    favoRow.addEventListener('click', toggle);
+    favoRow.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') toggle(); });
+  }
+
+  const copyBtn = document.querySelector<HTMLButtonElement>('.copy-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      const url = copyBtn.dataset.url!;
+      const label = copyBtn.querySelector('.copy-label')!;
+      try {
+        await navigator.clipboard.writeText(url);
+        label.textContent = 'コピーしました';
+        setTimeout(() => { label.textContent = 'URLコピー'; }, 1500);
+      } catch {}
+    });
+  }
+</script>
