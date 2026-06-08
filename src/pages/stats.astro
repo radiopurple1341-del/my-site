@@ -4,9 +4,17 @@ import { getCollection } from 'astro:content';
 
 const articles = await getCollection('article');
 const pathTitleMap: Record<string, string> = {};
+const likeIdLabelMap: Record<string, string> = {};
 for (const article of articles) {
-  const slug = article.id.split('/').pop();
+  const slug = article.id.split('/').pop()!;
   pathTitleMap[`/article/${slug}`] = article.data.title;
+  if (article.id.startsWith('works/')) {
+    likeIdLabelMap[`work:${slug}`] = article.data.title;
+  }
+}
+const diaries = await getCollection('diary');
+for (const diary of diaries) {
+  likeIdLabelMap[`diary:${diary.id}`] = `日記 ${diary.id}`;
 }
 ---
 
@@ -19,7 +27,7 @@ for (const article of articles) {
   </div>
 </BaseLayout>
 
-<script define:vars={{ pathTitleMap }}>
+<script define:vars={{ pathTitleMap, likeIdLabelMap }}>
   function formatPath(path) {
     return pathTitleMap[path] || path;
   }
@@ -71,10 +79,36 @@ for (const article of articles) {
     `;
   }
 
+  function renderLikesTable(data) {
+    if (!data.length) return '<p class="empty">データなし</p>';
+    return `
+      <table class="stats-table">
+        <thead>
+          <tr><th>#</th><th>記事 / 日記</th><th>★</th></tr>
+        </thead>
+        <tbody>
+          ${data.map((item, i) => {
+            const label = likeIdLabelMap[item.id] || item.id;
+            const isWork = item.id.startsWith('work:');
+            const slug = item.id.replace(/^work:/, '');
+            const href = isWork ? `/article/${slug}` : '';
+            const cell = href ? `<a href="${href}">${label}</a>` : label;
+            return `
+              <tr>
+                <td class="rank">${i + 1}</td>
+                <td class="title">${cell}</td>
+                <td class="count">${item.count}</td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
   async function loadStats() {
     try {
       const res = await fetch('/api/stats');
-      const { allTime, last7days } = await res.json();
+      const { allTime, last7days, likes } = await res.json();
       document.getElementById('stats-root').innerHTML = `
         <section>
           <h2 class="section-title">直近7日間</h2>
@@ -83,6 +117,10 @@ for (const article of articles) {
         <section>
           <h2 class="section-title">全期間</h2>
           ${renderAllTimeTable(allTime)}
+        </section>
+        <section>
+          <h2 class="section-title">Favo ランキング</h2>
+          ${renderLikesTable(likes)}
         </section>
       `;
     } catch {

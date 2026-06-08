@@ -85,13 +85,16 @@ export default {
       });
       const fromDate = dates[0];
 
-      const [allTimeRows, weekRows] = await Promise.all([
+      const [allTimeRows, weekRows, likesRows] = await Promise.all([
         env.DB.prepare(
           'SELECT path, SUM(count) as total FROM page_visits GROUP BY path ORDER BY total DESC LIMIT 30'
         ).all(),
         env.DB.prepare(
           'SELECT path, date, count FROM page_visits WHERE date >= ? ORDER BY path, date'
         ).bind(fromDate).all(),
+        env.DB.prepare(
+          'SELECT id, count FROM likes WHERE count > 0 ORDER BY count DESC LIMIT 30'
+        ).all(),
       ]);
 
       const pathTotals = {};
@@ -111,7 +114,7 @@ export default {
         })),
       };
 
-      return new Response(JSON.stringify({ allTime: allTimeRows.results, last7days }), { headers });
+      return new Response(JSON.stringify({ allTime: allTimeRows.results, last7days, likes: likesRows.results }), { headers });
     }
 
     if (url.pathname === '/api/like') {
