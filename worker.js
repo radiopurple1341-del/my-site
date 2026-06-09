@@ -12,7 +12,7 @@ export default {
         return new Response(null, { headers });
       }
 
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
       if (request.method === 'GET') {
         const row = await env.DB.prepare(
@@ -39,7 +39,7 @@ export default {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       };
-      const today = new Date();
+      const today = new Date(Date.now() + 9 * 3600 * 1000);
       const dates = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(today);
         d.setDate(d.getDate() - (6 - i));
@@ -60,7 +60,7 @@ export default {
       const { path: rawPath } = await request.json().catch(() => ({}));
       if (rawPath) {
         const path = rawPath === '/' ? '/' : rawPath.replace(/\/$/, '');
-        const today = new Date().toISOString().slice(0, 10);
+        const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
         await env.DB.prepare(
           'INSERT INTO page_visits (path, date, count) VALUES (?, ?, 1) ON CONFLICT(path, date) DO UPDATE SET count = count + 1'
         ).bind(path, today).run();
@@ -77,7 +77,7 @@ export default {
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'public, max-age=300',
       };
-      const today = new Date();
+      const today = new Date(Date.now() + 9 * 3600 * 1000);
       const dates = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(today);
         d.setDate(d.getDate() - (6 - i));
