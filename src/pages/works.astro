@@ -132,7 +132,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
                   }
                 </div>
               </td>
-              <td class="col-note">{work.data.description ? <span set:html={work.data.description} /> : <span class="note-empty">—</span>}</td>
+              <td class="col-note" data-href={href ?? undefined} data-external={isExternal ? '1' : undefined}>{work.data.description ? <span set:html={work.data.description} /> : <span class="note-empty">—</span>}</td>
               <td class="col-year">{work.data.workYear ?? '—'}</td>
               <td class="col-category">{work.data.category}</td>
               <td class="col-type">{work.data.workType ?? '—'}</td>
@@ -264,6 +264,18 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
     const [col, dir] = sortSelect.value.split(':');
     worksTable?.classList.toggle('sort-by-year', col === 'year');
     applySort(col, dir as 'asc' | 'desc');
+  });
+
+  // description エリアクリックで記事遷移
+  document.querySelectorAll<HTMLElement>('td.col-note[data-href]').forEach(td => {
+    td.addEventListener('click', () => {
+      const href = td.dataset.href!;
+      if (td.dataset.external) {
+        window.open(href, '_blank', 'noopener');
+      } else {
+        location.href = href;
+      }
+    });
   });
 
   // URLパラメータによる初期フィルター適用
@@ -575,6 +587,8 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   .is-external::before { background: #4a90d9; }
   .is-external::after  { background: #4a90d9; }
   .note-empty { display: none; }
+  .col-note[data-href] { cursor: pointer; }
+  .col-note[data-href]:hover span { text-decoration: underline; }
 
   /* 一言：col2・row2 */
   .col-note {
