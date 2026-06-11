@@ -6,6 +6,7 @@ category: 文章
 tags: [DIY]
 externalUrl: "https://m-nerds.com/3dbluray_fureru"
 thumbnail: "https://m-nerds.com/wp-content/uploads/2023/08/image1-1.png"
+addedDate: 2026-05-30
 featured: true
 author: "ふぢのやまい"
 siteName: "ムービーナーズ"

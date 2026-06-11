@@ -6,6 +6,7 @@ category: 文章
 tags: [社会]
 externalUrl: "https://news.mynavi.jp/article/20140411-denou3/"
 thumbnail: "https://news.mynavi.jp/article/20140411-denou3/index_images/index.jpg"
+addedDate: 2026-05-30
 featured: true
 author: ""
 siteName: "マイナビニュース"

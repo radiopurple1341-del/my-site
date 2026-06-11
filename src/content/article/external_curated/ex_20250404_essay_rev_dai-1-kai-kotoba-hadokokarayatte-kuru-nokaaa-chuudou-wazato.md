@@ -6,6 +6,7 @@ category: 文章
 tags: [社会]
 externalUrl: "https://kangaeruhito.jp/interview/761148"
 thumbnail: "https://kangaeruhito.jp/wp-content/uploads/2025/03/kokubun_nakajima_icon_01.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "國分功一郎,中島岳志"
 siteName: "考える人"

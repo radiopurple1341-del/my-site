@@ -52,7 +52,7 @@ const isCurated = !!(siteName || author);
         {isExternal && <span class="ext-mark">↗</span>}
       </a>
     </h3>
-    <p class="card-desc">{description}</p>
+    <p class="card-desc" set:html={description} />
   </div>
 </article>
 
@@ -95,12 +95,12 @@ const isCurated = !!(siteName || author);
   font-size: 11px;
   color: var(--color-text-muted);
 }
-.card-date { font-size: 11px; }
-.card-site { font-size: 11px; }
-.card-author { font-size: 11px; }
-.meta-sep { font-size: 11px; color: var(--color-border-strong); }
+.card-date { font-size: 13px; }
+.card-site { font-size: 13px; }
+.card-author { font-size: 13px; }
+.meta-sep { font-size: 13px; color: var(--color-border-strong); }
 .card-title {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.45;
   margin-bottom: 0.25rem;
@@ -109,7 +109,7 @@ const isCurated = !!(siteName || author);
 .card-title a:hover { color: var(--color-accent); text-decoration: none; }
 .ext-mark { font-size: 10px; color: var(--color-text-muted); margin-left: 2px; }
 .card-desc {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-text-mid);
   line-height: 1.65;
   white-space: pre-line;

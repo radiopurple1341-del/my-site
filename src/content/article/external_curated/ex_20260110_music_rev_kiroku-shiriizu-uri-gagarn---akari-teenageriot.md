@@ -6,6 +6,7 @@ category: 音楽
 tags: []
 externalUrl: "https://kusodekaihug2.hatenablog.com/entry/2021/02/21/030938"
 thumbnail: "https://cdn.image.st-hatena.com/image/scale/0d892fd6d259c5fa228124f41a5c862511fbe5fa/backend=imagemagick;version=1;width=1300/https%3A%2F%2Fwww.amazon.co.jp%2Fimages%2FI%2F61u3jCas1kL._SS500_.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "曙橋"
 siteName: "朱莉TeenageRiot"

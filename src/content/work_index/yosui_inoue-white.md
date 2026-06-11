@@ -1,6 +1,6 @@
 ---
 title: "white"
-artist: "Yosui Inoue"
+artist: "井上陽水"
 category: 音楽
 workYear: 1978
 workType: "アルバム"

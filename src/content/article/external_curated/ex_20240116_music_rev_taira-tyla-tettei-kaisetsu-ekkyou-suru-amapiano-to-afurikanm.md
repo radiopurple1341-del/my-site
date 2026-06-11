@@ -6,6 +6,7 @@ category: 音楽
 tags: []
 externalUrl: "https://rollingstonejapan.com/articles/detail/40780/1/1/1"
 thumbnail: "https://images.rollingstonejapan.com/articles/40000/40780/OG/5c8c0cef60eb38ae8d09df9bece477e8.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "audiot909"
 siteName: "Rolling Stone Japan"

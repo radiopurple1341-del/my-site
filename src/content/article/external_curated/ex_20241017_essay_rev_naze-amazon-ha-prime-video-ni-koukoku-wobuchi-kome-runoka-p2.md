@@ -6,6 +6,7 @@ category: 文章
 tags: [社会]
 externalUrl: "https://p2ptk.org/monopoly/4880/"
 thumbnail: "https://p2ptk.org/wp-content/uploads/2024/10/nico-baum-lfF1nJs_qY-unsplash_e2.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "heatwave_p2p"
 siteName: "p2ptk[.]org »"

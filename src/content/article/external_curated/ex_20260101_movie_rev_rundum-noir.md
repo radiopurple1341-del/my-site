@@ -8,6 +8,7 @@ category: 映画
 tags: [批評]
 externalUrl: "https://www.random-noir.net/list-2/"
 thumbnail: "/artworks/ex_20260518_movie_rev_rundum-noir.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "Murderous Ink"
 siteName: "ランダム・ノワール"

@@ -7,6 +7,7 @@ category: 音楽
 tags: [文章]
 externalUrl: "https://realsound.jp/book/2025/09/post-2133932.html"
 thumbnail: "https://realsound.jp/wp-content/uploads/2025/09/20250927-tsuyachan-01.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "つやちゃん"
 siteName: "Real Sound"

@@ -6,6 +6,7 @@ category: 音楽
 tags: [批評, DIY]
 externalUrl: "https://realsound.jp/2023/06/post-1338306.html"
 thumbnail: "https://realsound.jp/wp-content/uploads/2023/05/20230531_bmth02.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "s.h.i."
 siteName: "Real Sound｜リアルサウンド"

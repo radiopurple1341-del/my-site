@@ -4,7 +4,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 
 const allArticles = (await getCollection('article'))
-  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+  .sort((a, b) => {
+    const aAdded = a.data.addedDate?.getTime() ?? 0;
+    const bAdded = b.data.addedDate?.getTime() ?? 0;
+    if (bAdded !== aAdded) return bAdded - aAdded;
+    return b.data.pubDate.getTime() - a.data.pubDate.getTime();
+  });
 
 const categories = ['音楽', '映画', '漫画', '書籍', '文章'];
 const allTags = [...new Set(allArticles.flatMap(a => a.data.tags))].sort();

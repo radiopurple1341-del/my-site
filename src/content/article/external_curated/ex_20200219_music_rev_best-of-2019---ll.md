@@ -6,6 +6,7 @@ category: 音楽
 tags: [文章]
 externalUrl: "https://listening-log.hatenablog.com/entry/2020/02/19/182321"
 thumbnail: "https://cdn.image.st-hatena.com/image/scale/a6dfa0342aebb756580f7b59a12a96e5bb2b19b4/backend=imagemagick;version=1;width=1300/https%3A%2F%2Fcdn-ak.f.st-hatena.com%2Fimages%2Ffotolife%2Fy%2Fyorosz%2F20200219%2F20200219171225.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "よろすず"
 siteName: "LL"

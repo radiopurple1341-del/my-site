@@ -6,6 +6,7 @@ category: 音楽
 tags: [文章]
 externalUrl: "https://note.com/yorosz/n/ndbe34429d18d?magazine_key=m97a0a50aac5f"
 thumbnail: "https://assets.st-note.com/production/uploads/images/88897175/rectangle_large_type_2_b3e618876fd1e248a980cbfcc7936c4e.jpeg?fit=bounds&quality=85&width=1280"
+addedDate: 2026-05-30
 featured: true
 author: "よろすず"
 siteName: "note"

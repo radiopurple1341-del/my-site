@@ -6,6 +6,7 @@ category: 音楽
 tags: []
 externalUrl: "https://ystmokzk.hatenablog.jp/archive/category/%E9%9F%B3%E6%A5%BD-Yankee%20Hotel%20Foxtrot"
 thumbnail: "/artworks/wilco-yankee-hotel-foxtrot.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "おかざきよしとも"
 siteName: "ブンゲイブ・ケイオンガクブ"

@@ -30,6 +30,7 @@ const article = defineCollection({
     curated: z.boolean().optional(),          // 他サイト記事キュレーション（external_curated/配下）
     author: z.string().optional(),            // 著者名（external_curatedで使用）
     siteName: z.string().optional(),          // 掲載サイト名（external_curatedで使用）
+    addedDate: z.coerce.date().optional(),    // サイト登録日（external_curatedのソート用）
   }),
 });
 

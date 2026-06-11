@@ -6,6 +6,7 @@ category: 映画
 tags: [批評, 文章]
 externalUrl: "http://www.kaminotane.com/2024/03/05/25508/"
 thumbnail: "https://www.kaminotane.com/wp-content/uploads/2024/03/『夜明けのすべて』メイン.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "濱口竜介,三宅唱,三浦哲哉"
 siteName: "かみのたね"

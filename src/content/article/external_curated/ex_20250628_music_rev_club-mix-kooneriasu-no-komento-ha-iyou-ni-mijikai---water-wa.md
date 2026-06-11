@@ -6,6 +6,7 @@ category: 音楽
 tags: [批評]
 externalUrl: "https://waterwalkmusic.com/archives/743"
 thumbnail: "https://waterwalkmusic.com/wp-content/uploads/2025/06/名称未設定-1-scaled.jpg"
+addedDate: 2026-05-30
 featured: true
 author: "EPOCALC"
 siteName: "Water Walk"

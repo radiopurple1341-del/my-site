@@ -6,6 +6,7 @@ category: 文章
 tags: [社会]
 externalUrl: "https://econ101.jp/he-myth-of-meritocracy-how-exams/"
 thumbnail: "https://i0.wp.com/econ101.jp/wp-content/uploads/2025/04/F01_J.jpg?fit=1200%2C721&#038;ssl=1"
+addedDate: 2026-05-30
 featured: true
 author: "WARE_bluefield"
 siteName: "経済学101"

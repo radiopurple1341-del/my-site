@@ -6,6 +6,7 @@ category: 音楽
 tags: [批評]
 externalUrl: "https://note.com/yasuhide1978/n/n7bb21c6604b6"
 thumbnail: "https://assets.st-note.com/production/uploads/images/67060386/rectangle_large_type_2_874b376606f577b1e51e0a39d60a1f31.png?fit=bounds&quality=85&width=1280"
+addedDate: 2026-05-30
 featured: true
 author: "ヴァジュラ𝔦𝔡"
 siteName: "note"
