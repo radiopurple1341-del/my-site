@@ -269,6 +269,7 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
   const favoRow = document.querySelector<HTMLElement>('.favo-row[data-like-id]');
   if (favoRow) {
     const id = favoRow.dataset.likeId!;
+    const starEl = favoRow.querySelector<HTMLElement>('.star')!;
 
     if (localStorage.getItem('liked_' + id)) {
       starEl.textContent = '★';
@@ -281,8 +282,6 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
         favoRow.querySelector('.like-count')!.textContent = String(counts[id] ?? 0);
       })
       .catch(() => {});
-
-    const starEl = favoRow.querySelector<HTMLElement>('.star')!;
 
     const toggle = async () => {
       const isLiked = !!localStorage.getItem('liked_' + id);
