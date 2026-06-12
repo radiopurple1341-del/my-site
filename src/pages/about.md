@@ -36,6 +36,8 @@ SNSのように流れていくのではなく、積もっていく場所とし�
 
 ちなみに棚は無限に増えていく予定。第一目標は1000。
 
+<span style="color:red">個別記事は、末尾にて☆を押せます。</span>noteで言うスキみたいなもので、押されると「読んでくれた人がいるんだなぁ」となるので、<b>良かったら是非、☆押してやってください。</b>
+
 ## アーカイブ
 自分がこれまで書いてきたnote・FC2ブログ + 本サイト記事の一覧。
 および、<span style="color:red">自分が好きな他サイト様の記事も勝手に集積しております</span>（続々と増やしていく予定）。サイトリンクならぬ個別記事リンクです。掲載にあたっては自分のレコメンドポイントを併記しています。
@@ -43,6 +45,7 @@ SNSのように流れていくのではなく、積もっていく場所とし�
 
 ## 日記
 Twitterみたいなやつ。たぶん。
+こっちも無駄に☆を押せます。Twitterだからね。
 
 ## トップページについて
 最新記事や、作品棚の追加。日記の更新などを確認できます。
@@ -50,7 +53,8 @@ Twitterみたいなやつ。たぶん。
 
 ## その他
 - [Twitter](https://twitter.com/WoweeYouth)
-- [FC2ブログ](https://slapsticker.blog.fc2.com/) — 初代ブログ、昔は「一人音楽座談会」を名乗っていた
+- [Bluesky](https://bsky.app/profile/woweejr.bsky.social)
+- [FC2ブログ](https://slapsticker.blog.fc2.com/) — 初代ブログ「WITHOUT SOUNDS」。昔は「一人音楽座談会」と名乗っていた。
 - [note](https://note.com/okyouth2head) — 2代目ブログ。
 
 <br />
