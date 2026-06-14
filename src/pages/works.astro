@@ -226,8 +226,8 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 
   function applySort(col: string, dir: 'asc' | 'desc') {
     const sorted = getRows().sort((a, b) => {
-      const av = stripThe(a.dataset[col] ?? '');
-      const bv = stripThe(b.dataset[col] ?? '');
+      const av = stripThe(a.dataset[col] || a.dataset['created'] || '');
+      const bv = stripThe(b.dataset[col] || b.dataset['created'] || '');
       if (col === 'year') {
         return dir === 'asc'
           ? (parseInt(av) || 0) - (parseInt(bv) || 0)
