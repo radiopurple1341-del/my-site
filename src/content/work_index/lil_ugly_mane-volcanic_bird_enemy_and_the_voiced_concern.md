@@ -5,6 +5,7 @@ category: 音楽
 workYear: 2021
 workMonth: 10
 workType: "アルバム"
+pubDate: 2026-06-14
 tags: []
 description: |
   Boards of Canadaとインディロックが机の上で融合したような奇跡
