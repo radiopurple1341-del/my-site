@@ -76,6 +76,27 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
       </div>
     )}
 
+    {workId && (
+      <section class="comment-section" data-article-id={workId}>
+        <h2 class="comment-heading">コメント</h2>
+        <div class="comment-list" id="comment-list">
+          <p class="comment-empty">まだコメントはありません</p>
+        </div>
+        <div class="comment-form-wrap">
+          <div class="reply-target" id="reply-target" style="display:none">
+            <span id="reply-label"></span>
+            <button class="reply-cancel" id="reply-cancel">✕</button>
+          </div>
+          <input class="comment-input" id="comment-name" type="text" placeholder="名前（省略可）" maxlength="50" />
+          <textarea class="comment-input comment-textarea" id="comment-body" placeholder="コメントを書く（300文字以内）" maxlength="300" rows="3"></textarea>
+          <div class="comment-form-footer">
+            <span class="comment-count" id="comment-char">0 / 300</span>
+            <button class="comment-submit" id="comment-submit">投稿</button>
+          </div>
+        </div>
+      </section>
+    )}
+
     <div class="work-footer">
       <nav class="work-nav">
         <a href={backHref} class="back-link">← 作品棚に戻る</a>
@@ -263,6 +284,103 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
 }
 .back-link:hover,
 .next-link:hover { color: var(--color-text); text-decoration: none; }
+
+/* コメント */
+.comment-section {
+  margin-top: 2.5rem;
+  border-top: 0.5px solid var(--color-border);
+  padding-top: 1.5rem;
+}
+.comment-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+.comment-list { margin-bottom: 1.5rem; }
+.comment-empty { font-size: 13px; color: var(--color-text-muted); }
+.comment-item {
+  padding: 0.75rem 0;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.comment-item:last-child { border-bottom: none; }
+.comment-item.is-reply {
+  margin-left: 1.5rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--color-border);
+}
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+.comment-name { font-size: 12px; font-weight: 700; color: var(--color-text); }
+.comment-date { font-size: 11px; color: var(--color-text-muted); }
+.comment-body { font-size: 13px; color: var(--color-text-mid); line-height: 1.7; white-space: pre-wrap; }
+.comment-reply-btn {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.3rem;
+}
+.comment-reply-btn:hover { color: var(--color-text); }
+.reply-target {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+.reply-cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding: 0;
+  margin-left: auto;
+}
+.comment-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  font-size: 13px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  font-family: inherit;
+}
+.comment-input:focus { outline: none; border-color: var(--color-text-muted); }
+.comment-textarea { resize: vertical; min-height: 72px; }
+.comment-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.comment-count { font-size: 11px; color: var(--color-text-muted); }
+.comment-submit {
+  font-size: 12px;
+  padding: 0.4rem 1rem;
+  border: 0.5px solid var(--color-border);
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background 0.15s;
+}
+.comment-submit:hover { background: var(--color-surface); }
+.comment-submit:disabled { opacity: 0.4; cursor: default; }
 </style>
 
 <script>
@@ -324,6 +442,108 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
         label.textContent = 'コピーしました';
         setTimeout(() => { label.textContent = 'URLコピー'; }, 1500);
       } catch {}
+    });
+  }
+
+  // コメント
+  const commentSection = document.querySelector<HTMLElement>('.comment-section');
+  if (commentSection) {
+    const articleId = commentSection.dataset.articleId!;
+    const listEl = document.getElementById('comment-list')!;
+    const nameEl = document.getElementById('comment-name') as HTMLInputElement;
+    const bodyEl = document.getElementById('comment-body') as HTMLTextAreaElement;
+    const submitBtn = document.getElementById('comment-submit') as HTMLButtonElement;
+    const charEl = document.getElementById('comment-char')!;
+    const replyTarget = document.getElementById('reply-target')!;
+    const replyLabel = document.getElementById('reply-label')!;
+    const replyCancel = document.getElementById('reply-cancel')!;
+    let replyToId: number | null = null;
+    let replyToName = '';
+
+    type Comment = { id: number; parent_id: number | null; name: string; content: string; created_at: string };
+
+    function renderComments(comments: Comment[]) {
+      const parents = comments.filter(c => !c.parent_id);
+      const childMap = new Map<number, Comment[]>();
+      comments.filter(c => c.parent_id).forEach(c => {
+        const arr = childMap.get(c.parent_id!) ?? [];
+        arr.push(c);
+        childMap.set(c.parent_id!, arr);
+      });
+
+      if (!parents.length) {
+        listEl.innerHTML = '<p class="comment-empty">まだコメントはありません</p>';
+        return;
+      }
+
+      listEl.innerHTML = parents.map(p => {
+        const replies = (childMap.get(p.id) ?? []).map(r => commentHTML(r, true)).join('');
+        return commentHTML(p, false) + replies;
+      }).join('');
+
+      listEl.querySelectorAll<HTMLButtonElement>('.comment-reply-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          replyToId = Number(btn.dataset.id);
+          replyToName = btn.dataset.name!;
+          replyLabel.textContent = `▶ ${replyToName} さんへの返信`;
+          replyTarget.style.display = 'flex';
+          bodyEl.focus();
+        });
+      });
+    }
+
+    function commentHTML(c: Comment, isReply: boolean) {
+      return `<div class="comment-item${isReply ? ' is-reply' : ''}">
+        <div class="comment-meta">
+          <span class="comment-name">${escHtml(c.name)}</span>
+          <span class="comment-date">${c.created_at}</span>
+        </div>
+        <p class="comment-body">${escHtml(c.content)}</p>
+        ${!isReply ? `<button class="comment-reply-btn" data-id="${c.id}" data-name="${escHtml(c.name)}">返信</button>` : ''}
+      </div>`;
+    }
+
+    function escHtml(s: string) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    fetch(`/api/comment?article_id=${articleId}`)
+      .then(r => r.json())
+      .then((data: Comment[]) => renderComments(data))
+      .catch(() => {});
+
+    bodyEl.addEventListener('input', () => {
+      charEl.textContent = `${bodyEl.value.length} / 300`;
+    });
+
+    replyCancel.addEventListener('click', () => {
+      replyToId = null;
+      replyToName = '';
+      replyTarget.style.display = 'none';
+    });
+
+    submitBtn.addEventListener('click', async () => {
+      const content = bodyEl.value.trim();
+      if (!content) return;
+      submitBtn.disabled = true;
+      try {
+        const res = await fetch('/api/comment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ article_id: articleId, parent_id: replyToId, name: nameEl.value, content }),
+        });
+        if (!res.ok) throw new Error();
+        bodyEl.value = '';
+        charEl.textContent = '0 / 300';
+        replyToId = null;
+        replyTarget.style.display = 'none';
+        const data: Comment[] = await fetch(`/api/comment?article_id=${articleId}`).then(r => r.json());
+        renderComments(data);
+      } catch {
+        alert('投稿に失敗しました。');
+      } finally {
+        setTimeout(() => { submitBtn.disabled = false; }, 2000);
+      }
     });
   }
 </script>

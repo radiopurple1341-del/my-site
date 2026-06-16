@@ -159,6 +159,56 @@ export default {
       }
     }
 
+    if (url.pathname === '/api/comment') {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      };
+
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { headers });
+      }
+
+      if (request.method === 'GET') {
+        const article_id = url.searchParams.get('article_id');
+        if (!article_id) return new Response('[]', { headers });
+        const rows = await env.DB.prepare(
+          'SELECT id, parent_id, name, content, created_at FROM comments WHERE article_id = ? ORDER BY created_at ASC'
+        ).bind(article_id).all();
+        return new Response(JSON.stringify(rows.results), { headers });
+      }
+
+      if (request.method === 'POST') {
+        const { article_id, parent_id, name, content } = await request.json().catch(() => ({}));
+        if (!article_id || !content || content.trim().length === 0 || content.length > 300) {
+          return new Response(JSON.stringify({ error: 'invalid' }), { headers, status: 400 });
+        }
+        const trimmedName = (name || '').trim().slice(0, 50) || '名無し';
+        const trimmedContent = content.trim();
+        const created_at = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 16).replace('T', ' ');
+        const last = await env.DB.prepare(
+          'SELECT content FROM comments WHERE article_id = ? ORDER BY created_at DESC LIMIT 1'
+        ).bind(article_id).first();
+        if (last && last.content === trimmedContent) {
+          return new Response(JSON.stringify({ error: 'duplicate' }), { headers, status: 429 });
+        }
+        const result = await env.DB.prepare(
+          'INSERT INTO comments (article_id, parent_id, name, content, created_at) VALUES (?, ?, ?, ?, ?)'
+        ).bind(article_id, parent_id || null, trimmedName, trimmedContent, created_at).run();
+        return new Response(JSON.stringify({ id: result.meta.last_row_id, name: trimmedName, content: trimmedContent, created_at }), { headers });
+      }
+
+      if (request.method === 'DELETE') {
+        const id = url.searchParams.get('id');
+        const token = url.searchParams.get('token');
+        if (!id || !env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+          return new Response(JSON.stringify({ error: 'unauthorized' }), { headers, status: 401 });
+        }
+        await env.DB.prepare('DELETE FROM comments WHERE id = ? OR parent_id = ?').bind(Number(id), Number(id)).run();
+        return new Response(JSON.stringify({ ok: true }), { headers });
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
