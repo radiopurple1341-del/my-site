@@ -395,6 +395,16 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
   transition: color 0.15s, border-color 0.15s;
 }
 :global(.comment-reply-btn:hover) { color: var(--color-text); border-color: var(--color-text-muted); }
+:global(.comment-id) { font-size: 10px; color: var(--color-text-muted); font-family: monospace; }
+:global(.comment-owner-badge) {
+  font-size: 10px;
+  color: var(--color-accent);
+  border: 0.5px solid var(--color-accent);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-weight: 700;
+}
+:global(.comment-item.is-owner > .comment-meta > .comment-name) { color: var(--color-accent); }
 </style>
 
 <script>
@@ -474,7 +484,16 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
     let replyToId: number | null = null;
     let replyToName = '';
 
-    type Comment = { id: number; parent_id: number | null; name: string; content: string; created_at: string };
+    // URLパラメータでadminトークンをlocalStorageに保存
+    const urlParams = new URLSearchParams(location.search);
+    const adminParam = urlParams.get('admin');
+    if (adminParam) {
+      localStorage.setItem('admin_token', adminParam);
+      history.replaceState({}, '', location.pathname);
+    }
+    const adminToken = localStorage.getItem('admin_token');
+
+    type Comment = { id: number; parent_id: number | null; name: string; content: string; created_at: string; poster_id?: string; is_owner?: number };
 
     function renderComments(comments: Comment[]) {
       const parents = comments.filter(c => !c.parent_id);
@@ -507,10 +526,17 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
     }
 
     function commentHTML(c: Comment, isReply: boolean) {
-      return `<div class="comment-item${isReply ? ' is-reply' : ''}">
+      const isOwner = !!c.is_owner;
+      const idLabel = c.poster_id
+        ? (isOwner
+          ? `<span class="comment-owner-badge">管理人</span>`
+          : `<span class="comment-id">ID:${c.poster_id}</span>`)
+        : '';
+      return `<div class="comment-item${isReply ? ' is-reply' : ''}${isOwner ? ' is-owner' : ''}">
         <div class="comment-meta">
           <span class="comment-name">${escHtml(c.name)}</span>
           <span class="comment-date">${c.created_at}</span>
+          ${idLabel}
         </div>
         <p class="comment-body">${escHtml(c.content)}</p>
         ${!isReply ? `<button class="comment-reply-btn" data-id="${c.id}" data-name="${escHtml(c.name)}">返信</button>` : ''}
@@ -544,7 +570,7 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
         const res = await fetch('/api/comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ article_id: articleId, parent_id: replyToId, name: nameEl.value, content }),
+          body: JSON.stringify({ article_id: articleId, parent_id: replyToId, name: nameEl.value, content, admin_token: adminToken }),
         });
         if (!res.ok) throw new Error();
         bodyEl.value = '';

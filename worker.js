@@ -173,13 +173,13 @@ export default {
         const article_id = url.searchParams.get('article_id');
         if (!article_id) return new Response('[]', { headers });
         const rows = await env.DB.prepare(
-          'SELECT id, parent_id, name, content, created_at FROM comments WHERE article_id = ? ORDER BY created_at ASC'
+          'SELECT id, parent_id, name, content, created_at, poster_id, is_owner FROM comments WHERE article_id = ? ORDER BY created_at ASC'
         ).bind(article_id).all();
         return new Response(JSON.stringify(rows.results), { headers });
       }
 
       if (request.method === 'POST') {
-        const { article_id, parent_id, name, content } = await request.json().catch(() => ({}));
+        const { article_id, parent_id, name, content, admin_token } = await request.json().catch(() => ({}));
         if (!article_id || !content || content.trim().length === 0 || content.length > 300) {
           return new Response(JSON.stringify({ error: 'invalid' }), { headers, status: 400 });
         }
@@ -192,10 +192,16 @@ export default {
         if (last && last.content === trimmedContent) {
           return new Response(JSON.stringify({ error: 'duplicate' }), { headers, status: 429 });
         }
+        const is_owner = (env.ADMIN_TOKEN && admin_token === env.ADMIN_TOKEN) ? 1 : 0;
+        const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+        const date = created_at.slice(0, 10);
+        const hashInput = new TextEncoder().encode(ip + date + (env.ID_SALT || 'salt'));
+        const hashBuffer = await crypto.subtle.digest('SHA-256', hashInput);
+        const poster_id = is_owner ? '管理人' : Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8);
         const result = await env.DB.prepare(
-          'INSERT INTO comments (article_id, parent_id, name, content, created_at) VALUES (?, ?, ?, ?, ?)'
-        ).bind(article_id, parent_id || null, trimmedName, trimmedContent, created_at).run();
-        return new Response(JSON.stringify({ id: result.meta.last_row_id, name: trimmedName, content: trimmedContent, created_at }), { headers });
+          'INSERT INTO comments (article_id, parent_id, name, content, created_at, poster_id, is_owner) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        ).bind(article_id, parent_id || null, trimmedName, trimmedContent, created_at, poster_id, is_owner).run();
+        return new Response(JSON.stringify({ id: result.meta.last_row_id, name: trimmedName, content: trimmedContent, created_at, poster_id, is_owner }), { headers });
       }
 
       if (request.method === 'DELETE') {
