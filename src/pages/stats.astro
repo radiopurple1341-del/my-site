@@ -24,6 +24,12 @@ for (const diary of diaries) {
     <div id="stats-root">
       <p class="loading">読み込み中...</p>
     </div>
+    <section>
+      <h2 class="section-title">コメント一覧</h2>
+      <div id="comments-root">
+        <p class="loading">読み込み中...</p>
+      </div>
+    </section>
   </div>
 </BaseLayout>
 
@@ -105,6 +111,52 @@ for (const diary of diaries) {
     `;
   }
 
+  function escHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function renderCommentsTable(comments) {
+    if (!comments.length) return '<p class="empty">コメントはありません</p>';
+    return `
+      <table class="stats-table comments-table">
+        <thead>
+          <tr>
+            <th>日時</th>
+            <th>記事</th>
+            <th>投稿者</th>
+            <th>内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${comments.map(c => {
+            const label = pathTitleMap[`/article/${c.article_id}`] || c.article_id;
+            const idLabel = c.is_owner
+              ? '<span class="comment-owner-badge">管理人</span>'
+              : (c.poster_id ? `<span class="comment-id">ID:${c.poster_id}</span>` : '');
+            return `
+              <tr>
+                <td class="date">${c.created_at}</td>
+                <td class="title"><a href="/article/${c.article_id}">${escHtml(label)}</a></td>
+                <td class="poster">${escHtml(c.name)} ${idLabel}${c.parent_id ? '<span class="reply-tag">返信</span>' : ''}</td>
+                <td class="body">${escHtml(c.content)}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  async function loadComments() {
+    try {
+      const res = await fetch('/api/comment?all=1');
+      const comments = await res.json();
+      document.getElementById('comments-root').innerHTML = renderCommentsTable(comments);
+    } catch {
+      document.getElementById('comments-root').innerHTML = '<p class="empty">読み込みに失敗しました</p>';
+    }
+  }
+
   async function loadStats() {
     try {
       const res = await fetch('/api/stats');
@@ -129,6 +181,7 @@ for (const diary of diaries) {
   }
 
   loadStats();
+  loadComments();
 </script>
 
 <style>
@@ -204,5 +257,42 @@ for (const diary of diaries) {
   .loading, .empty {
     color: var(--color-text-muted);
     font-size: 13px;
+  }
+  .comments-table .date {
+    white-space: nowrap;
+    color: var(--color-text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .comments-table .title {
+    max-width: 160px;
+  }
+  .comments-table .poster {
+    white-space: nowrap;
+  }
+  .comments-table .body {
+    max-width: 320px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .comment-id {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    font-family: monospace;
+    margin-left: 4px;
+  }
+  .comment-owner-badge {
+    font-size: 10px;
+    color: var(--color-accent);
+    border: 0.5px solid var(--color-accent);
+    border-radius: 3px;
+    padding: 0 4px;
+    font-weight: 700;
+    margin-left: 4px;
+  }
+  .reply-tag {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    margin-left: 4px;
   }
 </style>

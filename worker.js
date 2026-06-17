@@ -171,11 +171,19 @@ export default {
 
       if (request.method === 'GET') {
         const article_id = url.searchParams.get('article_id');
-        if (!article_id) return new Response('[]', { headers });
-        const rows = await env.DB.prepare(
-          'SELECT id, parent_id, name, content, created_at, poster_id, is_owner FROM comments WHERE article_id = ? ORDER BY created_at ASC'
-        ).bind(article_id).all();
-        return new Response(JSON.stringify(rows.results), { headers });
+        if (article_id) {
+          const rows = await env.DB.prepare(
+            'SELECT id, parent_id, name, content, created_at, poster_id, is_owner FROM comments WHERE article_id = ? ORDER BY created_at ASC'
+          ).bind(article_id).all();
+          return new Response(JSON.stringify(rows.results), { headers });
+        }
+        if (url.searchParams.get('all')) {
+          const rows = await env.DB.prepare(
+            'SELECT id, article_id, parent_id, name, content, created_at, poster_id, is_owner FROM comments ORDER BY id DESC LIMIT 200'
+          ).all();
+          return new Response(JSON.stringify(rows.results), { headers });
+        }
+        return new Response('[]', { headers });
       }
 
       if (request.method === 'POST') {
