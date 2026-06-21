@@ -9,4 +9,5 @@ thumbnail: "https://assets.st-note.com/production/uploads/images/34804424/rectan
 featured: true
 workYear: 2020
 workMonth: 
+workId: "guide-sonic_youth"
 ---

@@ -5,7 +5,7 @@ category: 音楽
 workYear: 1995
 workMonth: 5
 workType: "アルバム"
-pubDate: 2026-06-10
+pubDate: 2026-06-04
 tags: []
 description: |
   メタル極北のひとつだが、ロックリスナー的にはこのアルバムが入りやすいのではと思う（メタル初心者感）
