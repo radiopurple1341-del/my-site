@@ -4,7 +4,7 @@ artist: "The Sea and Cake"
 category: 音楽
 isGuide: true
 workType: "特集"
-pubDate: 2026-06-02
+pubDate: 2026-05-04
 tags: [The Sea and Cake]
 thumbnail: "/thumbnail/sp-The+Sea+and+Cake.jpg"
 description: |
