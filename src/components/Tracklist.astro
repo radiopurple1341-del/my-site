@@ -35,6 +35,9 @@ function titleClass(track: Track): string {
 ---
 
 <div class="tracklist-wrap">
+  {!simple && (
+    <button class="credit-toggle" aria-expanded="false">クレジットを表示</button>
+  )}
   <table class={`tracklist${simple ? ' simple' : ''}`}>
     {!simple && (
       <thead>
@@ -132,6 +135,35 @@ function titleClass(track: Track): string {
 @media (max-width: 800px) {
   .col-lyric, .col-music, .col-arrange, .col-producer { display: none; }
   .col-title { width: auto; }
+  .tracklist-wrap.credits-open .col-lyric,
+  .tracklist-wrap.credits-open .col-music,
+  .tracklist-wrap.credits-open .col-arrange,
+  .tracklist-wrap.credits-open .col-producer { display: table-cell; }
+  .tracklist-wrap.credits-open .col-title { width: 37%; }
+  .tracklist-wrap.credits-open {
+    overflow-x: auto;
+  }
+  .tracklist-wrap.credits-open .tracklist {
+    min-width: 600px;
+  }
+}
+
+.credit-toggle {
+  display: none;
+}
+@media (max-width: 800px) {
+  .credit-toggle {
+    display: inline-block;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    background: #fff;
+    border: 0.5px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.4rem 1.1rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+  }
+  .credit-toggle:hover { color: var(--color-text); border-color: var(--color-text-muted); }
 }
 .tracklist.simple td {
   border-bottom: none;
@@ -148,3 +180,14 @@ function titleClass(track: Track): string {
 .mark-fav    { color: red; }
 .mark-single { text-decoration: underline; text-underline-offset: 3px; }
 </style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.credit-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wrap = btn.closest('.tracklist-wrap')!;
+      const open = wrap.classList.toggle('credits-open');
+      btn.textContent = open ? 'クレジットを隠す' : 'クレジットを表示';
+      btn.setAttribute('aria-expanded', String(open));
+    });
+  });
+</script>
