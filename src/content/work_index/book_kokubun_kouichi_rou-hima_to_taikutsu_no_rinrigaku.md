@@ -7,7 +7,7 @@ workMonth: 3
 workType: "評論"
 pubDate: 2026-06-29
 tags: [名著]
-thumbnail: "/artworks/book_kokubun_kouichi_rou-hima_to_taikutsu_no_rinrigaku.jpg"
+thumbnail: "https://m.media-amazon.com/images/I/818kWWGd+wL._SL1500_.jpg"
 description: |
   「人間はいつから退屈しているのか？」
   暇と退屈について先人(ルソーにマルクス、『ファイトクラブ』と多岐に渡る)を尋ね、疑問から数珠を繋いで概念を結んでいく過程が面白い。何より「自分の行動を一歩引いて見ることができる」効能があり、SNS時代に最も大切な距離感を得られるはず。
