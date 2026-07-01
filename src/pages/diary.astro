@@ -44,6 +44,17 @@ function linkify(text: string) {
 <BaseLayout title="日記">
   <div class="page-header">
     <h1 class="page-title">日記</h1>
+    <div class="tag-filter">
+      <button class="tag-btn active" data-tag="">すべて</button>
+      <button class="tag-btn" data-tag="YouTube">YouTube</button>
+      <button class="tag-btn" data-tag="サイト更新">サイト更新</button>
+      <button class="tag-btn" data-tag="雑記">雑記</button>
+      <button class="tag-btn" data-tag="音楽関連">音楽関連</button>
+      <button class="tag-btn" data-tag="映画関連">映画関連</button>
+      <button class="tag-btn" data-tag="ゲーム関連">ゲーム関連</button>
+      <button class="tag-btn" data-tag="書籍関連">書籍関連</button>
+      <button class="tag-btn" data-tag="生活">生活</button>
+    </div>
   </div>
   <div class="diary-list">
     {entries.map(entry => {
@@ -53,8 +64,9 @@ function linkify(text: string) {
       const dd  = String(d.getDate()).padStart(2, '0');
       const dateStr = `${yy}.${mm}.${dd}`;
       const char = getCharacter(entry.data.character);
+      const tags = entry.data.tags ?? [];
       return (
-        <article class="post" id={entry.id}>
+        <article class="post" id={entry.id} data-tags={JSON.stringify(tags)}>
           <img src={char.icon} alt={char.name} class="avatar" />
           <time class="post-date">{dateStr}</time>
           <p class="post-text" set:html={linkify((entry.body ?? '').trim())} />
@@ -79,7 +91,25 @@ function linkify(text: string) {
   font-size: 18px;
   font-weight: 700;
   color: var(--color-text);
+  margin-bottom: 0.75rem;
 }
+.tag-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag-btn {
+  font-size: 12px;
+  padding: 0.25rem 0.85rem;
+  border: 0.5px solid var(--color-border);
+  border-radius: 999px;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.tag-btn:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+.tag-btn.active { background: var(--color-text); color: #fff; border-color: var(--color-text); }
 
 .diary-list {
   display: flex;
@@ -89,6 +119,7 @@ function linkify(text: string) {
 }
 
 .post {
+  scroll-margin-top: 6rem;
   border: 0.5px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 14px 16px;
@@ -157,7 +188,30 @@ function linkify(text: string) {
 .like-btn .star { font-size: 20px; }
 .like-btn.liked .star { color: #f5a623; }
 .like-btn.liked { color: #f5a623; }
+.post[hidden] { display: none; }
 </style>
+
+<script>
+  // タグフィルター
+  const tagBtns = document.querySelectorAll<HTMLButtonElement>('.tag-btn');
+  const posts = document.querySelectorAll<HTMLElement>('.post');
+
+  tagBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tagBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tag = btn.dataset.tag ?? '';
+      posts.forEach(post => {
+        if (!tag) {
+          post.hidden = false;
+          return;
+        }
+        const tags: string[] = JSON.parse(post.dataset.tags || '[]');
+        post.hidden = !tags.includes(tag);
+      });
+    });
+  });
+</script>
 
 <script>
   const buttons = document.querySelectorAll<HTMLButtonElement>('.like-btn[data-like-id]');

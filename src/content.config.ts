@@ -6,7 +6,8 @@ const diary = defineCollection({
   loader: glob({ base: './src/content/diary', pattern: '**/*.md' }),
   schema: z.object({
     pubDate: z.coerce.date().optional(),
-    character: z.string().optional(), // キャラクター指定（省略時はデフォルト）
+    character: z.string().optional(),
+    tags: z.array(z.string()).optional(),
   }),
 });
 

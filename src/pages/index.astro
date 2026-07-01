@@ -207,7 +207,7 @@ const carouselItems = [
             const dateStr = `${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
             const text = (entry.body ?? '').trim();
             return (
-              <div class="diary-row">
+              <div class="diary-row" data-href={`/diary#${entry.id}`}>
                 <time class="diary-date">{dateStr}</time>
                 <p class="diary-text" set:html={linkify(text)} />
               </div>
@@ -372,6 +372,17 @@ document.addEventListener('DOMContentLoaded', () => {
     renderRandom();
   });
 });
+
+</script>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.diary-row[data-href]').forEach(row => {
+    row.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('a')) return;
+      const href = row.dataset.href;
+      if (href) location.href = href;
+    });
+  });
 </script>
 
 <style>
@@ -593,6 +604,8 @@ body :global(.site-wrap) { max-width: 800px; }
   border-bottom: 0.5px solid var(--color-border);
 }
 .diary-row:last-child { border-bottom: none; }
+.diary-row[data-href] { cursor: pointer; }
+.diary-row[data-href]:hover .diary-text { color: var(--color-text); }
 .diary-date { font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
 .diary-text {
   font-size: 12px;
