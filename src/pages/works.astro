@@ -53,13 +53,16 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
     <div class="filters-right">
       <button class="note-filter-btn" id="note-filter">📝 一言あり</button>
       <button class="article-filter-btn" id="article-filter">🔗 記事あり</button>
-      <button class="random-btn" id="random-btn">🔄 ランダム10</button>
-      <select id="sort-select" class="sort-select">
-        <option value="artist:asc">アーティスト名順</option>
-        <option value="year:asc">リリース年順（古→新）</option>
-        <option value="year:desc">リリース年順（新→古）</option>
-        <option value="updated:desc">最新更新日順</option>
-      </select>
+      <button class="updated-sort-btn" id="updated-sort-btn">🕒 最新更新順</button>
+      <div class="filters-right-row2">
+        <select id="sort-select" class="sort-select">
+          <option value="artist:asc">アーティスト名順</option>
+          <option value="year:asc">リリース年順（古→新）</option>
+          <option value="year:desc">リリース年順（新→古）</option>
+          <option value="updated:desc">最新更新日順</option>
+        </select>
+        <button class="random-btn" id="random-btn">🔄 ランダム10</button>
+      </div>
     </div>
   </div>
 
@@ -247,7 +250,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
         sortDir = sortDir === 'asc' ? 'desc' : 'asc';
       } else {
         sortCol = col;
-        sortDir = 'asc';
+        sortDir = col === 'created' ? 'desc' : 'asc';
       }
 
       sortableHeaders.forEach(h => {
@@ -264,6 +267,14 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
     const [col, dir] = sortSelect.value.split(':');
     worksTable?.classList.toggle('sort-by-year', col === 'year');
     applySort(col, dir as 'asc' | 'desc');
+  });
+
+  const updatedSortBtn = document.getElementById('updated-sort-btn');
+  updatedSortBtn?.addEventListener('click', () => {
+    updatedSortBtn.classList.add('active');
+    if (sortSelect) sortSelect.value = 'updated:desc';
+    worksTable?.classList.remove('sort-by-year');
+    applySort('updated', 'desc');
   });
 
   // description エリアクリックで記事遷移
@@ -386,6 +397,9 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 .col-type    { display: none; }
 .col-year    { width: 3%; white-space: nowrap; }
 .col-note    { width: 34%; color: var(--color-text-muted); font-size: 12px; white-space: pre-line; }
+.col-note[data-href] { cursor: pointer; }
+.col-note[data-href] > span:not(.note-empty) { color: #0033cc; }
+.col-note[data-href]:hover > span:not(.note-empty) { text-decoration: underline; }
 .col-created { width: 7%; white-space: nowrap; }
 .col-updated { display: none; }
 
@@ -466,6 +480,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 
 .article-filter-btn,
 .note-filter-btn,
+.updated-sort-btn,
 .random-btn {
   font-size: 13px;
   color: var(--color-text-muted);
@@ -477,6 +492,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 }
 .article-filter-btn:hover,
 .note-filter-btn:hover,
+.updated-sort-btn:hover,
 .random-btn:hover { background: var(--color-surface); }
 .article-filter-btn.active,
 .note-filter-btn.active {
@@ -484,12 +500,15 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   border-color: var(--color-accent);
   background: var(--color-accent-light);
 }
+.updated-sort-btn.active,
 .random-btn.active {
   color: var(--color-accent);
   font-weight: 700;
   background: var(--color-accent-light);
 }
 
+.updated-sort-btn { display: none; }
+.filters-right-row2 { display: contents; }
 
 .sort-select { display: none; }
 
@@ -511,12 +530,22 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   .filter-sep { flex-basis: 100%; height: 0; padding: 0; overflow: hidden; }
   .table-wrap { overflow: visible; }
 
-  /* filters-right：記事あり・一言あり・プルダウン（右端）→ 改行 → ランダム10 */
+  /* filters-right：記事あり・一言あり・最新更新順 → 改行 → プルダウン・ランダム10（1:1） */
   .filters-right { flex-wrap: wrap; }
   .article-filter-btn { order: 1; }
   .note-filter-btn { order: 2; }
-  .sort-select { order: 3; margin-left: auto; }
-  .random-btn { order: 10; flex-basis: 100%; }
+  .updated-sort-btn { display: inline-block; order: 3; }
+  .filters-right-row2 {
+    display: flex;
+    order: 4;
+    flex-basis: 100%;
+    gap: 0.4rem;
+  }
+  .filters-right-row2 .sort-select,
+  .filters-right-row2 .random-btn {
+    flex: 1 1 0;
+    margin: 0;
+  }
 
   /* ②テーブル→グリッドカードレイアウト */
   .works-table,
@@ -587,8 +616,6 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   .is-external::before { background: #4a90d9; }
   .is-external::after  { background: #4a90d9; }
   .note-empty { display: none; }
-  .col-note[data-href] { cursor: pointer; }
-  .col-note[data-href]:hover span { text-decoration: underline; }
 
   /* 一言：col2・row2 */
   .col-note {
