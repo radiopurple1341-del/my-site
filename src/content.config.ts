@@ -49,7 +49,8 @@ const work = defineCollection({
     thumbnail: z.string().optional(),
     description: z.string().optional(),        // 一言メモ（作品リストの「一言」列に表示）
     pubDate: z.coerce.date().optional(),       // 登録日（空欄ならbirthtime参照）
-    isGuide: z.boolean().optional(),           // 特集記事フラグ（通常作品と異なる表示）
+    isGuide: z.boolean().optional(),           // 特集記事フラグ（外部記事を強調・トップページ表示対象）
+    isSpecial: z.boolean().optional(),         // 特集記事フラグ（本サイトmdx記事を強調・トップページ表示対象外）
   }),
 });
 

@@ -90,10 +90,11 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
           const thumbSrc = work.data.thumbnail ?? null;
           const updated = getLastModified(work.filePath);
           const created = getCreatedDate(work.data.pubDate, work.filePath);
+          const isFeatured = work.data.isGuide || work.data.isSpecial;
           return (
             <tr
               id={work.id}
-              class={[href ? (isExternal ? 'has-article is-external' : 'has-article') : '', work.data.isGuide ? 'is-guide' : ''].filter(Boolean).join(' ') || undefined}
+              class={[href ? (isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : ''].filter(Boolean).join(' ') || undefined}
               data-category={work.data.category}
               data-tags={(work.data.tags ?? []).join(',')}
               data-year={String(work.data.workYear ?? '')}
@@ -111,9 +112,9 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
                         <span class="work-text">
                           <span class="work-meta">
                             {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
-                            {!work.data.isGuide && work.data.workYear != null && <span class="work-year-tag">：{work.data.workYear}</span>}
+                            {!isFeatured && work.data.workYear != null && <span class="work-year-tag">：{work.data.workYear}</span>}
                           </span>
-                          {work.data.isGuide
+                          {isFeatured
                             ? <span class="work-title"><span class="guide-badge">特集</span><br />{article?.data.title ?? work.data.title}</span>
                             : <><span class="work-sep">{work.data.artist && ' - '}</span><span class="work-title">『{work.data.title}』</span></>
                           }
@@ -124,9 +125,9 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
                         <span class="work-text">
                           <span class="work-meta">
                             {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
-                            {!work.data.isGuide && work.data.workYear != null && <span class="work-year-tag">：{work.data.workYear}</span>}
+                            {!isFeatured && work.data.workYear != null && <span class="work-year-tag">：{work.data.workYear}</span>}
                           </span>
-                          {work.data.isGuide
+                          {isFeatured
                             ? <span class="work-title"><span class="guide-badge">特集</span><br />{article?.data.title ?? work.data.title}</span>
                             : <><span class="work-sep">{work.data.artist && ' - '}</span><span class="work-title">『{work.data.title}』</span></>
                           }
