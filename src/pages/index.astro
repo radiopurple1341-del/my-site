@@ -83,7 +83,6 @@ const carouselItems = [
       isExternal: !!a.data.externalUrl,
       title: a.data.title,
       description: a.data.description || (a.data.workId && workByWorkId.get(a.data.workId)?.data.description) || '',
-      metaParts: [a.data.category, ...(a.data.tags?.slice(0, 1) ?? []), a.data.workYear].filter(Boolean),
       pubDate: a.data.pubDate,
     })),
   ...allWorks
@@ -96,7 +95,6 @@ const carouselItems = [
         isExternal: !!(article?.data.externalUrl),
         title: w.data.title,
         description: w.data.description ?? '',
-        metaParts: [w.data.category, ...(w.data.tags?.slice(0, 1) ?? [])].filter(Boolean),
         pubDate: w.data.pubDate ?? new Date(0),
       };
     })
@@ -137,9 +135,6 @@ const carouselItems = [
                     : <div class="slide-thumb-placeholder" />}
                 </div>
                 <div class="slide-body">
-                  {item.metaParts.length > 0 && (
-                    <p class="slide-meta">{item.metaParts.join(' / ')}</p>
-                  )}
                   <h2 class="slide-title">{item.title}</h2>
                   {item.description && <p class="slide-desc" set:html={item.description} />}
                 </div>
@@ -476,11 +471,6 @@ body :global(.site-wrap) { max-width: 800px; }
   display: block;
 }
 .slide-body { flex: 1; min-width: 0; overflow: hidden; }
-.slide-meta {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  margin-bottom: 0.25rem;
-}
 .slide-title {
   font-size: 28px;
   font-weight: 700;

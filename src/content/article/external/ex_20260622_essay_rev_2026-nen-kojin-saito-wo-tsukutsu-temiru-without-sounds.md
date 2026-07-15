@@ -1,5 +1,5 @@
 ---
-title: "2026年、個人サイトを作ってみる｜WITHOUT SOUNDS"
+title: "2026年、個人サイトを作ってみる"
 pubDate: 2026-06-22
 addedDate: 2026-06-24
 description: |
