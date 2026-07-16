@@ -77,6 +77,12 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
       </div>
     )}
 
+    <div class="work-footer">
+      <nav class="work-nav">
+        <a href={backHref} class="back-link">← 作品棚に戻る</a>
+      </nav>
+    </div>
+
     {workId && (
       <section class="comment-section" data-article-id={workId}>
         <h2 class="comment-heading">コメント</h2>
@@ -97,12 +103,6 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
         </div>
       </section>
     )}
-
-    <div class="work-footer">
-      <nav class="work-nav">
-        <a href={backHref} class="back-link">← 作品棚に戻る</a>
-      </nav>
-    </div>
   </article>
 </BaseLayout>
 
@@ -286,7 +286,11 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
   align-items: center;
   gap: 1.25rem;
 }
-.back-link,
+.back-link {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
 .next-link {
   font-size: 12px;
   color: var(--color-text-muted);
