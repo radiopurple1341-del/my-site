@@ -85,7 +85,7 @@ export default {
       });
       const fromDate = dates[0];
 
-      const [allTimeRows, weekRows, likesRows] = await Promise.all([
+      const [allTimeRows, weekRows, likesRows, sharesRows] = await Promise.all([
         env.DB.prepare(
           'SELECT path, SUM(count) as total FROM page_visits GROUP BY path ORDER BY total DESC LIMIT 30'
         ).all(),
@@ -94,6 +94,9 @@ export default {
         ).bind(fromDate).all(),
         env.DB.prepare(
           'SELECT id, count FROM likes WHERE count > 0 ORDER BY count DESC LIMIT 30'
+        ).all(),
+        env.DB.prepare(
+          'SELECT id, platform, count FROM shares WHERE count > 0 ORDER BY id'
         ).all(),
       ]);
 
@@ -114,7 +117,33 @@ export default {
         })),
       };
 
-      return new Response(JSON.stringify({ allTime: allTimeRows.results, last7days, likes: likesRows.results }), { headers });
+      return new Response(JSON.stringify({ allTime: allTimeRows.results, last7days, likes: likesRows.results, shares: sharesRows.results }), { headers });
+    }
+
+    if (url.pathname === '/api/share') {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      };
+
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { headers });
+      }
+
+      if (request.method === 'POST') {
+        const ALLOWED_PLATFORMS = ['twitter', 'line', 'bsky', 'hatena', 'copy'];
+        const { id, platform } = await request.json().catch(() => ({}));
+        if (!id || !ALLOWED_PLATFORMS.includes(platform)) {
+          return new Response(JSON.stringify({ error: 'invalid' }), { headers, status: 400 });
+        }
+        await env.DB.prepare(
+          'INSERT INTO shares (id, platform, count) VALUES (?, ?, 1) ON CONFLICT(id, platform) DO UPDATE SET count = count + 1'
+        ).bind(id, platform).run();
+        const row = await env.DB.prepare(
+          'SELECT count FROM shares WHERE id = ? AND platform = ?'
+        ).bind(id, platform).first();
+        return new Response(JSON.stringify({ count: row?.count ?? 1 }), { headers });
+      }
     }
 
     if (url.pathname === '/api/like') {

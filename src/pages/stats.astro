@@ -111,6 +111,47 @@ for (const diary of diaries) {
     `;
   }
 
+  const PLATFORM_LABELS = { twitter: 'Twitter', line: 'LINE', bsky: 'Bluesky', hatena: 'はてブ', copy: 'コピー' };
+  const PLATFORM_ORDER = ['twitter', 'line', 'bsky', 'hatena', 'copy'];
+
+  function renderSharesTable(rows) {
+    if (!rows.length) return '<p class="empty">データなし</p>';
+    const byId = {};
+    for (const row of rows) {
+      if (!byId[row.id]) byId[row.id] = { total: 0, platforms: {} };
+      byId[row.id].platforms[row.platform] = row.count;
+      byId[row.id].total += row.count;
+    }
+    const sorted = Object.entries(byId).sort((a, b) => b[1].total - a[1].total).slice(0, 30);
+    return `
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>#</th><th>記事</th>
+            ${PLATFORM_ORDER.map(p => `<th class="day-col">${PLATFORM_LABELS[p]}</th>`).join('')}
+            <th>合計</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map(([id, data], i) => {
+            const label = likeIdLabelMap[id] || id;
+            const isWork = id.startsWith('work:');
+            const slug = id.replace(/^work:/, '');
+            const href = isWork ? `/article/${slug}` : '';
+            const cell = href ? `<a href="${href}">${label}</a>` : label;
+            return `
+              <tr>
+                <td class="rank">${i + 1}</td>
+                <td class="title">${cell}</td>
+                ${PLATFORM_ORDER.map(p => `<td class="day-val">${data.platforms[p] || '-'}</td>`).join('')}
+                <td class="count">${data.total}</td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
   function escHtml(str) {
     return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
@@ -160,7 +201,7 @@ for (const diary of diaries) {
   async function loadStats() {
     try {
       const res = await fetch('/api/stats');
-      const { allTime, last7days, likes } = await res.json();
+      const { allTime, last7days, likes, shares } = await res.json();
       document.getElementById('stats-root').innerHTML = `
         <section>
           <h2 class="section-title">直近7日間</h2>
@@ -173,6 +214,10 @@ for (const diary of diaries) {
         <section>
           <h2 class="section-title">Favo ランキング</h2>
           ${renderLikesTable(likes)}
+        </section>
+        <section>
+          <h2 class="section-title">シェア ランキング</h2>
+          ${renderSharesTable(shares)}
         </section>
       `;
     } catch {

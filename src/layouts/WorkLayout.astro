@@ -30,6 +30,8 @@ const pageUrl = encodeURIComponent(rawPageUrl);
 const pageTitle = encodeURIComponent(`${title} | Without Sound`);
 const twitterUrl = `https://twitter.com/intent/tweet?text=${pageTitle}&url=${pageUrl}`;
 const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
+const bskyUrl = `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title} | Without Sound ${rawPageUrl}`)}`;
+const hatenaUrl = `https://b.hatena.ne.jp/entry/panel/?url=${pageUrl}&title=${pageTitle}`;
 ---
 
 <BaseLayout title={title} description={description} image={artwork}>
@@ -61,15 +63,21 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
           </div>
         </div>
         <div class="favo-share-divider" />
-        <div class="share-row">
+        <div class="share-row" data-share-id={`work:${workId}`}>
           <span class="share-label">この記事をシェア</span>
-          <a href={twitterUrl} target="_blank" rel="noopener" class="share-btn">
+          <a href={twitterUrl} target="_blank" rel="noopener" class="share-btn" data-platform="twitter">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#1DA1F2"><path d="M23.954 4.569a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 9.99 9.99 0 01-3.127 1.184 4.92 4.92 0 00-8.384 4.482C7.691 8.094 4.066 6.13 1.64 3.161a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.061a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.937 4.937 0 004.604 3.417 9.868 9.868 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63a9.936 9.936 0 002.46-2.548l-.047-.02z"/></svg>Twitter
           </a>
-          <a href={lineUrl} target="_blank" rel="noopener" class="share-btn">
+          <a href={lineUrl} target="_blank" rel="noopener" class="share-btn" data-platform="line">
             <span class="brand-dot" style="background:#06C755"></span>LINE
           </a>
-          <button class="share-btn copy-btn" data-url={rawPageUrl}>
+          <a href={bskyUrl} target="_blank" rel="noopener" class="share-btn" data-platform="bsky">
+            <span class="brand-dot" style="background:#1185FE"></span>Bluesky
+          </a>
+          <a href={hatenaUrl} target="_blank" rel="noopener" class="share-btn" data-platform="hatena">
+            <span class="brand-dot" style="background:#00A4DE"></span>はてブ
+          </a>
+          <button class="share-btn copy-btn" data-url={rawPageUrl} data-platform="copy">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
             <span class="copy-label">URLコピー</span>
           </button>
@@ -479,6 +487,21 @@ const lineUrl = `https://social-plugins.line.me/lineit/share?url=${pageUrl}`;
         label.textContent = 'コピーしました';
         setTimeout(() => { label.textContent = 'URLコピー'; }, 1500);
       } catch {}
+    });
+  }
+
+  const shareRow = document.querySelector<HTMLElement>('.share-row[data-share-id]');
+  if (shareRow) {
+    const shareId = shareRow.dataset.shareId!;
+    shareRow.querySelectorAll<HTMLElement>('[data-platform]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const platform = btn.dataset.platform!;
+        fetch('/api/share', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: shareId, platform }),
+        }).catch(() => {});
+      });
     });
   }
 
