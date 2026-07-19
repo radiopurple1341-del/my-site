@@ -29,6 +29,14 @@ const { title, description, image } = Astro.props;
   </body>
 </html>
 
+<script>
+  // Amazonアフィリエイトリンクを新規タブで開く
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="https://amzn.to/"]').forEach((a) => {
+    a.target = '_blank';
+    a.rel = 'noopener';
+  });
+</script>
+
 <style>
 .main-content {
   padding: 1.5rem 0 3rem;
