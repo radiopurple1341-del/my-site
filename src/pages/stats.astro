@@ -3,13 +3,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
 const articles = await getCollection('article');
+const works = await getCollection('work');
 const pathTitleMap: Record<string, string> = {};
 const likeIdLabelMap: Record<string, string> = {};
+const workHasArticle: Record<string, boolean> = {};
+
+for (const work of works) {
+  likeIdLabelMap[`work:${work.id}`] = work.data.title;
+}
 for (const article of articles) {
   const slug = article.id.split('/').pop()!;
   pathTitleMap[`/article/${slug}`] = article.data.title;
   if (article.id.startsWith('works/')) {
     likeIdLabelMap[`work:${slug}`] = article.data.title;
+    workHasArticle[slug] = true;
   }
 }
 const diaries = await getCollection('diary');
@@ -33,7 +40,7 @@ for (const diary of diaries) {
   </div>
 </BaseLayout>
 
-<script define:vars={{ pathTitleMap, likeIdLabelMap }}>
+<script define:vars={{ pathTitleMap, likeIdLabelMap, workHasArticle }}>
   function formatPath(path) {
     return pathTitleMap[path] || path;
   }
@@ -152,6 +159,37 @@ for (const diary of diaries) {
     `;
   }
 
+  function renderAffiliateClicksTable(rows) {
+    if (!rows.length) return '<p class="empty">データなし</p>';
+    return `
+      <table class="stats-table">
+        <thead>
+          <tr><th>#</th><th>ファイル</th><th>URL</th><th>回数</th><th>最終クリック</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map((item, i) => {
+            const label = likeIdLabelMap[item.source_id] || item.source_id;
+            const isWork = item.source_id.startsWith('work:');
+            const isDiary = item.source_id.startsWith('diary:');
+            const slug = item.source_id.replace(/^work:|^diary:/, '');
+            let href = '';
+            if (isWork) href = workHasArticle[slug] ? `/article/${slug}` : `/works#${slug}`;
+            if (isDiary) href = `/diary#${slug}`;
+            const cell = href ? `<a href="${href}">${label}</a>` : label;
+            return `
+              <tr>
+                <td class="rank">${i + 1}</td>
+                <td class="title">${cell}</td>
+                <td class="url"><a href="${item.url}" target="_blank" rel="noopener">${item.url}</a></td>
+                <td class="count">${item.count}</td>
+                <td class="date">${item.updated_at ?? '—'}</td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
   function escHtml(str) {
     return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
@@ -201,7 +239,7 @@ for (const diary of diaries) {
   async function loadStats() {
     try {
       const res = await fetch('/api/stats');
-      const { allTime, last7days, likes, shares } = await res.json();
+      const { allTime, last7days, likes, shares, affiliateClicks } = await res.json();
       document.getElementById('stats-root').innerHTML = `
         <section>
           <h2 class="section-title">直近7日間</h2>
@@ -218,6 +256,10 @@ for (const diary of diaries) {
         <section>
           <h2 class="section-title">シェア ランキング</h2>
           ${renderSharesTable(shares)}
+        </section>
+        <section>
+          <h2 class="section-title">Amazonリンク クリック</h2>
+          ${renderAffiliateClicksTable(affiliateClicks)}
         </section>
       `;
     } catch {

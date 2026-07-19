@@ -50,7 +50,7 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/panel/?url=${pageUrl}&title=${pa
       </div>
     )}
 
-    <div class="work-body">
+    <div class="work-body" data-work-id={workId}>
       <slot />
     </div>
 
@@ -500,6 +500,22 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/panel/?url=${pageUrl}&title=${pa
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: shareId, platform }),
+        }).catch(() => {});
+      });
+    });
+  }
+
+  // Amazonアフィリエイトリンクのクリック集計
+  const workBody = document.querySelector<HTMLElement>('.work-body[data-work-id]');
+  if (workBody) {
+    const workId = workBody.dataset.workId!;
+    workBody.querySelectorAll<HTMLAnchorElement>('a[href^="https://amzn.to/"]').forEach((a) => {
+      a.addEventListener('click', () => {
+        fetch('/api/affiliate-click', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source_id: `work:${workId}`, url: a.href }),
+          keepalive: true,
         }).catch(() => {});
       });
     });

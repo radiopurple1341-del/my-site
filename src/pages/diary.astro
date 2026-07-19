@@ -267,3 +267,19 @@ function linkify(text: string) {
     });
   });
 </script>
+
+<script>
+  // Amazonアフィリエイトリンクのクリック集計
+  document.querySelectorAll<HTMLElement>('.post[id]').forEach(post => {
+    post.querySelectorAll<HTMLAnchorElement>('.post-text a[href^="https://amzn.to/"]').forEach(a => {
+      a.addEventListener('click', () => {
+        fetch('/api/affiliate-click', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source_id: `diary:${post.id}`, url: a.href }),
+          keepalive: true,
+        }).catch(() => {});
+      });
+    });
+  });
+</script>

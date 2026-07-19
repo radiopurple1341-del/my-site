@@ -85,7 +85,7 @@ export default {
       });
       const fromDate = dates[0];
 
-      const [allTimeRows, weekRows, likesRows, sharesRows] = await Promise.all([
+      const [allTimeRows, weekRows, likesRows, sharesRows, affiliateRows] = await Promise.all([
         env.DB.prepare(
           'SELECT path, SUM(count) as total FROM page_visits GROUP BY path ORDER BY total DESC LIMIT 30'
         ).all(),
@@ -97,6 +97,9 @@ export default {
         ).all(),
         env.DB.prepare(
           'SELECT id, platform, count FROM shares WHERE count > 0 ORDER BY id'
+        ).all(),
+        env.DB.prepare(
+          'SELECT source_id, url, count, updated_at FROM affiliate_clicks WHERE count > 0 ORDER BY count DESC LIMIT 50'
         ).all(),
       ]);
 
@@ -117,7 +120,30 @@ export default {
         })),
       };
 
-      return new Response(JSON.stringify({ allTime: allTimeRows.results, last7days, likes: likesRows.results, shares: sharesRows.results }), { headers });
+      return new Response(JSON.stringify({ allTime: allTimeRows.results, last7days, likes: likesRows.results, shares: sharesRows.results, affiliateClicks: affiliateRows.results }), { headers });
+    }
+
+    if (url.pathname === '/api/affiliate-click') {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      };
+
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { headers });
+      }
+
+      if (request.method === 'POST') {
+        const { source_id, url: linkUrl } = await request.json().catch(() => ({}));
+        if (!source_id || !linkUrl || !/^https:\/\/amzn\.to\//.test(linkUrl)) {
+          return new Response(JSON.stringify({ error: 'invalid' }), { headers, status: 400 });
+        }
+        const updated_at = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 16).replace('T', ' ');
+        await env.DB.prepare(
+          'INSERT INTO affiliate_clicks (source_id, url, count, updated_at) VALUES (?, ?, 1, ?) ON CONFLICT(source_id, url) DO UPDATE SET count = count + 1, updated_at = ?'
+        ).bind(source_id, linkUrl, updated_at, updated_at).run();
+        return new Response(JSON.stringify({ ok: true }), { headers });
+      }
     }
 
     if (url.pathname === '/api/share') {

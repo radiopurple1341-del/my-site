@@ -290,6 +290,21 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
     });
   });
 
+  // Amazonアフィリエイトリンクのクリック集計
+  document.querySelectorAll<HTMLAnchorElement>('td.col-note a[href^="https://amzn.to/"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const workId = a.closest('tr')?.id;
+      if (!workId) return;
+      fetch('/api/affiliate-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_id: `work:${workId}`, url: a.href }),
+        keepalive: true,
+      }).catch(() => {});
+    });
+  });
+
   // URLパラメータによる初期フィルター適用
   if (initialFilter) {
     const targetBtn = Array.from(filterBtns).find(b => b.dataset.filter === initialFilter);
