@@ -9,4 +9,5 @@ thumbnail: "https://assets.st-note.com/production/uploads/images/134473635/recta
 featured: true
 workYear: 2024
 workMonth: 
+workId: "tmge-syoki-chiba-1"
 ---
