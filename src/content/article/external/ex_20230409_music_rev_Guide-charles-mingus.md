@@ -9,4 +9,5 @@ thumbnail: "https://assets.st-note.com/production/uploads/images/102563302/recta
 featured: true
 workYear: 2023
 workMonth: 
+workId: "charles-mingus-guide1"
 ---
