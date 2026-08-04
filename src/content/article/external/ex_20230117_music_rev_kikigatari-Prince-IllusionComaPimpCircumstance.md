@@ -9,4 +9,5 @@ thumbnail: "https://assets.st-note.com/production/uploads/images/95862457/rectan
 featured: true
 workYear: 2004
 workMonth: 
+workId: "prince-song-illusion"
 ---

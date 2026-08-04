@@ -19,9 +19,9 @@ const { label = '続きを読む ' } = Astro.props;
 .expand { margin: 1.25rem 0; }
 .expand-btn {
   display: inline;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
-  color: #2a4e38;
+  color: #0033cc;
   cursor: pointer;
   list-style: none;
   user-select: none;
@@ -29,12 +29,12 @@ const { label = '続きを読む ' } = Astro.props;
 }
 .expand-btn::-webkit-details-marker { display: none; }
 .expand-btn::before {
-  content: '▶\00a0';
-  font-size: 18px;
+  content: '▶▶\00a0';
+  font-size: 20px;
   display: inline-block;
   transition: transform 0.2s;
 }
-details[open] .expand-btn::before {
+details[open] > summary.expand-btn::before {
   transform: rotate(90deg);
 }
 
