@@ -1,6 +1,6 @@
 ---
 title: "セキララ"
-artist: "Blankey Jet City -> 浅井健一 -> Sherbet"
+artist: "浅井健一 -> Sherbet"
 category: 音楽
 workYear: 1996
 workMonth: 7

@@ -1,6 +1,6 @@
 ---
 title: "AJICO SHOW (Live)"
-artist: "Blankey Jet City -> 浅井健一 -> AJICO"
+artist: "浅井健一 -> AJICO"
 category: 音楽
 workYear: 2001
 workMonth: 7

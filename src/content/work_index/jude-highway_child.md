@@ -1,6 +1,6 @@
 ---
 title: "Highway Child"
-artist: "Blankey Jet City -> 浅井健一 -> JUDE"
+artist: "浅井健一 -> JUDE"
 category: 音楽
 workYear: 2003
 workMonth: 10
