@@ -1,6 +1,6 @@
 ---
 title: "Diary - FUJI ROCK FESTIVAL'26 感想｜WITHOUT SOUNDS"
-pubDate: 2026-08-21
+pubDate: 2026-08-20
 addedDate: 2026-08-20
 description: |
   2026フジロックの感想。1か月遅れですが。
