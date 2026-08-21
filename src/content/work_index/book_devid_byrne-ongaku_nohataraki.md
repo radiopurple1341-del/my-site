@@ -1,6 +1,6 @@
 ---
 title: "音楽のはたらき"
-artist: "Talking Head -> David Byrne"
+artist: "Talking Heads -> David Byrne"
 category: 書籍
 workYear: 2023
 workMonth: 4
