@@ -94,7 +94,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
           return (
             <tr
               id={work.id}
-              class={[href ? (isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : ''].filter(Boolean).join(' ') || undefined}
+              class={[href ? (isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : '', thumbSrc ? '' : 'no-thumb'].filter(Boolean).join(' ') || undefined}
               data-category={work.data.category}
               data-tags={(work.data.tags ?? []).join(',')}
               data-year={String(work.data.workYear ?? '')}
@@ -108,7 +108,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
                 <div class="work-cell">
                   {href
                     ? <a href={href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener' : undefined} class="work-link">
-                        {thumbSrc && <img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" />}
+                        {thumbSrc && <span class="work-thumb-wrap"><img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" /></span>}
                         <span class="work-text">
                           <span class="work-meta">
                             {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
@@ -121,7 +121,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
                         </span>
                       </a>
                     : <span class="work-nolink">
-                        {thumbSrc && <img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" />}
+                        {thumbSrc && <span class="work-thumb-wrap"><img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" /></span>}
                         <span class="work-text">
                           <span class="work-meta">
                             {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
@@ -429,7 +429,33 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 }
 .work-link:visited { color: #7755aa; }
 .work-link:hover { text-decoration: underline; }
-.work-link::before {
+
+/* サムネイルありの作品：マークはサムネ右上角に */
+.work-thumb-wrap { position: relative; }
+.work-link .work-thumb-wrap::before {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-accent);
+  border-radius: 1px;
+}
+.work-link .work-thumb-wrap::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+
+/* サムネイルなしの作品：従来通り左上に */
+tr.no-thumb .work-link::before {
   content: '';
   position: absolute;
   left: -10px;
@@ -439,7 +465,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   background: var(--color-accent);
   border-radius: 1px;
 }
-.work-link::after {
+tr.no-thumb .work-link::after {
   content: '';
   position: absolute;
   left: -6px;
@@ -450,8 +476,11 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   background: var(--color-accent);
   box-shadow: 0 0 0 2px var(--color-bg);
 }
-.is-external .work-link::before { background: #4a90d9; }
-.is-external .work-link::after  { background: #4a90d9; }
+
+.is-external .work-thumb-wrap::before,
+.is-external.no-thumb .work-link::before { background: #4a90d9; }
+.is-external .work-thumb-wrap::after,
+.is-external.no-thumb .work-link::after  { background: #4a90d9; }
 .guide-badge {
   display: inline-block;
   font-size: 11px;
@@ -474,15 +503,20 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 .work-year-tag { display: none; }
 
 .work-cell { }
-.work-thumb {
+.work-thumb-wrap {
   display: none;
   width: 130px;
   height: 130px;
-  object-fit: cover;
-  border-radius: 2px;
   flex-shrink: 0;
 }
-.show-thumb .work-thumb { display: block; }
+.show-thumb .work-thumb-wrap { display: block; }
+.work-thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+}
 .show-thumb .work-link,
 .show-thumb .work-nolink {
   align-items: flex-start;
@@ -582,16 +616,22 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 
   /* col-work・work-cell・work-link を透過してグリッドに直接参加させる */
   .col-work, .work-cell, .work-link, .work-nolink { display: contents; }
-  .work-link::before, .work-link::after { display: none; }
+  .work-link .work-thumb-wrap::before, .work-link .work-thumb-wrap::after { display: none; }
   .col-category, .col-type, .col-year, .col-created { display: none !important; }
 
   /* サムネ：col1、2行スパン */
-  .work-thumb {
+  .work-thumb-wrap {
     display: block !important;
+    position: relative;
     width: 72px;
     height: 72px;
     grid-column: 1;
     grid-row: 1 / 3;
+  }
+  .work-thumb {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     border-radius: 2px;
   }
@@ -610,9 +650,30 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   .work-year-tag { display: none; }
   .sort-by-year .work-year-tag { display: inline; font-size: 10px; color: var(--color-text-muted); }
 
-  /* リンク付き作品のマーキング：trに絶対配置でサムネ左端に */
+  /* リンク付き作品のマーキング：サムネありはサムネ右上角に */
   .has-article { position: relative; }
-  .has-article::before {
+  .has-article .work-thumb-wrap::before {
+    content: '';
+    display: block;
+    position: absolute;
+    right: -8px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--color-accent);
+    border-radius: 1px;
+  }
+  .has-article .work-thumb-wrap::after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: -2px; top: -3px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-bg);
+  }
+
+  /* サムネなしは従来通りtr左端に */
+  .has-article.no-thumb::before {
     content: '';
     position: absolute;
     left: -6px; top: 0.75rem; bottom: 0.75rem;
@@ -620,7 +681,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
     background: var(--color-accent);
     border-radius: 1px;
   }
-  .has-article::after {
+  .has-article.no-thumb::after {
     content: '';
     position: absolute;
     left: -2px; top: calc(0.75rem - 3px);
@@ -629,8 +690,11 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
     background: var(--color-accent);
     box-shadow: 0 0 0 2px var(--color-bg);
   }
-  .is-external::before { background: #4a90d9; }
-  .is-external::after  { background: #4a90d9; }
+
+  .is-external .work-thumb-wrap::before,
+  .is-external.no-thumb::before { background: #4a90d9; }
+  .is-external .work-thumb-wrap::after,
+  .is-external.no-thumb::after  { background: #4a90d9; }
   .note-empty { display: none; }
 
   /* 一言：col2・row2 */
