@@ -1,6 +1,6 @@
 ---
 title: "砂時計の書"
-artist: "Radiohead(シンコー・ミュージック)"
+artist: "エルンスト・ユンガー"
 # category: 音楽 / 映画 / 漫画 / ゲーム / 書籍 / その他
 category: 書籍
 workYear: 2008

@@ -1,6 +1,6 @@
 ---
 title: "フェイクファー"
-artist: "SPITZ"
+artist: "スピッツ"
 category: 音楽
 workYear: 1998
 workType: "アルバム"
