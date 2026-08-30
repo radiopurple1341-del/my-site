@@ -1,6 +1,7 @@
 ---
 title: "The Complete Score from [The Catherine Wheel]"
 artist: "Talking Heads -> David Byrne"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1981
 workMonth: 12

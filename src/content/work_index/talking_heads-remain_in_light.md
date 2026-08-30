@@ -1,6 +1,7 @@
 ---
 title: "Remain in Light"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1980
 workMonth: 10

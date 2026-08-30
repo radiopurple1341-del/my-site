@@ -1,6 +1,7 @@
 ---
 title: "Speaking in Tongues"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1983
 workMonth: 5

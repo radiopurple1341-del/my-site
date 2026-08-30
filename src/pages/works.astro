@@ -3,8 +3,12 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const stripThe = (s: string) => s.replace(/^The\s+/i, '');
-const sortKey = (work: { data: { artist?: string; title: string } }) =>
-  stripThe(work.data.artist || work.data.title);
+
+// 作品棚の開閉グループ（手動指定）。mainGroupを持つ作品はここに追加した名前でまとめられる
+const GROUPED_ARTISTS = ['Talking Heads'];
+
+const sortKey = (work: { data: { artist?: string; title: string; mainGroup?: string } }) =>
+  stripThe(work.data.mainGroup || work.data.artist || work.data.title);
 
 const allWorks = (await getCollection('work'))
   .sort((a, b) => {
@@ -33,6 +37,21 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   if (pubDate) return formatDate(pubDate);
   return '';
 }
+
+const seenShelves = new Set<string>();
+
+// 各棚グループの最後のwork.id（末尾ネームプレート挿入位置の判定用）・件数
+const lastShelfMember = new Map<string, string>();
+const shelfCounts = new Map<string, number>();
+for (const work of allWorks) {
+  const g = work.data.mainGroup;
+  if (g && GROUPED_ARTISTS.includes(g)) {
+    lastShelfMember.set(g, work.id);
+    shelfCounts.set(g, (shelfCounts.get(g) ?? 0) + 1);
+  }
+}
+
+const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
 ---
 
 <BaseLayout title="作品棚">
@@ -91,10 +110,32 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
           const updated = getLastModified(work.filePath);
           const created = getCreatedDate(work.data.pubDate, work.filePath);
           const isFeatured = work.data.isGuide || work.data.isSpecial;
+          const shelfKey = work.data.mainGroup && GROUPED_ARTISTS.includes(work.data.mainGroup)
+            ? work.data.mainGroup
+            : null;
+          const isShelfHeader = shelfKey ? !seenShelves.has(shelfKey) : false;
+          if (isShelfHeader && shelfKey) seenShelves.add(shelfKey);
+          const isShelfEnd = shelfKey ? lastShelfMember.get(shelfKey) === work.id : false;
           return (
+            <>
+            {isShelfHeader && shelfKey && (
+              <tr class="shelf-row" data-shelf={shelfKey} data-artist={shelfKey} data-created="" data-updated="" data-year="">
+                <td class="shelf-label" colspan="7">
+                  <div class="plate">
+                    <button type="button" class="tab" aria-expanded="true">
+                      <span class="arrow" aria-hidden="true"></span>
+                      <span class={['name', isLatinName(shelfKey) ? 'latin' : ''].filter(Boolean).join(' ')}>{shelfKey}</span>
+                      <span class="count">{shelfCounts.get(shelfKey)}</span>
+                    </button>
+                    <div class="board"></div>
+                    <div class="board-thin"></div>
+                  </div>
+                </td>
+              </tr>
+            )}
             <tr
               id={work.id}
-              class={[href ? (isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : '', thumbSrc ? '' : 'no-thumb'].filter(Boolean).join(' ') || undefined}
+              class={[href ? (isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : '', thumbSrc ? '' : 'no-thumb', shelfKey ? 'shelf-item' : ''].filter(Boolean).join(' ') || undefined}
               data-category={work.data.category}
               data-tags={(work.data.tags ?? []).join(',')}
               data-year={String(work.data.workYear ?? '')}
@@ -103,6 +144,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
               data-created={created}
               data-updated={updated}
               data-has-note={work.data.description ? '1' : '0'}
+              data-shelf={shelfKey ?? undefined}
             >
               <td class="col-work">
                 <div class="work-cell">
@@ -143,6 +185,17 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
               <td class="col-created">{created || '—'}</td>
               <td class="col-updated">{updated || '—'}</td>
             </tr>
+            {isShelfEnd && shelfKey && (
+              <tr class="shelf-row shelf-end" data-shelf={shelfKey} data-artist={shelfKey} data-created="" data-updated="" data-year="">
+                <td class="shelf-label" colspan="7">
+                  <div class="plate plate-end">
+                    <div class="board"></div>
+                    <div class="board-thin"></div>
+                  </div>
+                </td>
+              </tr>
+            )}
+            </>
           );
         })}
       </tbody>
@@ -162,13 +215,21 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   let noteOnly = false;
   let sortCol = 'artist';
   let sortDir: 'asc' | 'desc' = 'asc';
+  let randomActive = false;
+  const closedShelves = new Set<string>(); // 手動で閉じた棚（デフォルトは全開放）
 
   function getRows() {
     return Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
   }
 
+  function isGroupModeActive() {
+    return sortCol === 'artist' && !activeFilter && !articleOnly && !noteOnly && !randomActive;
+  }
+
   function syncCount() {
-    const visible = getRows().filter(r => r.style.display !== 'none').length;
+    const groupMode = isGroupModeActive();
+    const workRows = getRows().filter(r => !r.classList.contains('shelf-row'));
+    const visible = workRows.filter(r => r.style.display !== 'none' || (r.dataset.shelf && groupMode)).length;
     if (countEl) countEl.textContent = `${visible}件`;
   }
 
@@ -181,23 +242,51 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   }
 
   function applyFilter() {
+    const groupMode = isGroupModeActive();
     getRows().forEach(row => {
+      if (row.classList.contains('shelf-row')) {
+        const key = row.dataset.shelf;
+        const isClosed = !!key && closedShelves.has(key);
+        if (row.classList.contains('shelf-end')) {
+          row.style.display = (groupMode && !isClosed) ? '' : 'none';
+        } else {
+          row.style.display = groupMode ? '' : 'none';
+          row.classList.toggle('is-closed', isClosed);
+          row.querySelector<HTMLButtonElement>('.tab')?.setAttribute('aria-expanded', String(!isClosed));
+        }
+        return;
+      }
       const tags = (row.dataset.tags ?? '').split(',').filter(Boolean);
       const categoryMatch = !activeFilter
         || row.dataset.category === activeFilter
         || tags.includes(activeFilter);
       const articleMatch = !articleOnly || row.classList.contains('has-article');
       const noteMatch = !noteOnly || row.dataset.hasNote === '1';
-      row.style.display = (categoryMatch && articleMatch && noteMatch) ? '' : 'none';
+      const matches = categoryMatch && articleMatch && noteMatch;
+      if (!matches) { row.style.display = 'none'; return; }
+      const shelfKey = row.dataset.shelf;
+      row.style.display = (groupMode && shelfKey && closedShelves.has(shelfKey)) ? 'none' : '';
     });
     syncCount();
   }
+
+  document.querySelectorAll<HTMLButtonElement>('.shelf-row .tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.closest<HTMLElement>('.shelf-row')?.dataset.shelf;
+      if (!key) return;
+      if (closedShelves.has(key)) closedShelves.delete(key);
+      else closedShelves.add(key);
+      applyFilter();
+    });
+  });
 
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeFilter = btn.dataset.filter ?? '';
+      randomActive = false;
+      randomBtn?.classList.remove('active');
       worksTable?.classList.toggle('filter-active', activeFilter !== '');
       applyFilter();
     });
@@ -206,6 +295,8 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   const articleFilterBtn = document.getElementById('article-filter');
   articleFilterBtn?.addEventListener('click', () => {
     articleOnly = !articleOnly;
+    randomActive = false;
+    randomBtn?.classList.remove('active');
     articleFilterBtn.classList.toggle('active', articleOnly);
     applyFilter();
   });
@@ -213,6 +304,8 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   const noteFilterBtn = document.getElementById('note-filter');
   noteFilterBtn?.addEventListener('click', () => {
     noteOnly = !noteOnly;
+    randomActive = false;
+    randomBtn?.classList.remove('active');
     noteFilterBtn.classList.toggle('active', noteOnly);
     applyFilter();
   });
@@ -220,6 +313,7 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
   const randomBtn = document.getElementById('random-btn');
   randomBtn?.addEventListener('click', () => {
     randomBtn.classList.add('active');
+    randomActive = true;
     applyFilter();
     applyRandom();
   });
@@ -259,23 +353,36 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
         if (icon) icon.textContent = h.dataset.col === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
       });
 
+      randomActive = false;
+      randomBtn?.classList.remove('active');
       applySort(sortCol, sortDir);
+      applyFilter();
     });
   });
 
   const sortSelect = document.getElementById('sort-select') as HTMLSelectElement | null;
   sortSelect?.addEventListener('change', () => {
     const [col, dir] = sortSelect.value.split(':');
+    sortCol = col;
+    sortDir = dir as 'asc' | 'desc';
+    randomActive = false;
+    randomBtn?.classList.remove('active');
     worksTable?.classList.toggle('sort-by-year', col === 'year');
     applySort(col, dir as 'asc' | 'desc');
+    applyFilter();
   });
 
   const updatedSortBtn = document.getElementById('updated-sort-btn');
   updatedSortBtn?.addEventListener('click', () => {
     updatedSortBtn.classList.add('active');
     if (sortSelect) sortSelect.value = 'updated:desc';
+    sortCol = 'updated';
+    sortDir = 'desc';
+    randomActive = false;
+    randomBtn?.classList.remove('active');
     worksTable?.classList.remove('sort-by-year');
     applySort('updated', 'desc');
+    applyFilter();
   });
 
   // description エリアクリックで記事遷移
@@ -406,6 +513,81 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 }
 .works-table tr { scroll-margin-top: 60px; }
 .works-table tr:hover td { background: var(--color-surface); }
+
+/* 作品棚：開閉式グループ（タブ＋棚板ネームプレート） */
+.shelf-row td.shelf-label { padding: 0; border-bottom: none; }
+
+.plate {
+  --ink: #1a1a1a;
+  --ink-hover: #332f2b;
+  margin: 24px 0 0;
+}
+.plate-end { margin: 8px 0 0; }
+
+.plate .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px 10px;
+  border: 0;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background-color 0.12s ease, padding-top 0.12s ease;
+}
+.plate .tab:hover,
+.plate .tab:focus-visible {
+  background: var(--ink-hover);
+  padding-top: 14px;
+}
+.plate .tab:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* 矢印：開時は下向き（デフォルト）、閉時は右向き */
+.plate .arrow {
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid #fff;
+  margin-top: 2px;
+}
+.shelf-row.is-closed .plate .arrow {
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid #fff;
+  border-right: 0;
+  margin-top: 0;
+}
+
+.plate .name {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.25;
+}
+.plate .name.latin {
+  font-family: 'Space Grotesk', var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plate .count {
+  font-family: 'JetBrains Mono', var(--font-mono);
+  font-size: 11px;
+  color: #fff;
+  border-left: 1px solid #4a4642;
+  padding-left: 12px;
+}
+
+/* 棚板の断面：太線 + 細線 */
+.plate .board { height: 5px; background: var(--ink); }
+.plate .board-thin { height: 1px; background: var(--ink); margin-top: 2px; }
 
 .col-work    { width: 39%; font-size: 14px; }
 .col-category { width: 8%; }
@@ -610,6 +792,17 @@ tr.no-thumb .work-link::after {
   }
   .works-table tbody tr:hover td { background: none; }
   .works-table tbody td { padding: 0; border: none; }
+
+  /* 作品棚ネームプレート：グリッドを解除してフルワイドのバーとして表示 */
+  .works-table tbody tr.shelf-row {
+    display: block;
+    padding: 0;
+    border-bottom: none;
+  }
+  .works-table tbody tr.shelf-row td.shelf-label {
+    display: block;
+    width: 100%;
+  }
 
   /* col-work・work-cell・work-link を透過してグリッドに直接参加させる */
   .col-work, .work-cell, .work-link, .work-nolink { display: contents; }

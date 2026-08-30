@@ -1,6 +1,7 @@
 ---
 title: "『アメリカン・ユートピア』(映画)の選曲意図、David Byrneだからこその説得力を紐解く"
 artist: "Talking Heads -> David Byrne"
+mainGroup: "Talking Heads"
 category: 映画
 workType: "特集"
 workYear: 2020

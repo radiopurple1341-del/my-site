@@ -1,6 +1,7 @@
 ---
 title: "Fear of Music"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1979
 workMonth: 8

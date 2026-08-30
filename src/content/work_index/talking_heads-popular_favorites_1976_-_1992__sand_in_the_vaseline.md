@@ -1,6 +1,7 @@
 ---
 title: "Popular Favorites 1976 - 1992 / Sand in the Vaseline"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1992
 workMonth: 10

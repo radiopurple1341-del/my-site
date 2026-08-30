@@ -1,6 +1,7 @@
 ---
 title: "Uh-Oh"
 artist: "Talking Heads -> David Byrne"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1992
 workMonth: 2

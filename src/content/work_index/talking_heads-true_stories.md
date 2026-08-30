@@ -1,11 +1,12 @@
 ---
 title: "True Stories"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1986
 workMonth: 10
 workType: "アルバム"
-pubDate: 2026-08-28
+pubDate: 2026-08-21
 tags: []
 description: |
   バーンが監督した同名コメディ映画に伴ったアルバム。サントラではない。

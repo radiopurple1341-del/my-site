@@ -1,6 +1,7 @@
 ---
 title: "Naked"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1988
 workMonth: 3

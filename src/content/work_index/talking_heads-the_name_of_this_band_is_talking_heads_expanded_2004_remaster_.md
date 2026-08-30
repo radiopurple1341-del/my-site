@@ -1,6 +1,7 @@
 ---
-title: "The Name of This Band Is Talking Heads (Expanded 2004 Remaster)"
+title: "The Name of This Band Is Talking Heads"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1982
 workMonth: 3

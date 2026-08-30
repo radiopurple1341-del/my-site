@@ -1,6 +1,7 @@
 ---
 title: "Talking Heads: 77"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1977
 workMonth: 9

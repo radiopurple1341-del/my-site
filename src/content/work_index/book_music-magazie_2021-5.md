@@ -1,6 +1,7 @@
 ---
 title: "ミュージック・マガジン 2021年5月号　特集デイヴィッド・バーン"
-artist: "ミュージック・マガジン"
+artist: "Talking Heads -> ミュージック・マガジン"
+mainGroup: "Talking Heads"
 category: 書籍
 workYear: 2021
 workMonth: 5

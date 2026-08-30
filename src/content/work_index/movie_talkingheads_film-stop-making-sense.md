@@ -1,6 +1,7 @@
 ---
 title: "Stop Making Sense"
 artist: "Talking Heads / Jonathan Demme"
+mainGroup: "Talking Heads"
 # category: 音楽 / 映画 / 漫画 / ゲーム / 書籍 / その他
 category: 映画
 workYear: 1984

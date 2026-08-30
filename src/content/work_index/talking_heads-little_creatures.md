@@ -1,6 +1,7 @@
 ---
 title: "Little Creatures"
 artist: "Talking Heads"
+mainGroup: "Talking Heads"
 category: 音楽
 workYear: 1985
 workMonth: 7
