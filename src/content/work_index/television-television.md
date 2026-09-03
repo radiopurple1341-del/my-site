@@ -1,6 +1,7 @@
 ---
 title: "Television"
 artist: "Television"
+mainGroup: "Television"
 category: 音楽
 workYear: 1992
 workMonth: 10

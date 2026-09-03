@@ -1,6 +1,7 @@
 ---
 title: "EVERY NIGHT"
 artist: "井上陽水"
+mainGroup: "井上陽水"
 category: 音楽
 workYear: 1980
 workMonth: 12

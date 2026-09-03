@@ -1,6 +1,7 @@
 ---
 title: "The Blow Up"
 artist: "Television"
+mainGroup: "Television"
 category: 音楽
 workYear: 1999
 workMonth: 3

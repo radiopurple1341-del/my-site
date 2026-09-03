@@ -1,6 +1,7 @@
 ---
 title: "Words from the Front "
 artist: "Television -> Tom Verlaine"
+mainGroup: "Television"
 category: 音楽
 workYear: 1982
 workType: "アルバム"

@@ -5,7 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const stripThe = (s: string) => s.replace(/^The\s+/i, '');
 
 // 作品棚の開閉グループ（手動指定）。mainGroupを持つ作品はここに追加した名前でまとめられる
-const GROUPED_ARTISTS = ['Talking Heads'];
+const GROUPED_ARTISTS = ['Talking Heads', 'NEU!', '井上陽水', 'Sonic Youth', 'Television'];
 
 const sortKey = (work: { data: { artist?: string; title: string; mainGroup?: string } }) =>
   stripThe(work.data.mainGroup || work.data.artist || work.data.title);
@@ -84,6 +84,14 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
       </div>
     </div>
   </div>
+
+  {GROUPED_ARTISTS.length > 0 && (
+    <div class="shelf-jump">
+      {GROUPED_ARTISTS.map(name => (
+        <button type="button" class="shelf-jump-btn" data-jump-target={name}>{name}</button>
+      ))}
+    </div>
+  )}
 
   <!-- 作品テーブル -->
   <div class="table-wrap">
@@ -385,6 +393,42 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
     applyFilter();
   });
 
+  // 棚ジャンプボタン：アーティスト名順・フィルター解除に戻したうえで該当棚まで移動
+  document.querySelectorAll<HTMLButtonElement>('.shelf-jump-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.jumpTarget;
+      if (!key) return;
+
+      closedShelves.delete(key);
+
+      activeFilter = '';
+      articleOnly = false;
+      noteOnly = false;
+      randomActive = false;
+      sortCol = 'artist';
+      sortDir = 'asc';
+
+      filterBtns.forEach(b => b.classList.toggle('active', (b.dataset.filter ?? '') === ''));
+      articleFilterBtn?.classList.remove('active');
+      noteFilterBtn?.classList.remove('active');
+      randomBtn?.classList.remove('active');
+      updatedSortBtn?.classList.remove('active');
+      if (sortSelect) sortSelect.value = 'artist:asc';
+      worksTable?.classList.remove('filter-active', 'sort-by-year');
+      sortableHeaders.forEach(h => {
+        const icon = h.querySelector('.sort-icon');
+        if (icon) icon.textContent = h.dataset.col === 'artist' ? ' ↑' : ' ↕';
+      });
+
+      applySort('artist', 'asc');
+      applyFilter();
+
+      document
+        .querySelector<HTMLElement>(`tr.shelf-row[data-shelf="${key}"]:not(.shelf-end)`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
   // description エリアクリックで記事遷移
   document.querySelectorAll<HTMLElement>('td.col-note[data-href]').forEach(td => {
     td.addEventListener('click', () => {
@@ -435,6 +479,26 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
 }
 .page-title { font-size: 18px; font-weight: 700; }
 .count { font-size: 12px; color: var(--color-text-muted); }
+
+.shelf-jump {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+.shelf-jump-btn {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #1a1a1a;
+  border: 0;
+  border-radius: 2px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.shelf-jump-btn:hover { background: #332f2b; }
 
 .filters {
   display: flex;

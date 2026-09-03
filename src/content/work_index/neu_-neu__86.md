@@ -1,6 +1,7 @@
 ---
 title: "NEU! '86"
 artist: "NEU!"
+mainGroup: "NEU!"
 category: 音楽
 workYear: 2010
 workMonth: 5

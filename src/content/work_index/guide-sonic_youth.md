@@ -1,6 +1,7 @@
 ---
 title: "Sonic Youthの軌跡を辿る①(プロローグ)"
 artist: "Sonic Youth"
+mainGroup: "Sonic Youth"
 category: 音楽
 isGuide: true
 workType: "特集"

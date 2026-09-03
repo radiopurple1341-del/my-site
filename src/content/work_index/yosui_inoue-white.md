@@ -1,6 +1,7 @@
 ---
 title: "white"
 artist: "井上陽水"
+mainGroup: "井上陽水"
 category: 音楽
 workYear: 1978
 workType: "アルバム"

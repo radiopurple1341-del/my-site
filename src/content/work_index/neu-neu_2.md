@@ -1,6 +1,7 @@
 ---
 title: "NEU! 2"
 artist: "NEU!"
+mainGroup: "NEU!"
 category: 音楽
 workYear: 1973
 workType: "アルバム"

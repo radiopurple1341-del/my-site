@@ -1,6 +1,7 @@
 ---
 title: "Last Night On Earth"
 artist: "Sonic Youth -> Lee Ranaldo and the Dust"
+mainGroup: "Sonic Youth"
 category: 音楽
 workYear: 2013
 workMonth: 10

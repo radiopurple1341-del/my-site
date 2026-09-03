@@ -1,6 +1,7 @@
 ---
 title: "Dreamtime"
 artist: "Television -> Tom Verlaine"
+mainGroup: "Television"
 category: 音楽
 workYear: 1981
 workType: "アルバム"

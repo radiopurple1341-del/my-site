@@ -1,6 +1,7 @@
 ---
 title: "Murray St."
 artist: "Sonic Youth"
+mainGroup: "Sonic Youth"
 category: 音楽
 workYear: 2002
 workMonth: 1

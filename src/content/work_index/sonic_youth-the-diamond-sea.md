@@ -1,6 +1,7 @@
 ---
 title: "The Diamond Sea"
 artist: "Sonic Youth"
+mainGroup: "Sonic Youth"
 category: 音楽
 workYear: 1995
 workMonth: 9

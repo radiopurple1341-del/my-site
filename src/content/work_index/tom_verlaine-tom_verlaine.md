@@ -1,6 +1,7 @@
 ---
 title: "Tom Verlaine"
 artist: "Television -> Tom Verlaine"
+mainGroup: "Television"
 category: 音楽
 workYear: 1979
 workType: "アルバム"

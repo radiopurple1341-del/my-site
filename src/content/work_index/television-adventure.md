@@ -1,6 +1,7 @@
 ---
 title: "Adventure"
 artist: "Television"
+mainGroup: "Television"
 category: 音楽
 workYear: 1978
 workMonth: 4

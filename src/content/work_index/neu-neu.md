@@ -1,6 +1,7 @@
 ---
 title: "NEU!"
 artist: "NEU!"
+mainGroup: "NEU!"
 category: 音楽
 workYear: 1972
 workType: "アルバム"

@@ -1,6 +1,7 @@
 ---
 title: "Anagrama (Syr 1)"
 artist: "Sonic Youth"
+mainGroup: "Sonic Youth"
 category: 音楽
 workYear: 1997
 workMonth: 5

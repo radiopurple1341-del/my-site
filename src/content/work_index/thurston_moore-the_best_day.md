@@ -1,6 +1,7 @@
 ---
 title: "The Best Day"
 artist: "Sonic Youth -> Thurston Moore"
+mainGroup: "Sonic Youth"
 category: 音楽
 workYear: 2014
 workMonth: 10

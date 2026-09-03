@@ -1,6 +1,7 @@
 ---
 title: "In/Out/In"
 artist: "Sonic Youth"
+mainGroup: "Sonic Youth"
 category: 音楽
 workYear: 2022
 workMonth: 1

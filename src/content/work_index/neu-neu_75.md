@@ -1,6 +1,7 @@
 ---
 title: "NEU! 75"
 artist: "NEU!"
+mainGroup: "NEU!"
 category: 音楽
 workYear: 1975
 workType: "アルバム"

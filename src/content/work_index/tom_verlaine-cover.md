@@ -1,6 +1,7 @@
 ---
 title: "Cover"
 artist: "Television -> Tom Verlaine"
+mainGroup: "Television"
 category: 音楽
 workYear: 1984
 workType: "アルバム"

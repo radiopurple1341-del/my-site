@@ -1,6 +1,7 @@
 ---
 title: "TelevisionがMarquee Moonに辿り着くまで"
 artist: "Television"
+mainGroup: "Television"
 category: 音楽
 workYear: 1977
 workMonth: 2

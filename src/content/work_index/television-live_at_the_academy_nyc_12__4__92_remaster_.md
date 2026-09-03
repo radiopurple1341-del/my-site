@@ -1,6 +1,7 @@
 ---
 title: "Live At The Academy NYC 12.4.92 (Remaster)"
 artist: "Television"
+mainGroup: "Television"
 category: 音楽
 workYear: 2003
 workMonth: 4

@@ -1,6 +1,7 @@
 ---
 title: "The Collective"
 artist: "Sonic Youth -> Kim Gordon"
+mainGroup: "Sonic Youth"
 category: 音楽
 workYear: 2024
 workMonth: 3
