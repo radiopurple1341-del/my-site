@@ -27,11 +27,32 @@ import Review from '../../../components/Review.astro';
 import Quote from '../../../components/Quote.astro';
 import LinkCard from '../../../components/LinkCard.astro';
 import Band from '../../../components/Band.astro';
+import Memo from '../../../components/Memo.astro';
 
 <Tabs>
   <Tab label="2026/06/09" active>
+# 基本情報
+<Memo>
+  <ul>
+    <li>{"発売日：1978年8月"}</li>
+    <li>{"ディスコグラフィ：6thアルバム"}
+      <ul>
+        <li>前作は『招待状のないショー』</li>
+      </ul>
+    </li>
+    <li>{"一般的な評価：あまり取り上げられない一作"}
+      <ul>
+        <li>『ゴールデンベスト』選出曲がひとつもない数少ないアルバム</li>
+        <li>地味、暗いと言われがち</li>
+        <li>一部ファンからは高い評価</li>
+        <li>自分もその一部ファン</li>
+      </ul>
+    </li>
+    <li>あまり指摘されないが、録音が非常に良い</li>
+  </ul>
+</Memo>
 
-## トラックリスト
+# トラックリスト
 <TrackLegend />
 <Tracklist
   defaultLyric="井上陽水"
@@ -41,7 +62,7 @@ import Band from '../../../components/Band.astro';
   tracks={[
     { n: 1, title: "★青い闇の警告", mark: "★★-u", lyric: "", music: "", arrange: "", producer: "", time: "5:32" },
     { n: 2, title: "ミス コンテスト", mark: "★-u", lyric: "", music: "", arrange: "", producer: "", time: "5:27" },
-    { n: 3, title: "white", mark: "★★", lyric: "", music: "", arrange: "", producer: "", time: "2:55" },
+    { n: 3, title: "☆white", mark: "★★", lyric: "", music: "", arrange: "", producer: "", time: "2:55" },
     { n: 4, title: "☆愛の装備", mark: "★★", lyric: "", music: "", arrange: "", producer: "", time: "4:47" },
     { n: 5, title: "迷走する町", mark: "★", lyric: "", music: "", arrange: "", producer: "", time: "4:19" },
     { n: 6, title: "ダンスの流行", mark: "★", lyric: "", music: "", arrange: "", producer: "", time: "3:54" },
@@ -111,7 +132,7 @@ import Band from '../../../components/Band.astro';
 
 しかし<strong>曲調に騙されずによくよく言葉を追うと、かなり怪しい歌詞</strong>である。
 
-「よろめいてつまづいてかたむいてころがって楽しんで苦しんで踊りを続けて」は素直に若者の無軌道さを表してそうだが、「朝まで夢も見れずさまよう」「ニ人の距難は近く遠い」は、かなり寂しい描写だろう。「君の赤いリボン落ちてどこかになくしてしまった　僕の白いシャツはぬれてもうじき病気になるだろう」も、処女性の喪失と、性病の感染といったメタファーを浮かべられる。最後はこう締められる。
+「よろめいてつまづいてかたむいてころがって楽しんで苦しんで踊りを続けて」は素直に若者の無軌道さを表してそうだが、「朝まで夢も見れずさまよう」「二人の距離は近く遠い」は、かなり寂しい描写だろう。「君の赤いリボン落ちてどこかになくしてしまった　僕の白いシャツはぬれてもうじき病気になるだろう」も、処女性の喪失と、性病の感染といったメタファーを浮かべられる。最後はこう締められる。
 <Quote source="">タンス、ダンス、ダンス、ダンス、ダンスでゆれてる毎日
 背を向けて立ち止まりひきずってごまかしていたわってうら切って
 <strong>いつまで踊ればリズムの外で君と休める？

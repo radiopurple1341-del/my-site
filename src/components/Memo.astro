@@ -1,0 +1,66 @@
+---
+interface Props {
+  title?: string;
+}
+const { title = "" } = Astro.props;
+---
+
+<div class="memo">
+  {title && <p class="memo-title">{title}</p>}
+  <div class="memo-body"><slot /></div>
+</div>
+<br />
+<hr />
+<br />
+
+<style>
+.memo {
+  margin: 1.75rem 0;
+  color: var(--color-text);
+}
+
+.memo-title {
+  margin: 0 0 1rem;
+  font-size: 1.3em;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.memo-body :global(ul) {
+  margin: 0;
+  padding-left: 1.3em;
+  list-style: none;
+}
+
+.memo-body :global(ul ul) {
+  margin-top: 0.6em;
+}
+
+.memo-body :global(li) {
+  position: relative;
+  margin: 0.6em 0;
+  line-height: 1.7;
+  font-size: 0.95em;
+}
+
+.memo-body :global(li::before) {
+  content: '';
+  position: absolute;
+  left: -1.1em;
+  top: 0.68em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.memo-body :global(ul ul li::before) {
+  width: 5px;
+  height: 5px;
+}
+
+.memo-body :global(ul ul ul li::before) {
+  width: 4px;
+  height: 4px;
+}
+</style>

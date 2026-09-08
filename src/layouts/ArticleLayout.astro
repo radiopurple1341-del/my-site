@@ -14,9 +14,7 @@ interface Props {
 
 const { title, description, pubDate, category, tags = [], thumbnail, externalUrl } = Astro.props;
 
-const dateStr = pubDate.toLocaleDateString('ja-JP', {
-  year: 'numeric', month: 'long', day: 'numeric'
-});
+const dateStr = `${String(pubDate.getFullYear()).slice(-2)}.${String(pubDate.getMonth() + 1).padStart(2, '0')}.${String(pubDate.getDate()).padStart(2, '0')}`;
 
 const categoryClass: Record<string, string> = {
   '音楽': 'music', '映画': 'film', '漫画': 'manga', '書籍': 'novel', 'ゲーム': 'game', 'その他': 'other'
