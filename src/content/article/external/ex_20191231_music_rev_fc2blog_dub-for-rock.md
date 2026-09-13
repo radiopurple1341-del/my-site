@@ -9,4 +9,5 @@ featured: true
 workYear: 2019
 workMonth: 
 thumbnail: "/thumbnail/DUB10LIST-min.jpg"
+workId: "guide_dub-for-rock"
 ---
