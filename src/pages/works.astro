@@ -110,10 +110,11 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
       <tbody>
         {allWorks.map(work => {
           const article = articleByWorkId.get(work.id);
-          const href = article
-            ? (article.data.externalUrl ?? `/article/${article.id.split('/').pop()}`)
-            : null;
-          const isExternal = !!(article?.data.externalUrl);
+          const directUrl = work.data.externalUrl;
+          const href = directUrl
+            ?? (article ? (article.data.externalUrl ?? `/article/${article.id.split('/').pop()}`) : null);
+          const isExternal = !!(directUrl || article?.data.externalUrl);
+          const isClipLink = !!directUrl;
           const thumbSrc = work.data.thumbnail ?? null;
           const updated = getLastModified(work.filePath);
           const created = getCreatedDate(work.data.pubDate, work.filePath);
@@ -143,7 +144,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
             )}
             <tr
               id={work.id}
-              class={[href ? (isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : '', thumbSrc ? '' : 'no-thumb', shelfKey ? 'shelf-item' : ''].filter(Boolean).join(' ') || undefined}
+              class={[href ? (isClipLink ? 'has-article has-clip-link' : isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : '', thumbSrc ? '' : 'no-thumb', shelfKey ? 'shelf-item' : ''].filter(Boolean).join(' ') || undefined}
               data-category={work.data.category}
               data-tags={(work.data.tags ?? []).join(',')}
               data-year={String(work.data.workYear ?? '')}
@@ -158,7 +159,25 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
                 <div class="work-cell">
                   {href
                     ? <a href={href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener' : undefined} class="work-link">
-                        {thumbSrc && <span class="work-thumb-wrap"><img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" /></span>}
+                        {thumbSrc && (
+                          <span class="work-thumb-wrap">
+                            <img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" />
+                            {isClipLink && (
+                              <span class="clip-mark" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                                </svg>
+                              </span>
+                            )}
+                          </span>
+                        )}
+                        {isClipLink && !thumbSrc && (
+                          <span class="clip-mark" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                            </svg>
+                          </span>
+                        )}
                         <span class="work-text">
                           <span class="work-meta">
                             {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
@@ -677,10 +696,11 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
 .work-link:visited { color: #7755aa; }
 .work-link:hover { text-decoration: underline; }
 .is-external .work-link { --mark-color: #4a90d9; }
+.has-clip-link .work-link { --mark-color: #4a90d9; }
 
-/* サムネイルありの作品：マークはサムネ右上角に */
+/* サムネイルありの作品：マークはサムネ右上角に（外部URL直リンクはクリップアイコンに差し替え） */
 .work-thumb-wrap { position: relative; }
-.work-link .work-thumb-wrap::before {
+tr:not(.has-clip-link) .work-link .work-thumb-wrap::before {
   content: '';
   position: absolute;
   right: -4px;
@@ -690,7 +710,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
   background: var(--mark-color);
   border-radius: 1px;
 }
-.work-link .work-thumb-wrap::after {
+tr:not(.has-clip-link) .work-link .work-thumb-wrap::after {
   content: '';
   position: absolute;
   right: -6px;
@@ -703,7 +723,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
 }
 
 /* サムネイルなしの作品：従来通り左上に */
-tr.no-thumb .work-link::before {
+tr.no-thumb:not(.has-clip-link) .work-link::before {
   content: '';
   position: absolute;
   left: -10px;
@@ -713,7 +733,7 @@ tr.no-thumb .work-link::before {
   background: var(--mark-color);
   border-radius: 1px;
 }
-tr.no-thumb .work-link::after {
+tr.no-thumb:not(.has-clip-link) .work-link::after {
   content: '';
   position: absolute;
   left: -6px;
@@ -724,6 +744,20 @@ tr.no-thumb .work-link::after {
   background: var(--mark-color);
   box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 3px var(--mark-color);
 }
+
+/* 外部URL直リンクのwork：クリップアイコンをサムネ（サムネなしはリンク全体）の右上寄りに、右端から少し幅を取って添える */
+.clip-mark {
+  --clip-size: 24px;
+  position: absolute;
+  top: -4px;
+  right: 4px;
+  width: var(--clip-size);
+  height: var(--clip-size);
+  color: var(--mark-color);
+  pointer-events: none;
+  z-index: 1;
+}
+.clip-mark svg { display: block; width: 100%; height: 100%; transform: scaleY(1.5) rotate(-45deg); }
 .guide-badge {
   display: inline-block;
   font-size: 11px;
@@ -907,7 +941,8 @@ tr.no-thumb .work-link::after {
   /* リンク付き作品のマーキング：サムネありはサムネ右上角に */
   .has-article { position: relative; --mark-color: var(--color-accent); }
   .is-external { --mark-color: #4a90d9; }
-  .has-article .work-thumb-wrap::before {
+  .has-clip-link { --mark-color: #4a90d9; }
+  .has-article:not(.has-clip-link) .work-thumb-wrap::before {
     content: '';
     display: block;
     position: absolute;
@@ -916,7 +951,7 @@ tr.no-thumb .work-link::after {
     background: var(--mark-color);
     border-radius: 1px;
   }
-  .has-article .work-thumb-wrap::after {
+  .has-article:not(.has-clip-link) .work-thumb-wrap::after {
     content: '';
     display: block;
     position: absolute;
@@ -928,7 +963,7 @@ tr.no-thumb .work-link::after {
   }
 
   /* サムネなしは従来通りtr左端に */
-  .has-article.no-thumb::before {
+  .has-article.no-thumb:not(.has-clip-link)::before {
     content: '';
     position: absolute;
     left: -6px; top: 0.75rem; bottom: 0.75rem;
@@ -936,7 +971,7 @@ tr.no-thumb .work-link::after {
     background: var(--mark-color);
     border-radius: 1px;
   }
-  .has-article.no-thumb::after {
+  .has-article.no-thumb:not(.has-clip-link)::after {
     content: '';
     position: absolute;
     left: -2px; top: calc(0.75rem - 3px);
@@ -946,6 +981,9 @@ tr.no-thumb .work-link::after {
     box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 3px var(--mark-color);
   }
   .note-empty { display: none; }
+
+  /* 外部URL直リンクのwork：モバイルはサイズと余白を少し縮小 */
+  .clip-mark { --clip-size: 20px; top: -2px; right: 2px; }
 
   /* 一言：col2・row2 */
   .col-note {

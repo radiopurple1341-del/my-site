@@ -52,6 +52,7 @@ const work = defineCollection({
     pubDate: z.coerce.date().optional(),       // 登録日（空欄ならbirthtime参照）
     isGuide: z.boolean().optional(),           // 特集記事フラグ（外部記事を強調・トップページ表示対象）
     isSpecial: z.boolean().optional(),         // 特集記事フラグ（本サイトmdx記事を強調・トップページ表示対象外）
+    externalUrl: z.string().url().optional(),  // 外部サイトへの直リンク（external_curated記事を作らず作品棚単体で完結させる場合に使用）
   }),
 });
 
