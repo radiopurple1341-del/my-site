@@ -1,6 +1,7 @@
 ---
 title: "Nook"
 artist: "The Notwist"
+mainGroup: "The Notwist"
 category: 音楽
 workYear: 1992
 workMonth: 7

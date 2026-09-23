@@ -5,7 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const stripThe = (s: string) => s.replace(/^The\s+/i, '');
 
 // 作品棚の開閉グループ（手動指定）。mainGroupを持つ作品はここに追加した名前でまとめられる
-const GROUPED_ARTISTS = ['Talking Heads', 'NEU!', '井上陽水', 'Sonic Youth', 'Television'];
+const GROUPED_ARTISTS = ['Talking Heads', 'NEU!', '井上陽水', 'Sonic Youth', 'Television', 'The Notwist'];
 
 const sortKey = (work: { data: { artist?: string; title: string; mainGroup?: string } }) =>
   stripThe(work.data.mainGroup || work.data.artist || work.data.title);

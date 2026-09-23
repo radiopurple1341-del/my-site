@@ -1,6 +1,7 @@
 ---
 title: "The Notwist"
 artist: "The Notwist"
+mainGroup: "The Notwist"
 category: 音楽
 workYear: 1991
 workMonth: 12

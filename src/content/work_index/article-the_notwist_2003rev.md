@@ -1,6 +1,7 @@
 ---
 title: "The Notwist: The Notwist / Nook"
 artist: "The Notwist"
+mainGroup: "The Notwist"
 category: 音楽
 isGuide: false
 workType: "外部レビュー"

@@ -1,6 +1,7 @@
 ---
 title: "12"
 artist: "The Notwist"
+mainGroup: "The Notwist"
 category: 音楽
 workYear: 1995
 workMonth: 5
