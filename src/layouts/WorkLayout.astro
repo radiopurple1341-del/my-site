@@ -155,6 +155,7 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/panel/?url=${pageUrl}&title=${pa
 }
 .favo-hint {
   font-size: 12px;
+  font-weight: 700;
   color: var(--color-text-muted);
 }
 .favo-row {
@@ -195,6 +196,7 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/panel/?url=${pageUrl}&title=${pa
 }
 .share-label {
   font-size: 13px;
+  font-weight: 700;
   color: var(--color-text-muted);
   white-space: nowrap;
   margin-right: 4px;
@@ -294,15 +296,21 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/panel/?url=${pageUrl}&title=${pa
   gap: 1.25rem;
 }
 .back-link {
-  font-size: 15px;
+  display: inline-block;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--color-text-muted);
+  color: #fff;
+  background: #16263a;
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: opacity 0.15s;
 }
+.back-link:hover { color: #fff; opacity: 0.85; text-decoration: none; }
 .next-link {
   font-size: 12px;
   color: var(--color-text-muted);
 }
-.back-link:hover,
 .next-link:hover { color: var(--color-text); text-decoration: none; }
 
 /* コメント（静的要素） */
