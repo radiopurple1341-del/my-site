@@ -255,7 +255,13 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/panel/?url=${pageUrl}&title=${pa
   padding-left: 1.5rem;
   margin-bottom: 1.25rem;
 }
-.work-body :global(li) { margin-bottom: 0.3rem; }
+.work-body :global(li) { margin-bottom: 0.3rem; overflow-wrap: anywhere; }
+.work-body :global(li > ul), .work-body :global(li > ol) { margin: 0.3rem 0 0; }
+.work-body :global(ul ul ul) { list-style-type: circle; }  /* 第3階層以降も第2階層と同じ○ */
+/* アウトライン記事：<Band>を置いたリスト項目は「・」を消して帯を左端に揃える */
+.work-body :global(li:has(> .band)) { list-style: none; margin-left: -1.5rem; }
+.work-body :global(li:has(> .band):not(:first-child)) { margin-top: 1.5rem; }
+.work-body :global(li > .band) { margin: 0 0 0.5rem; }
 .work-body :global(table) {
   width: 100%;
   border-collapse: collapse;
