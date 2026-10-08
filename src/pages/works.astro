@@ -108,7 +108,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
         </tr>
       </thead>
       <tbody>
-        {allWorks.map(work => {
+        {allWorks.map((work, i) => {
           const article = articleByWorkId.get(work.id);
           const directUrl = work.data.externalUrl;
           const href = directUrl
@@ -128,7 +128,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
           return (
             <>
             {isShelfHeader && shelfKey && (
-              <tr class="shelf-row" data-shelf={shelfKey} data-artist={shelfKey} data-created="" data-updated="" data-year="">
+              <tr class="shelf-row" data-shelf={shelfKey} data-artist={shelfKey} data-sortkey={sortKey(work)} data-order={i * 3} data-created="" data-updated="" data-year="">
                 <td class="shelf-label" colspan="7">
                   <div class="plate">
                     <button type="button" class="tab" aria-expanded="true">
@@ -150,6 +150,8 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
               data-year={String(work.data.workYear ?? '')}
               data-title={work.data.title}
               data-artist={work.data.artist || work.data.title}
+              data-sortkey={sortKey(work)}
+              data-order={i * 3 + 1}
               data-created={created}
               data-updated={updated}
               data-has-note={work.data.description ? '1' : '0'}
@@ -213,7 +215,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
               <td class="col-updated">{updated || '—'}</td>
             </tr>
             {isShelfEnd && shelfKey && (
-              <tr class="shelf-row shelf-end" data-shelf={shelfKey} data-artist={shelfKey} data-created="" data-updated="" data-year="">
+              <tr class="shelf-row shelf-end" data-shelf={shelfKey} data-artist={shelfKey} data-sortkey={sortKey(work)} data-order={i * 3 + 2} data-created="" data-updated="" data-year="">
                 <td class="shelf-label" colspan="7">
                   <div class="plate plate-end">
                     <div class="board"></div>
@@ -351,6 +353,13 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
 
   function applySort(col: string, dir: 'asc' | 'desc') {
     const sorted = getRows().sort((a, b) => {
+      // アーティスト名順は棚キー（mainGroup優先）で比較し、同キー内はサーバー側の初期順を保つ
+      // （data-artistで並べると、artistが別名の棚メンバーやネームプレート行が棚から外れる）
+      if (col === 'artist') {
+        const cmp = (a.dataset.sortkey ?? '').localeCompare(b.dataset.sortkey ?? '', 'ja');
+        if (cmp !== 0) return dir === 'asc' ? cmp : -cmp;
+        return Number(a.dataset.order) - Number(b.dataset.order);
+      }
       const av = stripThe(a.dataset[col] || a.dataset['created'] || '');
       const bv = stripThe(b.dataset[col] || b.dataset['created'] || '');
       if (col === 'year') {
