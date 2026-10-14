@@ -3,8 +3,7 @@ title: "砂時計の書"
 artist: "エルンスト・ユンガー"
 # category: 音楽 / 映画 / 漫画 / ゲーム / 書籍 / その他
 category: 書籍
-workYear: 2008
-workMonth: 8  # 任意
+workYear: 1990
 # workType 例: アルバム / EP / シングル / ライブ映像 / 映画 / ドキュメンタリー / 漫画 / 小説 / など自由記述
 workType: "評論"
 # tags: カテゴリをまたぐ横断導線用。例: tags: [音楽, 映画]
@@ -13,7 +12,8 @@ pubDate: 2026-05-27
 tags: []
 thumbnail: "/artworks/book_junger_about-sunadokei.jpg"
 description: |
-  <span style="color:red">名著</span>。文章の美しさ、世界への視野の広さに脱帽。この本から「思考」を学んだ。
-  記事化予定
+  <span style="color:red">名著</span>。文章の美しさ、世界への視野の広さと眼差しに脱帽。
+  あなたは歯車時計の世界にただ佇むか、砂時計を片手に持つか？
+  ミヒャエル・エンデ『モモ』に通じるものも。
   <a href="https://amzn.to/4u7IITu">Amazonリンク</a>
 ---

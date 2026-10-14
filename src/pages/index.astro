@@ -73,6 +73,12 @@ const articleByWorkId = new Map(linkedArticles.map(a => [a.data.workId!, a]));
 // workIdとwork_indexの紐付け（descriptionフォールバック用）
 const workByWorkId = new Map(allWorks.map(w => [w.id, w]));
 
+// カルーセルのスライド自体が<a>のため、description内の<a>は入れ子になり表示が崩れる
+// → Amazonリンクは丸ごと除去、それ以外はタグだけ外して文言を残す
+const stripLinks = (html: string) => html
+  .replace(/<a\s[^>]*href="[^"]*(amzn\.to|amazon\.)[^"]*"[^>]*>.*?<\/a>/gi, '')
+  .replace(/<\/?a(\s[^>]*)?>/gi, '');
+
 // カルーセル: 記事（external_curated除外）＋isGuideのwork を pubDate降順で最大5件
 const carouselItems = [
   ...articles
@@ -136,7 +142,7 @@ const carouselItems = [
                 </div>
                 <div class="slide-body">
                   <h2 class="slide-title">{item.title}</h2>
-                  {item.description && <p class="slide-desc" set:html={item.description} />}
+                  {item.description && <p class="slide-desc" set:html={stripLinks(item.description)} />}
                 </div>
               </a>
             ))}

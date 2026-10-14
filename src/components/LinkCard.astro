@@ -5,15 +5,16 @@ interface Props {
   description?: string;
   image?: string;
   newTab?: boolean;
+  bg?: "blue" | "yellow";
 }
 
-const { url, title, description, image, newTab = true } = Astro.props;
+const { url, title, description, image, newTab = true, bg } = Astro.props;
 
 const domain = (() => { try { return new URL(url).hostname; } catch { return url; } })();
 const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 ---
 
-<a class="link-card" href={url} target={newTab ? "_blank" : "_self"} rel={newTab ? "noopener noreferrer" : undefined}>
+<a class={`link-card ${bg ? `link-card--${bg}` : ""}`} href={url} target={newTab ? "_blank" : "_self"} rel={newTab ? "noopener noreferrer" : undefined}>
   {image && <img class="link-card-image" src={image} alt="" loading="lazy" />}
   <div class="link-card-body">
     <p class="link-card-title">{title}</p>
@@ -36,6 +37,12 @@ const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 .link-card:hover {
   filter: brightness(0.97);
   text-decoration: none;
+}
+.link-card--blue {
+  background: #AEDFF7;
+}
+.link-card--yellow {
+  background: #FBE07D;
 }
 .link-card-body {
   display: flex;
