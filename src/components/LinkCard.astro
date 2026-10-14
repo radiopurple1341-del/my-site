@@ -89,4 +89,12 @@ const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
   object-fit: cover;
   flex-shrink: 0;
 }
+@media (max-width: 500px) {
+  /* スマホは1行の文字数が少なく2行では途切れるため、descriptionを全文表示 */
+  .link-card-desc {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+}
 </style>
