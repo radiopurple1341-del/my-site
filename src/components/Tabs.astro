@@ -179,6 +179,58 @@
     return svg;
   }
 
+  // タブ列をドラッグ（PC）・スワイプ（スマホ）で横に動かす。はみ出していない場合は動かさない
+  // activate()でタブ列の中身（.tab-labels-inner）は作り直されるため、毎回containerから取り直す
+  function enableDrag(container: HTMLElement) {
+    const DRAG_THRESHOLD = 5; // これ未満の移動はクリックとして扱う
+    let pointerId: number | null = null;
+    let startX = 0;
+    let startOffset = 0;
+    let moved = false;
+
+    const getInner = () => container.querySelector<HTMLElement>('.tab-labels-inner');
+    const maxOffset = (inner: HTMLElement) => Math.max(0, inner.scrollWidth - container.offsetWidth);
+    const currentOffset = (inner: HTMLElement) => -new DOMMatrixReadOnly(getComputedStyle(inner).transform).m41;
+
+    container.addEventListener('pointerdown', e => {
+      const inner = getInner();
+      if (!inner || maxOffset(inner) <= 0) return;
+      pointerId = e.pointerId;
+      startX = e.clientX;
+      startOffset = currentOffset(inner);
+      moved = false;
+    });
+
+    container.addEventListener('pointermove', e => {
+      if (e.pointerId !== pointerId) return;
+      const dx = e.clientX - startX;
+      if (!moved) {
+        if (Math.abs(dx) < DRAG_THRESHOLD) return;
+        moved = true;
+        container.setPointerCapture(e.pointerId);
+      }
+      const inner = getInner();
+      if (!inner) return;
+      const offset = Math.min(Math.max(0, startOffset - dx), maxOffset(inner));
+      inner.style.transition = 'none';
+      inner.style.transform = `translateX(-${offset}px)`;
+    });
+
+    const end = (e: PointerEvent) => {
+      if (e.pointerId === pointerId) pointerId = null;
+    };
+    container.addEventListener('pointerup', end);
+    container.addEventListener('pointercancel', end);
+
+    // ドラッグ直後のクリックでタブが切り替わらないようにする
+    container.addEventListener('click', e => {
+      if (!moved) return;
+      moved = false;
+      e.stopPropagation();
+      e.preventDefault();
+    }, true);
+  }
+
   document.querySelectorAll<HTMLElement>('.tabs-wrapper').forEach(wrapper => {
     const panels = Array.from(wrapper.querySelectorAll<HTMLElement>('.tab-panel'));
     const labelsEl = wrapper.querySelector<HTMLElement>('.tab-labels')!;
@@ -235,6 +287,8 @@
     }
 
     activate(activeIdx, false);
+    enableDrag(labelsEl);
+    enableDrag(labelsBottomEl);
 
     // URLの #tab2 のような指定で該当タブ（1始まり）を開き、タブ位置までスクロール
     function openFromHash(animate: boolean) {
@@ -261,6 +315,7 @@
 
   .tab-labels {
     overflow-x: clip;
+    touch-action: pan-y; /* 横スワイプはタブ列のドラッグに使い、縦スクロールはブラウザに任せる */
   }
 
   .tab-labels:not(.tab-labels-bottom) {

@@ -242,10 +242,14 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/panel/?url=${pageUrl}&title=${pa
 .like-btn.liked .star { color: #f5a623; }
 .like-btn.liked { color: #f5a623; }
 
+/* 本文サイズはTabs側の .tab-content（17px / ≤800px で16px）と揃える */
 .work-body {
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.85;
   color: var(--color-text);
+}
+@media (max-width: 800px) {
+  .work-body { font-size: 16px; }
 }
 .work-body :global(h1) { font-size: 22px; margin: 0rem 0 1rem; font-weight: 700; }
 .work-body :global(h2) { font-size: 20px; margin: 0rem 0 1rem; font-weight: 700; }
