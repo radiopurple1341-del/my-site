@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   Neu!全作レビューシリーズ2。このB面をどう聴くか。
 thumbnail: "/artworks/neu-neu_2.jpg"
+pubDate: 2026-04-29
 ---

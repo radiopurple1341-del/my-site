@@ -42,6 +42,7 @@ const work = defineCollection({
     title: z.string(),
     artist: z.string().optional(),
     mainGroup: z.string().optional(),          // 作品棚の開閉グループキー（関連アーティストをまとめる単位）
+    relatedGroups: z.array(z.string()).optional(), // 本来の位置とは別に「関連」として重複表示する棚（GROUPED_ARTISTSの名前）
     category: z.enum(['音楽', '映画', '漫画', 'ゲーム', '書籍', 'その他']),
     workYear: z.number().int().min(1900).max(2100).optional(),
     workMonth: z.number().int().min(1).max(12).optional(),

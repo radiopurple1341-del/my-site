@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   
 thumbnail: "/artworks/the_sea_and_cake-the_fawn.jpg"
+pubDate: 2026-05-02
 ---

@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   ボザノバにジャズにチェンバーポップを吸収した無国籍ポストロック──もといシカゴ音響派もといThrill Jockey名盤
 thumbnail: "/artworks/the_sea_and_cake-oui.jpg"
+pubDate: 2026-05-02
 ---

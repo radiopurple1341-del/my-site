@@ -6,4 +6,5 @@ workYear: 2002
 workMonth: 9
 workType: "アルバム"
 thumbnail: "/artworks/tamio_okuda-e.jpg"
+pubDate: 2026-05-01
 ---

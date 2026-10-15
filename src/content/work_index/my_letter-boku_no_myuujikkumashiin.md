@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   
 thumbnail: "/artworks/my_letter-boku_no_myuujikkumashiin.jpg"
+pubDate: 2026-04-28
 ---

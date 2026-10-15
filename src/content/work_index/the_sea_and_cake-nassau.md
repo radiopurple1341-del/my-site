@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   特に時代や文脈がどうとかないけど俺が超好きなアルバム2
 thumbnail: "/artworks/the_sea_and_cake-nassau.jpg"
+pubDate: 2026-05-02
 ---

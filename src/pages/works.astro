@@ -40,16 +40,36 @@ function getCreatedDate(pubDate?: Date, _filePath?: string): string {
 
 const seenShelves = new Set<string>();
 
-// 各棚グループの最後のwork.id（末尾ネームプレート挿入位置の判定用）・件数
-const lastShelfMember = new Map<string, string>();
+// 各棚グループの件数
 const shelfCounts = new Map<string, number>();
 for (const work of allWorks) {
   const g = work.data.mainGroup;
-  if (g && GROUPED_ARTISTS.includes(g)) {
-    lastShelfMember.set(g, work.id);
-    shelfCounts.set(g, (shelfCounts.get(g) ?? 0) + 1);
+  if (g && GROUPED_ARTISTS.includes(g)) shelfCounts.set(g, (shelfCounts.get(g) ?? 0) + 1);
+}
+
+// 描画用の行リスト。relatedGroupsの作品は本来の位置とは別に、指定した棚へ「関連」行として重複表示する
+type Entry = { work: (typeof allWorks)[number]; shelfKey: string | null; related: boolean };
+const entryKey = (e: Entry) => e.related && e.shelfKey ? stripThe(e.shelfKey) : sortKey(e.work);
+const relatedCounts = new Map<string, number>();
+const entries: Entry[] = allWorks.map(work => {
+  const g = work.data.mainGroup;
+  return { work, shelfKey: g && GROUPED_ARTISTS.includes(g) ? g : null, related: false };
+});
+for (const work of allWorks) {
+  for (const g of work.data.relatedGroups ?? []) {
+    if (!GROUPED_ARTISTS.includes(g) || work.data.mainGroup === g) continue;
+    entries.push({ work, shelfKey: g, related: true });
+    relatedCounts.set(g, (relatedCounts.get(g) ?? 0) + 1);
   }
 }
+// 棚の中はメンバー・関連の区別なく発表年月順（allWorksと同じ基準で、関連行は棚キーで並べる）
+entries.sort((a, b) => {
+  const keyCmp = entryKey(a).localeCompare(entryKey(b), 'ja');
+  if (keyCmp !== 0) return keyCmp;
+  const yearCmp = (a.work.data.workYear ?? 0) - (b.work.data.workYear ?? 0);
+  if (yearCmp !== 0) return yearCmp;
+  return (a.work.data.workMonth ?? 0) - (b.work.data.workMonth ?? 0);
+});
 
 const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
 ---
@@ -87,11 +107,15 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
 
   {GROUPED_ARTISTS.length > 0 && (
     <div class="shelf-jump">
+      <span class="shelf-jump-label">＜棚を覗く＞</span>
       {GROUPED_ARTISTS.map(name => (
         <button type="button" class="shelf-jump-btn" data-jump-target={name}>{name}</button>
       ))}
     </div>
   )}
+
+  <!-- 棚の天板（末尾にも同じ板を置く） -->
+  <div class="shelf-edge" aria-hidden="true"></div>
 
   <!-- 作品テーブル -->
   <div class="table-wrap">
@@ -108,7 +132,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
         </tr>
       </thead>
       <tbody>
-        {allWorks.map((work, i) => {
+        {entries.map(({ work, shelfKey, related }, i) => {
           const article = articleByWorkId.get(work.id);
           const directUrl = work.data.externalUrl;
           const href = directUrl
@@ -119,12 +143,10 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
           const updated = getLastModified(work.filePath);
           const created = getCreatedDate(work.data.pubDate, work.filePath);
           const isFeatured = work.data.isGuide || work.data.isSpecial;
-          const shelfKey = work.data.mainGroup && GROUPED_ARTISTS.includes(work.data.mainGroup)
-            ? work.data.mainGroup
-            : null;
           const isShelfHeader = shelfKey ? !seenShelves.has(shelfKey) : false;
           if (isShelfHeader && shelfKey) seenShelves.add(shelfKey);
-          const isShelfEnd = shelfKey ? lastShelfMember.get(shelfKey) === work.id : false;
+          const isShelfEnd = !!shelfKey && entries[i + 1]?.shelfKey !== shelfKey;
+          const relatedCount = shelfKey ? (relatedCounts.get(shelfKey) ?? 0) : 0;
           return (
             <>
             {isShelfHeader && shelfKey && (
@@ -134,7 +156,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
                     <button type="button" class="tab" aria-expanded="true">
                       <span class="arrow" aria-hidden="true"></span>
                       <span class={['name', isLatinName(shelfKey) ? 'latin' : ''].filter(Boolean).join(' ')}>{shelfKey}</span>
-                      <span class="count">{shelfCounts.get(shelfKey)}</span>
+                      <span class="count">{shelfCounts.get(shelfKey)}{relatedCount > 0 && ` + ${relatedCount}`}</span>
                     </button>
                     <div class="board"></div>
                     <div class="board-thin"></div>
@@ -143,14 +165,16 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
               </tr>
             )}
             <tr
-              id={work.id}
-              class={[href ? (isClipLink ? 'has-article has-clip-link' : isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : '', thumbSrc ? '' : 'no-thumb', shelfKey ? 'shelf-item' : ''].filter(Boolean).join(' ') || undefined}
+              id={related ? undefined : work.id}
+              class={[href ? (isClipLink ? 'has-article has-clip-link' : isExternal ? 'has-article is-external' : 'has-article') : '', isFeatured ? 'is-guide' : '', thumbSrc ? '' : 'no-thumb', shelfKey ? 'shelf-item' : '', related ? 'is-related' : ''].filter(Boolean).join(' ') || undefined}
+              data-work-id={work.id}
+              data-related={related ? '1' : undefined}
               data-category={work.data.category}
               data-tags={(work.data.tags ?? []).join(',')}
               data-year={String(work.data.workYear ?? '')}
               data-title={work.data.title}
               data-artist={work.data.artist || work.data.title}
-              data-sortkey={sortKey(work)}
+              data-sortkey={entryKey({ work, shelfKey, related })}
               data-order={i * 3 + 1}
               data-created={created}
               data-updated={updated}
@@ -182,6 +206,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
                         )}
                         <span class="work-text">
                           <span class="work-meta">
+                            {related && <span class="guide-badge related-badge">関連</span>}
                             {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
                             {!isFeatured && work.data.workYear != null && <span class="work-year-tag">：{work.data.workYear}</span>}
                           </span>
@@ -195,6 +220,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
                         {thumbSrc && <span class="work-thumb-wrap"><img class="work-thumb" src={thumbSrc} alt="" width="120" height="120" loading="lazy" /></span>}
                         <span class="work-text">
                           <span class="work-meta">
+                            {related && <span class="guide-badge related-badge">関連</span>}
                             {work.data.artist && <span class="work-artist">{work.data.artist}</span>}
                             {!isFeatured && work.data.workYear != null && <span class="work-year-tag">：{work.data.workYear}</span>}
                           </span>
@@ -230,6 +256,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
       </tbody>
     </table>
   </div>
+  <div class="shelf-edge shelf-edge-end" aria-hidden="true"></div>
 </BaseLayout>
 
 <script>
@@ -257,7 +284,8 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
 
   function syncCount() {
     const groupMode = isGroupModeActive();
-    const workRows = getRows().filter(r => !r.classList.contains('shelf-row'));
+    // 関連行は重複表示なので件数に含めない
+    const workRows = getRows().filter(r => !r.classList.contains('shelf-row') && !r.dataset.related);
     const visible = workRows.filter(r => r.style.display !== 'none' || (r.dataset.shelf && groupMode)).length;
     if (countEl) countEl.textContent = `${visible}件`;
   }
@@ -283,6 +311,12 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
           row.classList.toggle('is-closed', isClosed);
           row.querySelector<HTMLButtonElement>('.tab')?.setAttribute('aria-expanded', String(!isClosed));
         }
+        return;
+      }
+      // 関連行は棚表示（グループモード）で棚が開いているときだけ出す
+      if (row.dataset.related) {
+        const key = row.dataset.shelf;
+        row.style.display = (groupMode && !(key && closedShelves.has(key))) ? '' : 'none';
         return;
       }
       const tags = (row.dataset.tags ?? '').split(',').filter(Boolean);
@@ -473,7 +507,7 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
   document.querySelectorAll<HTMLAnchorElement>('td.col-note a[href^="https://amzn.to/"]').forEach(a => {
     a.addEventListener('click', (e) => {
       e.stopPropagation();
-      const workId = a.closest('tr')?.id;
+      const workId = a.closest('tr')?.dataset.workId;
       if (!workId) return;
       fetch('/api/affiliate-click', {
         method: 'POST',
@@ -515,6 +549,13 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
   gap: 0.4rem;
   margin: 0 0 1rem;
 }
+/* 見出しとして1行目に独立させ、ボタンは次の行から並べる */
+.shelf-jump-label {
+  flex-basis: 100%;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
 .shelf-jump-btn {
   font-size: 15px;
   font-weight: 400;
@@ -527,6 +568,15 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
   cursor: pointer;
 }
 .shelf-jump-btn:hover { background: #332f2b; }
+
+/* 作品棚全体の天板・底板：ネームプレートの棚板（.plate .board / .board-thin）と同じ太線5px＋細線1px */
+.shelf-edge {
+  height: 8px; /* border-box：太線5px＋隙間2px＋細線1px */
+  border-top: 5px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  margin: 0 0 1rem;
+}
+.shelf-edge-end { margin: 1rem 0 0; }
 
 .filters {
   display: flex;
@@ -561,8 +611,8 @@ const isLatinName = (s: string) => /^[\x20-\x7E]*$/.test(s);
   color: var(--color-text-mid);
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-sm);
-  border: 0.5px solid transparent;
-  background: none;
+  border: 1px solid #1a1a1a;
+  background: #fff;
   cursor: pointer;
 }
 .filter-btn:hover { background: var(--color-surface); }
@@ -778,6 +828,11 @@ tr.no-thumb:not(.has-clip-link) .work-link::after {
   border-radius: 2px;
   vertical-align: middle;
 }
+/* relatedGroupsで他の棚に重複表示している行。棚のネームプレートと同じ墨色 */
+.related-badge {
+  background: #1a1a1a;
+  margin-right: 0.4rem;
+}
 .work-nolink {
   display: flex;
   align-items: center;
@@ -819,11 +874,11 @@ tr.no-thumb:not(.has-clip-link) .work-link::after {
 .updated-sort-btn,
 .random-btn {
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-sm);
-  border: 0.5px solid var(--color-border);
-  background: none;
+  border: 1px solid #1a1a1a;
+  background: #fff;
   cursor: pointer;
 }
 .article-filter-btn:hover,
@@ -852,11 +907,11 @@ tr.no-thumb:not(.has-clip-link) .work-link::after {
   .sort-select {
     display: block;
     font-size: 13px;
-    color: var(--color-text-muted);
+    color: var(--color-text);
     padding: 0.2rem 0.4rem;
     border-radius: var(--radius-sm);
-    border: 0.5px solid var(--color-border);
-    background: var(--color-bg);
+    border: 1px solid #1a1a1a;
+    background: #fff;
     cursor: pointer;
   }
 }
@@ -867,7 +922,21 @@ tr.no-thumb:not(.has-clip-link) .work-link::after {
   .table-wrap { overflow: visible; }
 
   /* filters-right：記事あり・一言あり・最新更新順 → 改行 → プルダウン・ランダム10（1:1） */
-  .filters-right { flex-wrap: wrap; }
+  .filters-right { flex-wrap: wrap; flex-basis: 100%; }
+  /* カテゴリとの区切り */
+  .filters-right::before {
+    content: '・・・・・・・・・・・・・・';
+    flex-basis: 100%;
+    text-align: left;
+    color: var(--color-text-muted);
+    line-height: 1;
+  }
+  /* カテゴリ（白）と区別するため、絞り込み・並び替え系は薄い水色。オン状態のアクセント色は残す */
+  .article-filter-btn:not(.active),
+  .note-filter-btn:not(.active),
+  .updated-sort-btn:not(.active),
+  .random-btn:not(.active),
+  .sort-select { background: #eefaff; }
   .article-filter-btn { order: 1; }
   .note-filter-btn { order: 2; }
   .updated-sort-btn { display: inline-block; order: 3; }

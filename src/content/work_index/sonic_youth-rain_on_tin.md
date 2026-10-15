@@ -10,4 +10,5 @@ description: |
  SYが残した大名曲のひとつ
  <span style="color:red">Lifetime 50 Songs</span>
 thumbnail: "/artworks/sonic_youth-murray_st_.jpg"
+pubDate: 2026-04-30
 ---

@@ -6,6 +6,7 @@ category: 音楽
 workYear: 2010
 workMonth: 5
 workType: "アルバム"
+pubDate: 2026-04-29
 tags: []
 description: |
   諸々に諸々を重ねてリリースされた、いろんな意味であまりに"らしい"、エピローグとしての4作目。記事化予定。

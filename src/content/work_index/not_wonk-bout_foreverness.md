@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   
 thumbnail: "/artworks/not_wonk-bout_foreverness.jpg"
+pubDate: 2026-04-29
 ---

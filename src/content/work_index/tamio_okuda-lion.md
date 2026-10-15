@@ -8,4 +8,5 @@ workYear: 2004
 workMonth: 10
 workType: "アルバム"
 thumbnail: "/artworks/tamio_okuda-lion.jpg"
+pubDate: 2026-05-01
 ---

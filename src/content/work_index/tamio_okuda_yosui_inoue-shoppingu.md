@@ -5,4 +5,5 @@ category: 音楽
 workYear: 1997
 workType: "アルバム"
 thumbnail: "/artworks/yosui_inoue__tamio_okuda-shoppingu.jpg"
+pubDate: 2026-05-02
 ---

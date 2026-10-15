@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   
 thumbnail: "/artworks/sam_prekop-whos_your_new_professor.jpg"
+pubDate: 2026-04-30
 ---

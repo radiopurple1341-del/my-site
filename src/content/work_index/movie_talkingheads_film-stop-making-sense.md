@@ -10,6 +10,7 @@ workMonth: 4   # 任意
 workType: "ライブ映像"
 # tags: カテゴリをまたぐ横断導線用。例: tags: [音楽, 映画]
 # 　　　category と同名タグを付けると、他カテゴリフィルターでも表示される
+pubDate: 2026-04-28
 tags: [音楽, 傑作]
 thumbnail: "/artworks/talkingheads_film-stop-making-sense.jpg"
 description: |

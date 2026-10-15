@@ -9,6 +9,7 @@ workMonth: 11  # 任意
 workType: "RPG"
 # tags: カテゴリをまたぐ横断導線用。例: tags: [音楽, 映画]
 # 　　　category と同名タグを付けると、他カテゴリフィルターでも表示される
+pubDate: 2026-04-27
 tags: []
 thumbnail: "/artworks/game-13agis.jpg"
 description: |

@@ -5,4 +5,5 @@ category: 音楽
 workYear: 1998
 workType: "アルバム"
 thumbnail: "/artworks/tamio_okuda-matatabi.jpg"
+pubDate: 2026-05-01
 ---

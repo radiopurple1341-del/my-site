@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   2019年度本ブログ年間ベストAL
 thumbnail: "/artworks/not_wonk-down_the_valley.jpg"
+pubDate: 2026-04-29
 ---

@@ -9,6 +9,7 @@ workMonth: 5  # 任意
 workType: "映画"
 # tags: カテゴリをまたぐ横断導線用。例: tags: [音楽, 映画]
 # 　　　category と同名タグを付けると、他カテゴリフィルターでも表示される
+pubDate: 2026-04-28
 tags: []
 thumbnail: "/artworks/richard-fleischer_narrow-margin.jpg"
 description: |

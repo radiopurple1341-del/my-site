@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   
 thumbnail: "/artworks/not_wonk-this_ordinary.jpg"
+pubDate: 2026-04-29
 ---

@@ -7,4 +7,5 @@ workMonth: 4
 workType: "ライブ映像"
 thumbnail: "/artworks/radiohead-from-the-basement-2008.jpg"
 description: |
+pubDate: 2026-04-29
 ---

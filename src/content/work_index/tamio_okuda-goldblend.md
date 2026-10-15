@@ -5,4 +5,5 @@ category: 音楽
 workYear: 2000
 workType: "アルバム"
 thumbnail: "/artworks/tamio_okuda-goldblend.jpg"
+pubDate: 2026-05-01
 ---

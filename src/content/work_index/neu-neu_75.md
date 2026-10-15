@@ -9,4 +9,5 @@ description: |
  Neu!全作レビューシリーズ3。
  代表作は1stだが、こちらも<b>入門にオススメ</b>
 thumbnail: "/artworks/neu-neu_75.jpg"
+pubDate: 2026-04-29
 ---

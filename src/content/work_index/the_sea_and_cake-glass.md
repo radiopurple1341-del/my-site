@@ -9,4 +9,5 @@ description: |
   Remixなどを集めた企画盤
   ここにしか収録のない「An Echo In」が地味に名曲
 thumbnail: "/artworks/the_sea_and_cake-glass.jpg"
+pubDate: 2026-05-02
 ---

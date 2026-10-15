@@ -6,4 +6,5 @@ workYear: 2013
 workMonth: 11
 workType: "アルバム"
 thumbnail: "/artworks/tamio_okuda-o__t__come_home.jpg"
+pubDate: 2026-05-01
 ---

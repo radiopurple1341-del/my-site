@@ -9,4 +9,5 @@ workYear: 2005
 workMonth: 4
 workType: "アルバム"
 thumbnail: "/artworks/tamio_okuda-comp.jpg"
+pubDate: 2026-05-01
 ---

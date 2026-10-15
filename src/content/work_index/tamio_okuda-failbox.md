@@ -9,4 +9,5 @@ description: |
 workYear: 1997
 workType: "アルバム"
 thumbnail: "/artworks/tamio_okuda-failbox.jpg"
+pubDate: 2026-05-01
 ---

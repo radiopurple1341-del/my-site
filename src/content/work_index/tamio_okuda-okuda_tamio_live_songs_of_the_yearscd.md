@@ -9,4 +9,5 @@ description: |
   民生のライブの魅力が詰まった2枚組
   <b>入門にオススメ</b>
 thumbnail: "/artworks/tamio_okuda-okuda_tamio_live_songs_of_the_yearscd.jpg"
+pubDate: 2026-05-01
 ---

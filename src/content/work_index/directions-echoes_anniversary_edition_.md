@@ -9,4 +9,5 @@ thumbnail: "/artworks/directions-echoes_anniversary_edition_.jpg"
 description: |
   Bundy K. Brownによる、ポストロックを越えて辿り着いた至福の陶酔ループ。若きfour tetも「僕の設計図だ」と語る、シカゴ音響派とエレクトロニカを結ぶ名曲
    <a href="https://amzn.to/4ampjpU">Amazonリンク</a>
+pubDate: 2026-04-27
 ---

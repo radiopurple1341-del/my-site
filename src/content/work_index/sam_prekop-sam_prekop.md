@@ -8,4 +8,5 @@ workType: "アルバム"
 description: |
   
 thumbnail: "/artworks/sam_prekop-sam_prekop.jpg"
+pubDate: 2026-04-30
 ---

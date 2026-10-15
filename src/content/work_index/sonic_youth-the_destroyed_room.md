@@ -9,4 +9,5 @@ workType: "アルバム"
 description: |
   
 thumbnail: "/artworks/sonic_youth-the_destroyed_room.jpg"
+pubDate: 2026-04-30
 ---

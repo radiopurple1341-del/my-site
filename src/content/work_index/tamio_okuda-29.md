@@ -6,4 +6,5 @@ workYear: 1995
 workMonth: 3
 workType: "アルバム"
 thumbnail: "/artworks/tamio_okuda-29.jpg"
+pubDate: 2026-04-30
 ---
