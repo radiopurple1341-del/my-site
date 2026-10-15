@@ -235,6 +235,20 @@
     }
 
     activate(activeIdx, false);
+
+    // URLの #tab2 のような指定で該当タブ（1始まり）を開き、タブ位置までスクロール
+    function openFromHash(animate: boolean) {
+      const m = location.hash.match(/^#tab(\d+)$/);
+      if (!m) return;
+      const idx = Number(m[1]) - 1;
+      if (idx < 0 || idx >= panels.length) return;
+      activate(idx, animate);
+      const top = wrapper.getBoundingClientRect().top + window.scrollY;
+      const headerH = (document.querySelector('header') as HTMLElement | null)?.offsetHeight ?? 0;
+      window.scrollTo({ top: top - headerH - 8, behavior: animate ? 'smooth' : 'auto' });
+    }
+    openFromHash(false);
+    window.addEventListener('hashchange', () => openFromHash(true));
   });
 </script>
 
