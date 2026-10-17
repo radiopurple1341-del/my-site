@@ -23,15 +23,34 @@
   // 台形内の使用可能テキスト幅（両端のskew + 余白を除く）
   const TAB_TEXT_MAX_W = TAB_W - TAB_SKEW * 1.2 - 16;
 
-  function centerActiveTab(inner: HTMLElement, idx: number, animate: boolean = true) {
+  // タブ列の移動アニメーション（減速しながら止まる）
+  const SLIDE_TRANSITION = 'transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1)';
+
+  // .tab-labels-inner の現在の横位置（左へ動かした量）。transition中は途中の値が返る
+  function readOffset(inner: HTMLElement | null): number {
+    if (!inner) return 0;
+    return -new DOMMatrixReadOnly(getComputedStyle(inner).transform).m41;
+  }
+
+  function setOffset(inner: HTMLElement, offset: number) {
+    inner.style.transform = `translateX(${-offset}px)`;
+  }
+
+  // fromOffset: 作り直す前のタブ列の位置。そこから中央寄せ位置まで動かす
+  function centerActiveTab(inner: HTMLElement, idx: number, animate: boolean = true, fromOffset: number = 0) {
     const btn = inner.children[idx] as HTMLElement | null;
     if (!btn) return;
     const containerWidth = inner.parentElement?.offsetWidth ?? 0;
     const totalWidth = inner.scrollWidth;
     const target = btn.offsetLeft + btn.offsetWidth / 2 - containerWidth / 2;
     const clamped = Math.min(Math.max(0, target), Math.max(0, totalWidth - containerWidth));
-    inner.style.transition = animate ? 'transform 0.3s ease' : 'none';
-    inner.style.transform = `translateX(-${clamped}px)`;
+    if (animate) {
+      inner.style.transition = 'none';
+      setOffset(inner, fromOffset);
+      inner.getBoundingClientRect(); // 開始位置を確定させてからtransitionを掛ける
+    }
+    inner.style.transition = animate ? SLIDE_TRANSITION : 'none';
+    setOffset(inner, clamped);
   }
 
   function fitTextToTab(svgEl: SVGSVGElement) {
@@ -181,43 +200,122 @@
 
   // タブ列をドラッグ（PC）・スワイプ（スマホ）で横に動かす。はみ出していない場合は動かさない
   // activate()でタブ列の中身（.tab-labels-inner）は作り直されるため、毎回containerから取り直す
-  function enableDrag(container: HTMLElement) {
-    const DRAG_THRESHOLD = 5; // これ未満の移動はクリックとして扱う
+  // 戻り値: 慣性移動を止める関数（タブ切り替え時に呼ぶ）
+  function enableDrag(container: HTMLElement): () => void {
+    const DRAG_THRESHOLD = 5;   // これ未満の移動はクリックとして扱う
+    const FRICTION = 0.95;      // 慣性の減衰率（16msあたり）
+    const EDGE_FRICTION = 0.6;  // 端を越えた後の減衰率（16msあたり）
+    const MAX_VELOCITY = 4;     // px/ms
+    const VELOCITY_WINDOW = 100; // 指を離す直前この時間(ms)の動きから速度を求める
+
     let pointerId: number | null = null;
     let startX = 0;
     let startOffset = 0;
+    let offset = 0;             // 端の抵抗をかける前の位置
     let moved = false;
+    let samples: { t: number; x: number }[] = [];
+    let rafId = 0;
 
     const getInner = () => container.querySelector<HTMLElement>('.tab-labels-inner');
     const maxOffset = (inner: HTMLElement) => Math.max(0, inner.scrollWidth - container.offsetWidth);
-    const currentOffset = (inner: HTMLElement) => -new DOMMatrixReadOnly(getComputedStyle(inner).transform).m41;
+
+    // 端を越えた分はゴムのように引っ張り量を弱めて表示する
+    const rubber = (o: number, max: number) => {
+      const w = container.offsetWidth || 1;
+      const damp = (d: number) => (1 - 1 / (d * 0.55 / w + 1)) * w;
+      if (o < 0) return -damp(-o);
+      if (o > max) return max + damp(o - max);
+      return o;
+    };
+
+    const stop = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = 0;
+    };
+
+    const settle = (inner: HTMLElement) => {
+      const max = maxOffset(inner);
+      if (offset < 0 || offset > max) {
+        offset = Math.min(Math.max(0, offset), max);
+        inner.style.transition = SLIDE_TRANSITION;
+        setOffset(inner, offset);
+      }
+    };
+
+    const startInertia = (velocity: number) => {
+      let v = velocity;
+      let last = performance.now();
+      const step = (now: number) => {
+        const inner = getInner();
+        if (!inner) return stop();
+        const dt = Math.min(now - last, 50);
+        last = now;
+        const max = maxOffset(inner);
+        const outside = offset < 0 || offset > max;
+        v *= Math.pow(outside ? EDGE_FRICTION : FRICTION, dt / 16);
+        offset += v * dt;
+        inner.style.transition = 'none';
+        setOffset(inner, rubber(offset, max));
+        if (Math.abs(v) < 0.02) {
+          rafId = 0;
+          settle(inner);
+          return;
+        }
+        rafId = requestAnimationFrame(step);
+      };
+      rafId = requestAnimationFrame(step);
+    };
 
     container.addEventListener('pointerdown', e => {
       const inner = getInner();
       if (!inner || maxOffset(inner) <= 0) return;
+      stop();
+      // 慣性・transitionの途中でも、触れた位置でそのまま止める
+      offset = readOffset(inner);
+      inner.style.transition = 'none';
+      setOffset(inner, offset);
       pointerId = e.pointerId;
       startX = e.clientX;
-      startOffset = currentOffset(inner);
       moved = false;
+      samples = [];
     });
 
     container.addEventListener('pointermove', e => {
       if (e.pointerId !== pointerId) return;
-      const dx = e.clientX - startX;
       if (!moved) {
-        if (Math.abs(dx) < DRAG_THRESHOLD) return;
+        if (Math.abs(e.clientX - startX) < DRAG_THRESHOLD) return;
         moved = true;
         container.setPointerCapture(e.pointerId);
+        // しきい値ぶん跳ばないよう、動き出した地点を起点にする
+        startX = e.clientX;
+        startOffset = offset;
       }
       const inner = getInner();
       if (!inner) return;
-      const offset = Math.min(Math.max(0, startOffset - dx), maxOffset(inner));
-      inner.style.transition = 'none';
-      inner.style.transform = `translateX(-${offset}px)`;
+      const now = performance.now();
+      samples.push({ t: now, x: e.clientX });
+      while (samples.length > 2 && now - samples[0].t > VELOCITY_WINDOW) samples.shift();
+      offset = startOffset - (e.clientX - startX);
+      setOffset(inner, rubber(offset, maxOffset(inner)));
     });
 
     const end = (e: PointerEvent) => {
-      if (e.pointerId === pointerId) pointerId = null;
+      if (e.pointerId !== pointerId) return;
+      pointerId = null;
+      if (!moved) return;
+      const inner = getInner();
+      if (!inner) return;
+      const now = performance.now();
+      const first = samples[0];
+      const last = samples[samples.length - 1];
+      let v = 0;
+      // 指を止めてから離した場合は慣性を付けない
+      if (first && last && last.t > first.t && now - last.t < 50) {
+        v = -(last.x - first.x) / (last.t - first.t);
+        v = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, v));
+      }
+      if (Math.abs(v) > 0.1) startInertia(v);
+      else settle(inner);
     };
     container.addEventListener('pointerup', end);
     container.addEventListener('pointercancel', end);
@@ -229,6 +327,8 @@
       e.stopPropagation();
       e.preventDefault();
     }, true);
+
+    return stop;
   }
 
   document.querySelectorAll<HTMLElement>('.tabs-wrapper').forEach(wrapper => {
@@ -241,9 +341,16 @@
     let activeIdx = panels.findIndex(p => p.dataset.active === 'true');
     if (activeIdx < 0) activeIdx = 0;
 
+    const stopDrags: (() => void)[] = [];
+
     function activate(idx: number, animate: boolean = true) {
       panels.forEach(p => p.classList.remove('is-active'));
       panels[idx].classList.add('is-active');
+
+      // 作り直す前の位置を控えて、そこから中央寄せ位置へ動かす
+      stopDrags.forEach(stop => stop());
+      const prevOffset = readOffset(labelsEl.querySelector<HTMLElement>('.tab-labels-inner'));
+      const prevOffsetB = readOffset(labelsBottomEl.querySelector<HTMLElement>('.tab-labels-inner'));
 
       labelsEl.innerHTML = '';
       labelsBottomEl.innerHTML = '';
@@ -282,13 +389,12 @@
         fitTextToTab(btnB.querySelector('svg')!);
       });
 
-      centerActiveTab(inner, idx, animate);
-      centerActiveTab(innerB, idx, animate);
+      centerActiveTab(inner, idx, animate, prevOffset);
+      centerActiveTab(innerB, idx, animate, prevOffsetB);
     }
 
     activate(activeIdx, false);
-    enableDrag(labelsEl);
-    enableDrag(labelsBottomEl);
+    stopDrags.push(enableDrag(labelsEl), enableDrag(labelsBottomEl));
 
     // URLの #tab2 のような指定で該当タブ（1始まり）を開き、タブ位置までスクロール
     function openFromHash(animate: boolean) {
@@ -316,6 +422,8 @@
   .tab-labels {
     overflow-x: clip;
     touch-action: pan-y; /* 横スワイプはタブ列のドラッグに使い、縦スクロールはブラウザに任せる */
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .tab-labels:not(.tab-labels-bottom) {
@@ -328,6 +436,7 @@
     display: flex;
     align-items: flex-end;
     gap: 0;
+    will-change: transform;
   }
 
   :global(.tab-btn) {
