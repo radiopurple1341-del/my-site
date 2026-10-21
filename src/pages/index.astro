@@ -10,7 +10,7 @@ function linkify(text: string) {
       '<a href="$1" target="_blank" rel="noopener">$2</a>'
     )
     .replace(
-      /(?<!href=")(https?:\/\/[^\s<>"]+)/g,
+      /(?<!=")(https?:\/\/[^\s<>"]+)/g,
       '<a href="$1" target="_blank" rel="noopener">$1</a>'
     );
 }
@@ -207,6 +207,15 @@ const carouselItems = [
             const d = diaryDate(entry);
             const dateStr = `${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
             const text = (entry.body ?? '').trim();
+            // 埋め込み（iframe）を含む日記は、3行制限と行クリックを外してプレイヤーを表示する
+            if (text.includes('<iframe')) {
+              return (
+                <div class="diary-row">
+                  <time class="diary-date">{dateStr}</time>
+                  <div class="diary-text diary-text-embed" set:html={linkify(text)} />
+                </div>
+              );
+            }
             return (
               <div class="diary-row" data-href={`/diary#${entry.id}`}>
                 <time class="diary-date">{dateStr}</time>
@@ -611,6 +620,11 @@ body :global(.site-wrap) { max-width: 800px; }
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+.diary-text-embed {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
 }
 
 /* 更新情報（1270px未満では非表示） */

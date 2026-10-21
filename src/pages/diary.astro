@@ -35,7 +35,7 @@ function linkify(text: string) {
       '<a href="$1" target="_blank" rel="noopener">$2</a>'
     )
     .replace(
-      /(?<!href=")(https?:\/\/[^\s<>"]+)/g,
+      /(?<!=")(https?:\/\/[^\s<>"]+)/g,
       '<a href="$1" target="_blank" rel="noopener">$1</a>'
     );
 }
@@ -69,7 +69,10 @@ function linkify(text: string) {
         <article class="post" id={entry.id} data-tags={JSON.stringify(tags)}>
           <img src={char.icon} alt={char.name} class="avatar" />
           <time class="post-date">{dateStr}</time>
-          <p class="post-text" set:html={linkify((entry.body ?? '').trim())} />
+          {/* 埋め込み（iframe）を含む日記は、<div>を<p>の中に置けないため div で出力する */}
+          {(entry.body ?? '').includes('<iframe')
+            ? <div class="post-text" set:html={linkify((entry.body ?? '').trim())} />
+            : <p class="post-text" set:html={linkify((entry.body ?? '').trim())} />}
           <div class="post-footer">
             <button class="like-btn" data-like-id={`diary:${entry.id}`} aria-label="いいね">
               <span class="star">☆</span><span class="like-count">0</span>
