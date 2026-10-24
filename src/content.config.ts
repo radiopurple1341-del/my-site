@@ -57,4 +57,23 @@ const work = defineCollection({
   }),
 });
 
-export const collections = { diary, article, work };
+// ライブ：参加したライブの記録（ライブ棚）
+const live = defineCollection({
+  loader: glob({ base: './src/content/live', pattern: '**/[^_]*.md' }),
+  schema: z.object({
+    title: z.string(),                         // ライブ名・ツアー名
+    // 公演日。日付不明の古いライブ用に "YYYY-MM" / "YYYY" も可
+    date: z.union([z.date(), z.string().regex(/^\d{4}(-\d{2}(-\d{2})?)?$/)])
+      .transform(d => typeof d === 'string' ? d : d.toISOString().slice(0, 10)),
+    artists: z.array(z.string()).default([]),  // 出演者（対バン・フェスは複数）
+    venue: z.string().optional(),              // 会場
+    liveType: z.enum(['単独公演', '対バン', 'フェス']).optional(),
+    flyer: z.string().optional(),              // フライヤー画像パス（public/flyers/）
+    description: z.string().optional(),        // 一言コメント
+    article: z.string().optional(),            // 個別記事のファイル名（拡張子なし）
+    externalUrl: z.string().url().optional(),  // 外部記事への直リンク
+    tags: z.array(z.string()).optional(),
+  }),
+});
+
+export const collections = { diary, article, work, live };

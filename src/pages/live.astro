@@ -1,0 +1,495 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// 中身がなくても棚として常に並べる年。[開始, 終了] で複数年をまとめた棚になる
+// （データ側にある年で、どの棚にも入らないものは1年ごとの棚が自動で追加される。単年の棚は範囲の棚より優先）
+const SHELF_YEARS: (number | [number, number])[] = [2026, [2008, 2025], 2007, 2006];
+
+const lives = (await getCollection('live'))
+  .sort((a, b) => b.data.date.localeCompare(a.data.date)); // 新しい順
+
+const articles = await getCollection('article');
+const articleBySlug = new Map(articles.map(a => [a.id.split('/').pop()!, a]));
+
+const yearOf = (date: string) => Number(date.slice(0, 4));
+type Shelf = { key: string; from: number; to: number };
+const shelves: Shelf[] = SHELF_YEARS.map(s => Array.isArray(s)
+  ? { key: `${s[0]} - ${s[1]}`, from: s[0], to: s[1] }
+  : { key: String(s), from: s, to: s });
+const shelfOf = (y: number) =>
+  shelves.find(s => s.from === y && s.to === y) ?? shelves.find(s => s.from <= y && y <= s.to);
+for (const y of new Set(lives.map(l => yearOf(l.data.date)))) {
+  if (!shelfOf(y)) shelves.push({ key: String(y), from: y, to: y });
+}
+shelves.sort((a, b) => b.to - a.to);
+const livesByShelf = new Map(shelves.map(s => [s.key, lives.filter(l => shelfOf(yearOf(l.data.date)) === s)]));
+
+// YYYY-MM-DD → YY.MM.DD（月・日が不明なものはそこまで）
+function formatDate(date: string): string {
+  const [y, m, d] = date.split('-');
+  return [y.slice(2), m, d].filter(Boolean).join('.');
+}
+---
+
+<BaseLayout title="ライブ棚">
+  <div class="page-header">
+    <h1 class="page-title">ライブ棚</h1>
+    <p class="count">{lives.length}本</p>
+  </div>
+
+  <div class="filters">
+    <button type="button" class="order-btn" id="order-btn" aria-pressed="false">↓ 新しい順</button>
+  </div>
+
+  <div class="shelf-jump">
+    <span class="shelf-jump-label">＜棚を覗く＞</span>
+    {shelves.map(({ key }) => (
+      <button type="button" class="shelf-jump-btn" data-jump-target={key}>{key}</button>
+    ))}
+  </div>
+
+  <div class="shelf-edge" aria-hidden="true"></div>
+
+  <div class="table-wrap">
+    <table class="live-table" id="live-table">
+      {shelves.map(({ key }) => {
+        const items = livesByShelf.get(key) ?? [];
+        return (
+          <tbody data-shelf={key}>
+            <tr class="shelf-row">
+              <td class="shelf-label" colspan="2">
+                <div class="plate">
+                  <button type="button" class="tab" aria-expanded="true">
+                    <span class="arrow" aria-hidden="true"></span>
+                    <span class="name latin">{key}</span>
+                    <span class="count">{items.length}</span>
+                  </button>
+                  <div class="board"></div>
+                  <div class="board-thin"></div>
+                </div>
+              </td>
+            </tr>
+            {items.length === 0 && (
+              <tr class="live-row is-empty">
+                <td colspan="2">更新待機中</td>
+              </tr>
+            )}
+            {items.map(live => {
+              const article = live.data.article ? articleBySlug.get(live.data.article) : undefined;
+              const href = live.data.externalUrl
+                ?? (article ? (article.data.externalUrl ?? `/article/${live.data.article}`) : null);
+              const isExternal = !!(live.data.externalUrl || article?.data.externalUrl);
+              const LinkTag = href ? 'a' : 'span';
+              const linkAttrs = href
+                ? { href, target: isExternal ? '_blank' : undefined, rel: isExternal ? 'noopener' : undefined }
+                : {};
+              return (
+                <tr
+                  id={live.id}
+                  class={['live-row', href ? 'has-article' : '', isExternal ? 'is-external' : ''].filter(Boolean).join(' ')}
+                >
+                  <td class="col-flyer">
+                    <LinkTag class={href ? 'flyer-link' : 'flyer-nolink'} {...linkAttrs}>
+                      <span class="flyer-wrap">
+                        {live.data.flyer
+                          ? <img class="flyer" src={live.data.flyer} alt="" width="300" height="424" loading="lazy" />
+                          : <span class="flyer-empty">NO FLYER</span>}
+                      </span>
+                    </LinkTag>
+                  </td>
+                  <td class="col-info">
+                    <div class="live-info">
+                      <div class="live-head">
+                      {live.data.artists.length > 0 && (
+                        <p class="live-artists">{live.data.artists.join(' / ')}</p>
+                      )}
+                      <p class="live-title">
+                        <LinkTag class={href ? 'live-link' : undefined} {...linkAttrs}>{live.data.title}</LinkTag>
+                      </p>
+                      {live.data.venue && <p class="live-venue">{live.data.venue}</p>}
+                      <p class="live-date">
+                        {formatDate(live.data.date)}
+                        {live.data.liveType && <span class="live-type">{live.data.liveType}</span>}
+                      </p>
+                      </div>
+                      {live.data.description && (
+                        <p class="live-note" data-href={href ?? undefined} data-external={isExternal ? '1' : undefined} set:html={live.data.description} />
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        );
+      })}
+    </table>
+  </div>
+  <div class="shelf-edge shelf-edge-end" aria-hidden="true"></div>
+</BaseLayout>
+
+<script>
+  // 年代の降順（新しい順）・昇順（古い順）切り替え：棚・棚の中のライブ・棚ジャンプボタンをまとめて反転する
+  const orderBtn = document.getElementById('order-btn');
+  orderBtn?.addEventListener('click', () => {
+    const table = document.getElementById('live-table')!;
+    [...table.querySelectorAll('tbody')].reverse().forEach(tbody => {
+      table.appendChild(tbody);
+      [...tbody.querySelectorAll('.live-row:not(.is-empty)')].reverse().forEach(row => tbody.appendChild(row));
+    });
+    const jump = document.querySelector('.shelf-jump')!;
+    [...jump.querySelectorAll('.shelf-jump-btn')].reverse().forEach(btn => jump.appendChild(btn));
+    const asc = orderBtn.getAttribute('aria-pressed') !== 'true';
+    orderBtn.setAttribute('aria-pressed', String(asc));
+    orderBtn.textContent = asc ? '↑ 古い順' : '↓ 新しい順';
+  });
+
+  // 【テスト用】?stack を付けるとスマホ版を縦積みレイアウトで表示する
+  if (new URLSearchParams(location.search).has('stack')) {
+    document.getElementById('live-table')?.classList.add('is-stack');
+  }
+
+  // 棚の開閉
+  document.querySelectorAll<HTMLButtonElement>('.shelf-row .tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tbody = btn.closest('tbody');
+      if (!tbody) return;
+      const closed = tbody.classList.toggle('is-closed');
+      btn.setAttribute('aria-expanded', String(!closed));
+    });
+  });
+
+  // 棚ジャンプ：閉じていれば開いてから移動
+  document.querySelectorAll<HTMLButtonElement>('.shelf-jump-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tbody = document.querySelector<HTMLElement>(`tbody[data-shelf="${btn.dataset.jumpTarget}"]`);
+      if (!tbody) return;
+      tbody.classList.remove('is-closed');
+      tbody.querySelector('.tab')?.setAttribute('aria-expanded', 'true');
+      tbody.querySelector('.shelf-row')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // 一言エリアのクリックで記事へ遷移
+  document.querySelectorAll<HTMLElement>('.live-note[data-href]').forEach(td => {
+    td.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) return; // 一言の中のリンクはそちらを優先
+      const href = td.dataset.href!;
+      if (td.dataset.external) window.open(href, '_blank', 'noopener');
+      else location.href = href;
+    });
+  });
+</script>
+
+<style>
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.page-title { font-size: 18px; font-weight: 700; }
+.count { font-size: 12px; color: var(--color-text-muted); }
+
+/* 棚を覗く・天板・ネームプレートは作品棚（works.astro）と同じ見た目 */
+.shelf-jump {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+.shelf-jump-label {
+  flex-basis: 100%;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.shelf-jump-btn {
+  font-family: 'Space Grotesk', var(--font-sans);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: #1a1a1a;
+  border: 0;
+  border-radius: 2px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.shelf-jump-btn:hover { background: #332f2b; }
+
+/* 並び順切り替え：作品棚の絞り込み・並び替えボタンと同じ見た目 */
+.filters { margin-bottom: 1.5rem; }
+.order-btn {
+  font-size: 13px;
+  color: var(--color-text);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #1a1a1a;
+  background: #fff;
+  cursor: pointer;
+}
+.order-btn:hover { background: var(--color-surface); }
+
+.shelf-edge {
+  height: 8px;
+  border-top: 5px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  margin: 0 0 1rem;
+}
+.shelf-edge-end { margin: 1rem 0 0; }
+
+.table-wrap { overflow-x: auto; }
+
+.live-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.live-table th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  padding: 0.4rem 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+  white-space: nowrap;
+}
+.live-table td {
+  padding: 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+  color: var(--color-text-mid);
+  vertical-align: top;
+}
+.live-table tbody { scroll-margin-top: 200px; }
+.live-row:hover td { background: var(--color-surface); }
+
+.live-row.is-empty td {
+  color: var(--color-text-muted);
+  font-size: 16px; /* 一言メモ（.live-note）と同じ */
+  padding: 1.25rem 0.75rem;
+}
+.live-row.is-empty:hover td { background: none; }
+
+/* 閉じた棚：ネームプレートだけ残す */
+tbody.is-closed .live-row { display: none; }
+
+.shelf-row td.shelf-label { padding: 0; border-bottom: none; }
+
+.plate {
+  --ink: #1a1a1a;
+  --ink-hover: #332f2b;
+  margin: 24px 0 0;
+}
+.plate .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px 10px;
+  border: 0;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background-color 0.12s ease, padding-top 0.12s ease;
+}
+.plate .tab:hover,
+.plate .tab:focus-visible {
+  background: var(--ink-hover);
+  padding-top: 14px;
+}
+.plate .tab:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.plate .arrow {
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid #fff;
+  margin-top: 2px;
+}
+tbody.is-closed .plate .arrow {
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid #fff;
+  border-right: 0;
+  margin-top: 0;
+}
+.plate .name.latin {
+  font-family: 'Space Grotesk', var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.plate .count {
+  font-family: 'JetBrains Mono', var(--font-mono);
+  font-size: 11px;
+  color: #fff;
+  border-left: 1px solid #4a4642;
+  padding-left: 12px;
+}
+.plate .board { height: 5px; background: var(--ink); }
+.plate .board-thin { height: 1px; background: var(--ink); margin-top: 2px; }
+
+/* 2列：フライヤー｜情報 */
+.col-flyer { width: 300px; }
+.col-info  { padding-left: 1.5rem !important; }
+
+/* フライヤー：A判比率（1:√2） */
+.flyer-link,
+.flyer-nolink {
+  display: block;
+  --mark-color: var(--color-accent);
+}
+.is-external .flyer-link { --mark-color: #4a90d9; }
+.flyer-wrap {
+  position: relative;
+  display: block;
+  width: 300px;
+  aspect-ratio: 1 / 1.414;
+}
+.flyer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+}
+/* フライヤーなしの仮表示（チケット風デザインは別途検討） */
+.flyer-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--color-border);
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+/* 記事ありマーク：作品棚と同じくフライヤー右上角に */
+.flyer-link .flyer-wrap::before {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--mark-color);
+  border-radius: 1px;
+}
+.flyer-link .flyer-wrap::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--mark-color);
+  box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 3px var(--mark-color);
+}
+
+/* 情報：上から 出演者・企画名 / 会場 / 日付 / （1行空け）一言 */
+.live-info p { margin: 0; }
+.live-artists { font-size: 20px; font-weight: 700; color: var(--color-text); margin-bottom: 0.15rem !important; }
+.live-title { font-size: 28px; font-weight: 700; line-height: 1.5; color: var(--color-text); }
+.live-link { color: #0033cc; }
+.live-link:visited { color: #7755aa; }
+.live-link:hover { text-decoration: underline; }
+.live-type {
+  display: inline-block;
+  margin-left: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  padding: 1px 6px;
+}
+.live-venue { font-size: 20px; margin-top: 0.35rem !important; }
+.live-date {
+  font-family: 'JetBrains Mono', var(--font-mono);
+  font-size: 18px;
+  color: var(--color-text-muted);
+  margin-top: 0.15rem !important;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.live-note {
+  margin-top: 1.5em !important;
+  font-size: 16px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+.live-note[data-href] { cursor: pointer; color: #0033cc; }
+.live-note[data-href]:hover { text-decoration: underline; }
+
+@media (max-width: 800px) {
+  .table-wrap { overflow: visible; }
+
+  /* 上段：フライヤー（40%）｜出演者〜日付、下段：一言メモ（全幅） */
+  .live-table,
+  .live-table tbody { display: block; }
+  .live-table tbody tr.live-row {
+    display: grid;
+    grid-template-columns: 40% 1fr;
+    column-gap: 0.875rem;
+    padding: 1rem 0;
+    border-bottom: 0.5px solid var(--color-border);
+    align-items: start;
+  }
+  .live-row:hover td { background: none; }
+  .live-table tbody td { padding: 0 !important; border: none; }
+  .live-row.is-empty { display: block !important; }
+  .live-row.is-empty td { display: block; padding: 1rem 0 !important; font-size: 14px; }
+
+  .live-table tbody tr.shelf-row { display: block; }
+  .live-table tbody tr.shelf-row td.shelf-label { display: block; width: 100%; }
+
+  .col-flyer { width: auto; grid-column: 1; grid-row: 1; }
+  .flyer-wrap { width: 100%; }
+  .flyer-link .flyer-wrap::after { right: -2px; width: 8px; height: 8px; }
+
+  .col-info, .live-info { display: contents; }
+  .live-head { grid-column: 2; grid-row: 1; min-width: 0; }
+
+  .live-artists { font-size: 14px; }
+  .live-title { font-size: 18px; line-height: 1.4; }
+  .live-venue { font-size: 14px; }
+  .live-date { font-size: 13px; padding-bottom: 0; border-bottom: none; }
+  .live-type { font-size: 13px; margin-left: 0.5rem; }
+
+  /* 日付下の線は、全幅のメモの上に移す */
+  .live-note {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 0.875rem !important;
+    padding-top: 0.75rem;
+    border-top: 0.5px solid var(--color-border);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* 【テスト用】縦積み：フライヤー全幅 → 出演者〜日付 → メモ */
+  .is-stack tbody tr.live-row { grid-template-columns: 1fr; }
+  .is-stack .col-flyer { grid-row: 1; }
+  .is-stack .flyer-wrap { max-width: 300px; } /* デスクトップ版より大きくしない */
+  .is-stack .live-head { grid-column: 1; grid-row: 2; margin-top: 0.875rem; }
+  .is-stack .live-note { grid-row: 3; }
+  .is-stack .live-artists { font-size: 16px; }
+  .is-stack .live-title { font-size: 22px; }
+  .is-stack .live-venue { font-size: 16px; }
+  .is-stack .live-date { font-size: 14px; }
+  .is-stack .live-type { font-size: 14px; }
+}
+</style>
