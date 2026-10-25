@@ -2,12 +2,40 @@
 import { getCollection, render } from 'astro:content';
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import WorkLayout from '../../layouts/WorkLayout.astro';
+// MDX本文で使うコンポーネント。ここに登録すれば各記事でimportしなくても使える
+import B from '../../components/B.astro';
+import R from '../../components/R.astro';
+import RB from '../../components/RB.astro';
+import U from '../../components/U.astro';
+import URL from '../../components/URL.astro';
+import Band from '../../components/Band.astro';
+import Expand from '../../components/Expand.astro';
+import LinkCard from '../../components/LinkCard.astro';
+import Memo from '../../components/Memo.astro';
+import Quote from '../../components/Quote.astro';
+import Review from '../../components/Review.astro';
+import Spotify from '../../components/Spotify.astro';
+import YouTube from '../../components/YouTube.astro';
+import Tabs from '../../components/Tabs.astro';
+import Tab from '../../components/Tab.astro';
+import Tracklist from '../../components/Tracklist.astro';
+import TrackLegend from '../../components/TrackLegend.astro';
+
+const mdxComponents = {
+  B, R, RB, U, URL, Band, Expand, LinkCard, Memo, Quote, Review,
+  Spotify, YouTube, Tabs, Tab, Tracklist, TrackLegend,
+};
 
 export async function getStaticPaths() {
   const stripThe = (s: string) => s.replace(/^The\s+/i, '');
   const articles = await getCollection('article');
   const works = await getCollection('work');
   const workMap = new Map(works.map(w => [w.id, w.data]));
+  // ライブ棚から張られた記事 → 「棚に戻す」でそのライブの行へ戻す
+  const lives = await getCollection('live');
+  const liveBackMap = new Map(
+    lives.filter(l => l.data.article).map(l => [l.data.article!.toLowerCase(), `/live#${l.id}`])
+  );
 
   const workArticles = articles
     .filter(a => !!a.data.workId)
@@ -37,12 +65,12 @@ export async function getStaticPaths() {
     }
     return {
       params: { slug: article.id.split('/').pop() },
-      props: { article, prev, next },
+      props: { article, prev, next, liveBackHref: liveBackMap.get(article.id.split('/').pop()!) ?? null },
     };
   });
 }
 
-const { article, prev, next } = Astro.props;
+const { article, prev, next, liveBackHref } = Astro.props;
 const { Content } = await render(article);
 const isWorkArticle = !!article.data.workId;
 ---
@@ -57,8 +85,9 @@ const isWorkArticle = !!article.data.workId;
     workId={article.data.workId}
     prev={prev}
     next={next}
+    liveBackHref={liveBackHref}
   >
-    <Content />
+    <Content components={mdxComponents} />
   </WorkLayout>
 ) : (
   <ArticleLayout
@@ -69,7 +98,8 @@ const isWorkArticle = !!article.data.workId;
     tags={article.data.tags}
     thumbnail={article.data.thumbnail ?? article.data.artwork}
     externalUrl={article.data.externalUrl}
+    backHref={liveBackHref}
   >
-    <Content />
+    <Content components={mdxComponents} />
   </ArticleLayout>
 )}

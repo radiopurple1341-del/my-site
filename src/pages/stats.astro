@@ -14,6 +14,7 @@ for (const work of works) {
 for (const article of articles) {
   const slug = article.id.split('/').pop()!;
   pathTitleMap[`/article/${slug}`] = article.data.title;
+  likeIdLabelMap[`article:${slug}`] = article.data.title;
   if (article.id.startsWith('works/')) {
     likeIdLabelMap[`work:${slug}`] = article.data.title;
     workHasArticle[slug] = true;
@@ -102,9 +103,9 @@ for (const diary of diaries) {
         <tbody>
           ${data.map((item, i) => {
             const label = likeIdLabelMap[item.id] || item.id;
-            const isWork = item.id.startsWith('work:');
-            const slug = item.id.replace(/^work:/, '');
-            const href = isWork ? `/article/${slug}` : '';
+            const isArticle = /^(work|article):/.test(item.id);
+            const slug = item.id.replace(/^(work|article):/, '');
+            const href = isArticle ? `/article/${slug}` : '';
             const cell = href ? `<a href="${href}">${label}</a>` : label;
             return `
               <tr>
@@ -142,9 +143,9 @@ for (const diary of diaries) {
         <tbody>
           ${sorted.map(([id, data], i) => {
             const label = likeIdLabelMap[id] || id;
-            const isWork = id.startsWith('work:');
-            const slug = id.replace(/^work:/, '');
-            const href = isWork ? `/article/${slug}` : '';
+            const isArticle = /^(work|article):/.test(id);
+            const slug = id.replace(/^(work|article):/, '');
+            const href = isArticle ? `/article/${slug}` : '';
             const cell = href ? `<a href="${href}">${label}</a>` : label;
             return `
               <tr>
