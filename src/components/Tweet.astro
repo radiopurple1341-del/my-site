@@ -1,0 +1,51 @@
+---
+// X（旧Twitter）公式埋め込み。widgets.js が blockquote をカードに置き換える
+interface Props {
+  url: string;
+}
+
+const { url } = Astro.props;
+
+// x.com / twitter.com / mobile.twitter.com の status URL からユーザー名とIDを抽出
+const match = url.match(/(?:x|twitter)\.com\/([A-Za-z0-9_]+)\/status(?:es)?\/(\d+)/);
+const user = match?.[1] ?? '';
+const id   = match?.[2] ?? '';
+const href = `https://twitter.com/${user}/status/${id}`;
+---
+
+{id
+  ? (
+    <div class="tweet-wrap">
+      <blockquote class="twitter-tweet" data-lang="ja" data-theme="light" data-dnt="true">
+        <a href={href}>ツイートを表示（@{user}）</a>
+      </blockquote>
+    </div>
+  )
+  : <p class="tweet-error">ツイートURLが正しくありません: {url}</p>
+}
+
+<script>
+  // 1ページに複数ツイートがあっても widgets.js は1回だけ読み込む
+  if (!document.getElementById('twitter-wjs')) {
+    const s = document.createElement('script');
+    s.id = 'twitter-wjs';
+    s.src = 'https://platform.twitter.com/widgets.js';
+    s.async = true;
+    document.body.appendChild(s);
+  }
+</script>
+
+<style>
+.tweet-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+.tweet-wrap :global(.twitter-tweet) {
+  margin: 0 !important;
+}
+.tweet-error {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+</style>
