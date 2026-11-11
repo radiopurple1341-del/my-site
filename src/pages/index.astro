@@ -73,6 +73,13 @@ const articleByWorkId = new Map(linkedArticles.map(a => [a.data.workId!, a]));
 // workIdとwork_indexの紐付け（descriptionフォールバック用）
 const workByWorkId = new Map(allWorks.map(w => [w.id, w]));
 
+// ライブ棚のarticleと記事の紐付け（ライブ記事のdescriptionフォールバック用）
+const liveByArticle = new Map(
+  (await getCollection('live'))
+    .filter(l => l.data.article)
+    .map(l => [l.data.article!.toLowerCase(), l])
+);
+
 // カルーセルのスライド自体が<a>のため、description内の<a>は入れ子になり表示が崩れる
 // → Amazonリンクは丸ごと除去、それ以外はタグだけ外して文言を残す
 const stripLinks = (html: string) => html
@@ -88,7 +95,10 @@ const carouselItems = [
       href: a.data.externalUrl ?? `/article/${a.id.split('/').pop()}`,
       isExternal: !!a.data.externalUrl,
       title: a.data.title,
-      description: a.data.description || (a.data.workId && workByWorkId.get(a.data.workId)?.data.description) || '',
+      description: a.data.description
+        || (a.data.workId && workByWorkId.get(a.data.workId)?.data.description)
+        || liveByArticle.get(a.id.split('/').pop()!)?.data.description
+        || '',
       pubDate: a.data.pubDate,
     })),
   ...allWorks
