@@ -3,8 +3,6 @@ title: "聴き語りtr.1：Radiohead「A Wolf At the Door」('03) - 『Hail To t
 artist: "Radiohead"
 category: 音楽
 workYear: 2003
-isGuide: true
-workType: "特集"
 pubDate: 2026-08-05
 tags: [音楽]
 thumbnail: "/thumbnail/Radiohead_HTTT.jpg"

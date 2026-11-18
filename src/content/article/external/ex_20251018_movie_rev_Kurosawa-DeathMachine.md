@@ -9,4 +9,5 @@ thumbnail: "https://assets.st-note.com/production/uploads/images/222983564/recta
 featured: true
 workYear: 1997
 workMonth: 
+workId: "guide-kurosawa_kiyoshi_death"
 ---
