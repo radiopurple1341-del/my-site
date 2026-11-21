@@ -8,6 +8,7 @@ workMonth: 3
 workType: "ライブ映像"
 pubDate: 2026-11-21
 tags: []
+externalUrl: "https://www.youtube.com/watch?v=85tgpMs7Mxo"
 description: |
   <span style="color:red">全盛期ライブのひとつ。バックを務めるのは安全地帯！</span>
   音源だけからでは感じられない井上陽水の音楽的魅力がフルに出ているので必聴・必見。
