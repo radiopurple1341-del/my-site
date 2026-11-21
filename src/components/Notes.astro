@@ -1,0 +1,16 @@
+---
+// 記事末尾の注釈（※1. 〜）をまとめて囲み、本文より少し小さく表示する
+---
+<div class="notes"><slot /></div>
+
+<style>
+.notes {
+  font-size: 0.9em;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+/* 本文側の段落余白（.work-body / .tab-content）が大きいため、注釈内では詰める */
+.notes :global(p) {
+  margin: 0 0 0.6em;
+}
+</style>
